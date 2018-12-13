@@ -1,0 +1,279 @@
+\documentclass[book.tex]{subfiles}
+\begin{document}
+
+\chapter{First Class Families}
+
+\section{Defunctionalization}
+
+\preamble{Defunc}
+
+Until recently, it was believed that type families had no chance of being first
+class; because they're unable to be partially applied, reuse and abstraction
+seemed impossible goals. Every type-level \hs{fmap} would need to be specialized
+with its mapping function built-in, and there seemed no way of abstracting away
+this repetitive boilerplate.
+
+The work of \lyxia{} \cite{fcf} has relaxed this limitation, not by providing
+unsaturated type families, but by giving us tools for working around them. It
+works via \defnn{Defunctionalization}{defunctionalization}---the process of
+replacing an instantiation of a polymorphic function with a specialized label
+instead.
+
+For example, rather than the function \hs{fst}:
+
+\snip{Defunc}{fst}
+
+We can instead defunctionalize it by providing an equivalent label:
+
+\snip{Defunc}{Fst}
+
+All that's left to implement is the actual evaluation function. This can be
+codified as a typeclass with a functional dependency to guide the return type.
+
+\snip{Defunc}{Eval}
+
+The syntax \hs{| l -> t} at \ann{1} is known as a \defn{functional dependency},
+and states that the type \ty{t} is fully determined by the type \ty{l}. Here,
+\ty{l} is the type of our defunctionalized label, and \ty{t} is the return type
+of the evaluation.
+
+\snip{Defunc}{EvalFst}
+
+Despite being roundabout, this approach works just as well as \hs{fst} itself
+does.
+
+\begin{dorepl}{Defunc}
+eval (Fst ("hello", True))
+\end{dorepl}
+
+\begin{exercise}
+Defunctionalize \hs{listToMaybe :: [a] -> Maybe a}.
+\end{exercise}
+\begin{solution}
+\unspacedSnip{Defunc}{ListToMaybe}
+\snip{Defunc}{EvalListToMaybe}
+\end{solution}
+
+Even higher-order functions can be defunctionalized:
+
+\snip{Defunc}{Map}
+
+The \ty{dfb} type at \ann{1} could be labeled simply as \ty{b}, but we will
+enforce it is a defunctionalized symbol---evaluation of \ty{MapList} will depend on
+an \ty{Eval dfb} instance. This name helps suggest that.
+
+\snip{Defunc}{EvalMap}
+
+Pay attention to \ann{1}---rather than consing \hs{f a} to the mapped list, we
+instead cons \hs{eval (f a)}. While there is morally no difference, such an
+approach allows defunctionalization of \hs{map} to propagate evaluation of other
+defunctionalized symbols. We can see it in action:
+
+\begin{dorepl}{Defunc}
+eval (MapList Fst [("hello", 1), ("world", 2)])
+\end{dorepl}
+
+
+\section{Type-Level Defunctionalization} \label{fcf}
+
+\preamble{FCTF}
+
+This entire line of reasoning lifts, as Xia shows, to the type-level where it
+fits a little more naturally. Because type families are capable of
+discriminating on types, we can write a defunctionalized symbol whose type
+corresponds to the desired type-level function.
+
+These are known as \defnn{first class families}{first class family}, or
+\defn{FCF}s for short.
+
+We begin with a kind synonym, \ty{Exp a} which describes a type-level function
+which, when evaluated, will produce a type of kind \kind{a}.
+
+\snip{FCTF}{Exp}
+
+This ``evaluation'' is performed via an open type family \ty{Eval}. \ty{Eval}
+matches on \ty{Exp a}s, mapping them to an \kind{a}.
+
+\snip{FCTF}{Eval}
+
+To write defunctionalized ``labels'', empty data-types can be used. As an
+illustration, if we wanted to lift \hs{snd} to the type-level, we write a
+data-type whose kind mirrors the type of \hs{snd}.
+
+\snip{FCTF}{Snd}
+
+\begin{dorepl}{FCTF}
+:t snd
+:kind Snd
+\end{dorepl}
+
+The type of \hs{snd} and kind of \ty{Snd} share a symmetry, if you ignore the
+trailing \hs{-> Type} on \ty{Snd}. An instance of \ty{Eval} can be used to
+implement the evaluation of \ty{Snd}.
+
+\snip{FCTF}{EvalSnd}
+
+\begin{dorepl}{FCTF}
+:kind! Eval (Snd '(1, "hello"))
+\end{dorepl}
+
+Functions that perform pattern matching can be lifted to the defunctionalized
+style by providing multiple type instances for \ty{Eval}.
+
+\snip{FCTF}{FromMaybe}
+
+\ty{Eval} of \ty{FromMaybe} proceeds as you'd expect.
+
+\begin{dorepl}{FCTF}
+:kind! Eval (FromMaybe "nothing" ('Just "just"))
+:kind! Eval (FromMaybe "nothing" 'Nothing)
+\end{dorepl}
+
+\begin{exercise}
+Defunctionalize \hs{listToMaybe} at the type-level.
+\end{exercise}
+\begin{solution}
+\unspacedSnip{FCTF}{ListToMaybe}
+\end{solution}
+
+However, the real appeal of this approach is that it allows for
+\emph{higher-order} functions. For example, \hs{map} is lifted by taking a
+defunctionalization label of kind \kind{a -> Exp b} and applying it to a
+\kind{[a]} to get a \kind{Exp [b]}.
+
+\snip{FCTF}{MapList}
+
+\ty{Eval} of \ty{'[]} is trivial:
+
+\snip{FCTF}{EvalNil}
+
+And \ty{Eval} of cons proceeds in the only way that will type check, by
+evaluating the function symbol applied to the head, and evaluating the
+\ty{MapList} of the tail.
+
+\snip{FCTF}{EvalCons}
+
+Behold! A type-level \ty{MapList} is now \emph{reusable}!
+
+\begin{dorepl}{FCTF}
+:kind! Eval (MapList (FromMaybe 0) ['Nothing, ('Just 1)])
+:kind! Eval (MapList Snd ['(5, 7), '(13, 13)])
+\end{dorepl}
+
+\begin{exercise}
+Defunctionalize \hs{foldr ::} \\ \ty{(a -> b -> b) -> b -> [a] -> b}.
+\end{exercise}
+\begin{solution}
+\unspacedSnip{FCTF}{Foldr}
+\end{solution}
+
+
+\section{Working with First Class Families}
+
+Interestingly, first-class families form a monad at the type-level.
+
+\snip{FCTF}{Pure}
+\snip{FCTF}{bind}
+
+As such, we can compose them in terms of their Kleisli composition.
+Traditionally the fish operator (\hs{<=<}) is used to represent this combinator
+in Haskell.  We are unable to use the more familiar period operator at the
+type-level, as it conflicts with the syntax of the \ty{forall} quantifier.
+
+\snip{FCTF}{kleisli}
+
+\begin{dorepl}{FCTF}
+:set -XPolyKinds
+type Snd2 = Snd <=< Snd
+:kind! Eval (Snd2 '(1, '(2, 3)))
+\end{dorepl}
+
+While \ty{(<=<)} at the type-level acts like regular function composition
+\hs{(.)}, \ty{(=<<)} behaves like function application \hs{(\$)}.
+
+\begin{dorepl}{FCTF}
+:kind! Eval (Snd <=< FromMaybe '(0, 0) =<< Pure (Just '(1, 2)))
+\end{dorepl}
+
+The \pkg{first-class-families}\cite{fcf} package provides most of \ty{Prelude}
+as FCFs, as well as some particularly useful functions for type-level
+programming. For example, we can determine if any two types are the
+same---remember, there is no \ty{Eq} at the type-level.
+
+\snip{FCTF}{TyEq}
+\snip{FCTF}{EvalTyEq}
+\snip{FCTF}{TyEqImpl}
+
+We also have the ability to collapse lists of \kind{Constraint}s.
+
+\snip{FCTF}{Collapse}
+
+Which leads us very naturally to:
+
+\snip{FCTF}{All}
+\snip{FCTF}{Pure1}
+
+And we find ourselves with a much nicer implementation of \ty{All} than we wrote
+in chapter 5.
+
+%\todo{index}
+
+\begin{dorepl}{FCTF}
+:kind! Eval (All Eq '[Int, Bool])
+\end{dorepl}
+
+
+\section{Ad-Hoc Polymorphism}
+
+Consider the following definition of \ty{Map}.
+
+\snip{FCTF}{Map}
+
+Because type families are capable of discriminating on types, we can write
+several instances of \ty{Eval} for \ty{Map}. For example, for lists:
+
+\snip{FCTF}{Map4List}
+
+And also for \ty{Maybe}:
+
+\snip{FCTF}{Map4Maybe}
+
+Why not an instance for \ty{Either} while we're at it.
+
+\snip{FCTF}{Map4Either}
+
+As you might expect, this gives us ad-hoc polymorphism for a promoted \hs{fmap}.
+
+\begin{dorepl}{FCTF}
+:kind! Eval (Map Snd ('Just '(1, 2)))
+:kind! Eval (Map Snd '[ '(1, 2) ])
+:kind! Eval (Map Snd (Left 'False))
+\end{dorepl}
+
+\begin{exercise}
+Write a promoted functor instance for tuples.
+\end{exercise}
+\begin{solution}
+\unspacedSnip{FCTF}{MapTuple}
+\end{solution}
+
+This technique of ad-hoc polymorphism generalizes in the obvious way, allowing
+us to implement the semigroup operation \ty{Mappend}:
+
+\snip{FCTF}{Mappend}
+
+However, at first glance, it's unclear how the approach can be used to implement
+\ty{Mempty}. Type families are not allowed to discriminate on their return type.
+We can cheat this restriction by muddying up the interface a little and making
+the ``type application'' explicit. We give the \gls{kind signature} of
+\ty{Mempty} as follows:
+
+\snip{FCTF}{Mempty}
+
+The understanding here is that given a type of any monoidal kind \kind{k},
+\ty{Mempty} will give back the monoidal identity for that kind. This can be done
+by matching on a rigid kind signature, as in the following instances.
+
+\snip{FCTF}{mempties}
+
+\end{document}

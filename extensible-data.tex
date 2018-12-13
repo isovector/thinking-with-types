@@ -1,0 +1,426 @@
+\documentclass[book.tex]{subfiles}
+\begin{document}
+
+\chapter{Extensible Data}
+
+\section{Introduction}
+
+One heralded feature of dynamic languages---conspicuously missing in
+Haskell---is their support for ad-hoc objects. Consider Python's dictionary
+datatype:
+
+\begin{code}
+record = \{ 'foo': 12, 'bar': True \} \annotate{1}
+record['qux'] = "hello" \annotate{2}
+record['foo'] = [1, 2, 3] \annotate{3}
+\end{code}
+
+At \ann{1}, \texttt{record} can be said to have a (Haskell) type
+\hs{\{foo :: Int, bar :: Bool\}}. However, at \ann{2} it also gains a
+\hs{qux :: String} field. And at \ann{3}, the type of \hs{foo} changes to
+\hs{[Int]}. Of course, Python doesn't actually enforce any of these typing
+rules. It is, however, a good example of a program that would be hard to
+represent in Haskell.
+
+In this chapter, we will discuss how to build this sort of ``extensible'' record
+type. As its dual, we will also investigate generalizing the \ty{Either} type to
+support an arbitrary number of potential types. These types are a good and
+instructive use of type-level programming.
+
+When looking at the canonical representations of types, we saw that all of
+custom Haskell data-types can be built as \emph{sums-of-products}. Sums
+correspond to \ty{Either a b}, and products correspond to the pair type \ty{(a,
+b)}. However, just because we can show an \gls{isomorphism} between a type and this
+sum-of-products doesn't mean such an encoding is \emph{efficient}.
+
+Because both \ty{Either} and \ty{(,)} are \emph{binary operators},
+using them for arbitrarily large representations will require lots of extra
+constructors. In the best case our representation will be a balanced binary tree
+(of the form \ty{Either (Either ...) (Either ...)}.) This corresponds to an
+overhead of $O(\log{n})$ constructors. In the worst case, it degrades into a
+linked list, and we pay for $O(n)$ constructors.
+
+It seems, however, like we should be able to describe a sum of any number of
+possibilities in $O(1)$ space, since it only ever contains one thing. Likewise,
+that we can describe a product in $O(n)$ space (rather than the $O(n+\log{n})$
+balanced binary tree, or $O(2n)$ linked list.)
+
+The ``trick'' building extensible sum and product types is to use the
+type system to encode the extra information. Anything we do at the type-level is
+free at runtime. Because open sums have fewer moving pieces, we will work
+through them first, and use their lessons to help build open products.
+
+
+\section{Open Sums}
+
+\preamble{OpenSum}
+
+By definition, an open sum is a container of a data whose type isn't known
+statically. Furthermore, there are no guarantees that we know which types it
+\emph{might be,} since the list of types itself might be polymorphic.
+
+Existential types are ones whose type has been forgotten by the type system. As a
+result, we can use them to allow us to store \emph{any} type inside of our open
+sum container. We will constrain this later on.
+
+Although they're not necessary, as we've seen, GADTs provide a nice interface
+for defining and working with existential types.
+
+\snip{OpenSum}{OpenSum}
+
+At \ann{1} we declare \ty{OpenSum} as a GADT. It has two parameters, \ty{f}
+of kind \ty{k -> Type} and \ty{ts} of kind \kind{[k]}. We call \ty{f} an
+\emph{indexed type}, which means it provides a \kind{Type} when given a
+\kind{k}. We will talk more about these parameters in a minute.
+
+The data constructor \hs{UnsafeOpenSum} at \ann{2} is thus named because, well,
+its unsafe. We'll later provide tools for constructing \ty{OpenSum}s safely, but
+building one via the data constructor isn't guaranteed to maintain our
+invariants. It's a common pattern in type level programming to label raw data
+constructors as \hs{Unsafe}, and write smart constructors that enforce the
+safety.
+
+Looking at \ann{3}, we see that \ty{OpenSum} is a container of \ty{f t}, where
+\ty{t} has kind \kind{k}. Because \ty{t} isn't mentioned in the return type of
+our constructor (\ann{4}), \ty{t} is existential. Once \ty{t} enters an
+\ty{OpenSum}, it can never be recovered. Knowledge of what \ty{t} is is lost
+forever.
+
+Returning to our parameters, we assign the semantics that the existential \ty{t}
+must be one of the elements of \ty{ts}. If \ty{ts \tyeqSpace '[ Int, Bool, String ]},
+we know \ty{t} was originally one of \ty{Int}, \ty{Bool} or \ty{String}, though
+we do not necessary know which.
+
+You might be wondering about the value of the \ty{f} parameter. Its presence
+allows us to add a common shape to all the members of \ty{ts}. For example,
+\ty{OpenSum ((->) String) '[Int, Bool]} is capable of storing \ty{String -> Int}
+and \ty{String -> Bool}.
+
+Users who just want to store regular types with no additional structure should
+let \ty{f \tyeqSpace Identity}.
+
+The \ty{OpenSum} data constructor also stores an \ty{Int}, which we will use
+later as a tag to ``remember'' what type the existential variable \ty{t} had. It
+will be used as an index into \ty{ts}. For example, if we are storing the number
+\hs{2} and \ty{ts \tyeqSpace '[A, B, C, D]}, we understand that originally, \ty{t
+\tyeqSpace C}.
+
+A first-class type family can be used to find \ty{t} in \ty{ts}:
+
+\snip{OpenSum}{FindElem}
+
+\ty{FindElem} works by looking through \ty{ts} and comparing the first element
+of each tuple with \ty{key}. The result of \ty{FindIndex} is a \kind{Maybe k},
+which we then, at \ann{1}, call the type-level equivalent of \hs{fromJust} on.
+If \ty{FindIndex} returned \ty{'Nothing}, \ty{FindElem} returns \ty{Stuck}. A
+stuck type family is one which can't reduce any further. We can exploit this
+property and ask whether \ty{FindElement} evaluated fully by asking whether it's
+a \ty{KnownNat}.
+
+\snip{OpenSum}{Member}
+
+A benefit of this approach is that a \ty{KnownNat} constraint allows for
+reification of the \kind{Nat} at the term-level---we can get an \ty{Int}
+corresponding to the \kind{Nat} we had. Additionally, the type-level nature of
+\ty{FindElem} means we pay no runtime cost for the computation.
+
+\snip{OpenSum}{findElem}
+
+Armed with \hs{findElem}, we are able to build a smart, type safe constructor
+for \ty{OpenSum}s.
+
+\snip{OpenSum}{inj}
+
+\hs{inj} allows injecting a \ty{f t} into any \ty{OpenSum f ts} so long as
+\ty{t} is an element somewhere in \ty{ts}. However, nothing about this
+definition suggests \ty{ts} must be monomorphic; it can remain as a type
+variable so long as we propagate the \ty{Member t ts} constraint upwards.
+
+But a sum type is no good without the ability to try to take things out of it.
+
+\snip{OpenSum}{prj}
+
+Projections out of \ty{OpenSum} are done by a runtime check at \ann{1} that the
+\ty{Int} type tag inside of \ty{OpenSum} is the same as the type we're trying to
+extract it as. If they are the same, at \ann{2} we know it's safe to perform an
+\hs{unsafeCoerce}, convincing the type checker to give back a (non-existential)
+\ty{t}. If the type tags are not the same, \hs{prj} gives back \hs{Nothing}.
+
+We find ourselves wanting to reduce an \ty{OpenSum} regardless of whats inside
+it. \ty{prj} is no help here---it either succeeds or it doesn't. If it fails, we
+the programmers have learned something about the type inside (what it is
+\emph{not}). The types don't reflect that knowledge.
+
+\snip{OpenSum}{decompose}
+
+The \hs{decompose} function lets us perform induction over an \ty{OpenSum}.
+Either we will get out the type corresponding to the head of \ty{ts}, or we will
+get back a \ty{OpenSum} with fewer possibilities. A type tag of 0 corresponds
+to the head of the type list, so it is unnecessary to call \hs{findElem}. We
+maintain this invariant by decrementing the type tag in the \hs{Right} case.
+
+In practice, it is also useful to be able to \emph{widen} the possibilities of
+an open sum. A new function, \hs{weaken}, tacks a \ty{x} type in front of
+the list of possibilities.
+
+\begin{exercise}
+Write \hs{weaken :: OpenSum f ts -> OpenSum f (x ': ts)}
+\end{exercise}
+\begin{solution}
+\unspacedSnip{OpenSum}{weaken}
+\end{solution}
+
+If we want to perform the same logic regardless of what's inside an
+\ty{OpenSum}, \hs{prj} and \hs{decompose} both feel inelegant. We introduce
+\hs{match} eliminator which consumes an \ty{OpenSum} in $O(1)$ time.
+
+\snip{OpenSum}{match}
+
+By using a rank-n type at \ann{1}, \hs{match} is given a function that can
+provide a \ty{b} \emph{regardless of what's inside the sum.} In this case,
+inspecting the type tag isn't necessary.
+
+There is a general principle to take away here. If it's too hard to do at the
+type-level, it's OK to cheat and prove things at the term-level. In these cases,
+\hs{unsafeCoerce} can be your best friend---so long as you're careful to hide
+the unsafe constructors.
+
+
+\section{Open Products}
+
+\preamble{OpenProduct}
+
+Open products are significantly more involved than their sum duals. Their
+implementation is made sticky due to the sheer number of moving pieces. Not only
+do open products have several internal types it's necessary to keep track of,
+they also require a human-friendly interface.
+
+Our implementation will associate names with each type inside. These names can
+later be used by the user to refer back to the data contained. As a result, the
+majority of our implementation will be type-level book-keeping. Inside the
+product itself will be nothing new of interest.
+
+We begin by defining a container \ty{Any} that will existentialize away its
+\ty{k} index. \ty{Any} is just a name around the same pattern we did in
+\ty{OpenSum}.
+
+\snip{OpenProduct}{Any}
+
+This implementation of \ty{OpenProduct} will to optimize for $O(1)$ reads, and
+$O(n)$ writes, although other trade-offs are possible. We thus define
+\ty{OpenProduct} as a \ty{Data.Vector} of \ty{Any}s.
+
+\snip{OpenProduct}{OpenProduct}
+
+\ty{OpenProduct} is structured similarly to \ty{OpenSum}, but its \ty{ts}
+parameter is of kind \kind{[(Symbol, k)]}. The parameter \ty{ts} now pulls
+double duty---not only does it keep track of which types are stored in our
+\ty{Vector Any}, but it also associates names to those pieces of data. We will
+use these \kind{Symbol}s to allow the user to provide his own names for the
+contents of the product.
+
+Creating an empty \ty{OpenProduct} is now possible. It has an empty \ty{Vector}
+and an empty list of types.
+
+\snip{OpenProduct}{nil}
+
+Because all data inside an \ty{OpenProduct} will be labeled by a \kind{Symbol},
+we need a way for users to talk about \kind{Symbol}s at the term-level.
+
+\snip{OpenProduct}{Key}
+
+By way of \extension{TypeApplications}, \ty{Key} allows users to provide labels
+for data. For example, \hs{Key @"myData"} is a value whose type is \ty{Key
+"myData"}. Later \apageref{OverloadedLabels} we will look at how to
+lessen the syntax to build \ty{Key}s. These are the necessary tools to insert
+data into an open product. Given a \ty{Key key} and a \ty{f k}, we can insert a
+\ty{'(key, k)} into our \ty{OpenProduct}.
+
+\snipRename{OpenProduct}{badInsert}{insert}
+
+Our function \hs{insert} adds our new \ty{'(key, k)} to the head of the type
+list, and inserts the \ty{f k} to the head of the internal \ty{Vector}. In this
+way, it preserves the invariant that our list of types has the same ordering as
+the data in the \ty{Vector}.
+
+We can test this in GHCi with the \ghcicmd{:t} command.
+
+\begin{dorepl}{OpenProduct}
+/badInsert/insert/let result = badInsert (Key @"key") (Just "hello") nil
+:t result
+/badInsert/insert/:t badInsert (Key @"another") (Just True) result
+\end{dorepl}
+
+While this looks good, there is a flaw in our implementation.
+
+\begin{dorepl}{OpenProduct}
+@let result = badInsert (Key @"key") (Just "hello") nil
+/badInsert/insert/:t badInsert (Key @"key") (Just True) result
+\end{dorepl}
+
+Trying to \hs{insert} a duplicate key into an \ty{OpenProduct} succeeds. While
+this isn't necessarily a \emph{bug}, it's confusing behavior for the user
+because only one piece of keyed data will be available to them. We can fix this
+with a type family which computes whether a key would be unique.
+
+\snip{OpenProduct}{UniqueKey}
+
+\ty{UniqueKey} is the type-level equivalent of \hs{null . filter (== key) .
+fst}. If the \ty{key} doesn't exist in \ty{ts}, \ty{UniqueKey} returns
+\ty{'True}. We can now fix the implementation of \hs{insert} by adding a
+constraint to it that \ty{UniqueKey key ts \tyeqSpace 'True}.
+
+\snipRename{OpenProduct}{oldInsert}{insert}
+
+GHCi agrees that this fixes the bug.
+
+\begin{dorepl}{OpenProduct}
+@let result = oldInsert (Key @"key") (Just "hello") nil
+/oldInsert/insert/:t oldInsert (Key @"key") (Just True) result
+\end{dorepl}
+
+Informative it is not, but at least it fixes the bug. In the next chapter, we
+will look at how to make this error message much friendlier.
+
+To project data out from an open product, we'll first need to write a getter.
+This requires doing a lookup in our list of types to figure out which index of
+the \ty{Vector} to return. The implementation is very similar to that for
+\ty{OpenSum}, except that we compare on the key names instead of the \kind{k}s
+themselves.
+
+\snip{OpenProduct}{FindElem}
+
+\snip{OpenProduct}{findElem}
+
+We will also require another type family to index into \ty{ts} and determine
+what type to return from \hs{get}. \ty{LookupType} returns the \kind{k}
+associated with the \ty{key}ed \kind{Symbol}.
+
+\snip{OpenProduct}{LookupType}
+
+\snip{OpenProduct}{get}
+
+At \ann{1}, we say the return type of \hs{get} is \ty{f} indexed by the
+result of \ty{LookupType key ts}. Since we've been careful in maintaining our
+invariant that the types wrapped in our \ty{Vector} correspond exactly with
+those in \ty{ts}, we know it's safe to \hs{unsafeCoerce} at \ann{2}.
+
+As one last example for open products, let's add the ability to modify the value
+at a key. There is no constraint that the new value has the same type as the old
+one. As usual, we begin with a first-class type family that will compute our new
+associated type list. \ty{UpdateElem} scans through \ty{ts} and sets the type
+associated with \ty{key} to \ty{t}.
+
+\snip{OpenProduct}{UpdateElem}
+
+The implementation of \hs{update} is rather predictable; we update the value
+stored in our \ty{Vector} at the same place we want to replace the type in
+\ty{ts}.
+
+\snip{OpenProduct}{update}
+
+\begin{exercise}
+Implement \hs{delete} for \ty{OpenProduct}s.
+\end{exercise}
+\begin{solution}
+\unspacedSnip{OpenProduct}{delete}
+\end{solution}
+
+\begin{exercise}
+Implement \hs{upsert} (update or insert) for \ty{OpenProduct}s.
+
+  Hint: write a type family to compute a \kind{Maybe Nat} corresponding to the
+  index of the key in the list of types, if it exists. Use class instances to
+  lower this kind to the term-level, and then pattern match on it to implement
+  \hs{upsert}.
+\end{exercise}
+\begin{solution}
+This is a particularly involved exercise. We begin by writing a FCF to compute
+  the resultant type of the \hs{upsert}:
+
+\snip{OpenProduct}{UpsertElem}
+
+  Notice that at \ann{1} we refer to \ty{Placeholder1Of3}---which is a little
+  hack to get around the lack of type-level lambdas in FCFs. Its definition is
+  this:
+
+\snip{OpenProduct}{Placeholder1Of3}
+\snip{OpenProduct}{EvalPlaceholder}
+
+  The actual implementation of \hs{upsert} requires knowing whether we should
+  insert or update. We will need to compute a \kind{Maybe Nat} for the type in
+  question:
+
+\snip{OpenProduct}{UpsertLoc}
+
+  And we can use a typeclass to lower this the \kind{Maybe Nat} into a \ty{Maybe
+  Int}:
+
+\snip{OpenProduct}{FindUpsertElem}
+\snip{OpenProduct}{FindUpsertNothing}
+\snip{OpenProduct}{FindUpsertJust}
+
+  Finally, we're capable of writing \hs{upsert}:
+
+\snip{OpenProduct}{upsert}
+\end{solution}
+
+
+\section{Overloaded Labels}
+\label{OverloadedLabels}
+
+We earlier promised to revisit the syntax behind \ty{Key}. Working with
+\ty{OpenProducts} doesn't yet bring us joy, mostly due to the syntactic noise
+behind constructing \ty{Key}s. Consider \hs{get (Key @"example") foo}; there are
+nine bytes of boilerplate syntactic overhead. While this doesn't seem like a
+lot, it weighs on the potential users of our library. You'd be surprised by how
+often things like these cause users to reach for lighter-weight alternatives.
+
+Thankfully, there \emph{is} a lighter-weight alternative. They're known as
+\defn{overloaded labels}, and can turn our earlier snippet into \hs{get
+\#example foo}.
+
+Overloaded labels are enabled by turning on \ext{OverloadedLabels}. This
+extension gives us access to the \hs{\#foo} syntax, which gets desugared as
+\hs{fromLabel @"foo" :: a} and asks the type system to solve a \ty{IsLabel "foo"
+a} constraint. Therefore, all we need to do is provide an instance of
+\ty{IsLabel} for \ty{Key}.
+
+\snip{OpenProduct}{keyIsLabel}
+
+Notice that the instance head is \emph{not} of the form
+\hs{IsLabel key (Key key)}, but instead has two type variables (\ty{key} and
+\ty{key'}) which are then asserted to be the same (\ann{1}). This odd
+phrasing is due to a quirk with Haskell's instance resolution, and is known as
+the \defn{constraint trick}.
+
+The machinery behind instance resolution is unintuitive. It will only match
+\defnn{instance heads}{instance head} (the part that comes after the fat
+constraint arrow \hs{=>}). The instance head of \hs{(Eq a, Eq b) => Eq (a, b)}
+is \hs{Eq (a, b)}. Once it has matched an instance head, Haskell will work
+backwards and only then try to solve the context (\hs{(Eq a, Eq b)} in this
+example.) All of this is to say that the context is not considered when matching
+looking for typeclass instances.
+
+It is this unintuitive property of instance resolution that makes the constraint
+trick necessary. Notice how when we're looking for key \hs{\#foo}, there is
+nothing constraining our return type to be \ty{Key "foo"}. Because of this, the
+instance Haskell looks for is \hs{IsLabel "foo" (Key a)}.
+
+If our instance definition were of the form \hs{instance IsLabel key (Key key)},
+this head \emph{won't} match \hs{IsLabel "foo" (Key a)}, because Haskell has no
+guarantees \ty{"foo" \tyeqSpace a}. Perhaps we can reason that this must be the case,
+because that is the only relevant instance of \ty{IsLabel}---but again, Haskell
+has no guarantees that someone won't later provide a different, non-overlapping
+instance.
+
+By using the constraint trick, an instance head of the form \hs{IsLabel key (Key
+key')} allows Haskell to find this instance when looking for \ty{IsLabel "foo"
+(Key a)}. It unifies \ty{key \tyeqSpace "foo"} and \ty{key' \tyeqSpace a}, and then will
+expand the context of our instance. When it does, it learns that \ty{key \tyeq
+key'}, and finally that \ty{a \tyeqSpace "foo"}. It's roundabout, but it gets there
+in the end.
+
+The definition of \ty{IsLabel} can be found in \ty{GHC.OverloadedLabels}.
+
+\end{document}

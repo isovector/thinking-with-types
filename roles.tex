@@ -1,0 +1,254 @@
+\documentclass[book.tex]{subfiles}
+\begin{document}
+
+\chapter{Roles}
+
+\section{Coercions}
+
+\preamble{Roles}
+
+In Haskell, newtypes are guaranteed to be a zero-cost abstraction. What this
+means is that, under the hood, a newtype has exactly the same memory
+representation as the type it wraps. At runtime, there is no difference between
+a newtype and its wrapped type. The distinction between the two is made up, and
+exists only in the type system.
+
+Given the following definitions from \pkg{base}, for example,
+
+\snip{Roles}{ZipList}
+\snip{Roles}{Sum}
+
+then the following values are all \defn{representationally equal}---they have
+exactly the same physical representation in memory
+
+\begin{itemize}
+  \item{\hsval{[54, 46]}}
+  \item{\hsval{[Sum 54, Sum 46]}}
+  \item{\hsval{ZipList [54, 46]}}
+  \item{\hsval{ZipList [Sum 54, Sum 46]}}
+\end{itemize}
+
+\hsval{ZipList [54, 46]} is representationally equal to \hsval{[54, 46]} because
+the wrapped list consists of the same bytes in memory as its unwrapped
+counterpart. Likewise \hsval{[Sum 54, Sum 46]} is the same, because point-wise,
+each element in the list is representationally equal. In the last example here
+we see that representational equality is transitive.
+
+This zero-cost property of newtypes has profound implications for performance.
+It gives us the ability to \emph{reinterpret} a value of one type as a value of
+another---and do it in $O(0)$ time. This can be performed via the \hs{coerce}
+function.
+
+\snip{Roles}{coerce}
+
+The \ty{Coercible a b} \index{Coercible} constraint is a proof that the types
+\ty{a} and \ty{b} do, in fact, have the same runtime representation. Unless
+explicitly prevented (discussed later,) a newtype is always \ty{Coercible} with
+its underlying type.  \ty{Coercible} is a magic constraint. The compiler will
+write instances of it for you, and in fact, insists on this---it's actually an
+error to write your own!
+
+\begin{dorepl}{Roles}
+instance Coercible a b
+\end{dorepl}
+
+Anyway, \hs{coerce} can be used to massage data from one type into another
+without paying any runtime cost. As an example, if we wanted to sum a list
+of \ty{Int}s, we could use the \ty{Sum Int} monoid instance.
+
+\snip{Roles}{slowSum}
+
+While this works, it's not entirely satisfactory; it requires traversing the
+entire list with an \hs{fmap} just in order to get the right \ty{Monoid}
+instance in scope. This is an $O(n)$ we need to pay, for no reason other than to
+satisfy the type system. In such a simple example, list fusion might optimize
+away this penalty, but then again, it might not. And without looking at the
+generated core, we have no way of knowing.
+
+For comparison, we can instead use \hs{coerce} to transform \ty{[Int]} into
+\ty{[Sum Int]} in $O(0)$ time, giving us access to the right \ty{Monoid} for
+free.
+
+\snip{Roles}{fastSum}
+
+As a general rule, if you ever find yourself writing \hs{fmap NewtypeCtor}, it
+should be replaced with \hs{coerce}---unless the functor instance is
+polymorphic, in which case the compiler will complain and refuse to compile the
+code. Your runtime performance will thank you, and you'll be able to sleep
+peacefully with the satisfaction of a job well done.
+
+Because \ty{Coercible} corresponds to representational \emph{equality}, we
+should expect it to follow all of the usual laws of equality.
+
+\begin{itemize}
+  \item{\Gls{reflexivity}---\ty{Coercible a a} is true for any type
+    \ty{a}}
+  \item{\Gls{symmetry}---\ty{Coercible a b} implies \ty{Coercible b
+    a}}
+  \item{\Gls{transitivity}---given \ty{Coercible a b} and
+    \ty{Coercible b c} we have \ty{Coercible a c}}
+\end{itemize}
+
+By this line of reasoning, we see that it's perfectly acceptable to coerce a
+\ty{Sum a} into a \ty{Product a}.
+
+\begin{dorepl}{Roles}
+coerce (1867 :: Sum Int) :: Product Int
+\end{dorepl}
+
+The line of reasoning here is that both \ty{Sum Int} and \ty{Product Int} are
+newtypes over \ty{Int}, therefore they are inter-coercible by transitivity.
+
+A natural question about coercions is whether representationally equal types are
+always safely interchangeable. They're not. To see why, consider the case of
+\ty{Data.Map.Map} from the \pkg{containers} package.
+
+\ty{Map k v} is a container providing map lookups with key \ty{k} and value
+\ty{v}. It's represented as a balanced tree, ordered via an \ty{Ord k} instance.
+For example, look at the type of its \hs{insert} method:
+
+\snip{Roles}{insert}
+
+This \ty{Ord k} instance is required in order to know where to put the resulting
+\ty{v} in the map. The consequence is that a \ty{Map k v}'s layout in memory is
+\emph{entirely dependent} on the \ty{Ord k} instance it was built with.
+Normally typeclass coherence prevents us from shooting ourselves in the foot (by
+switching out the \ty{Ord k} instance in scope, for example) but \hs{coerce}
+softens this invariant.
+
+For example, consider the newtype \ty{Reverse} which flips around an underlying
+\ty{Ord} instance.
+
+\snip{Roles}{Reverse}
+\snip{Roles}{OrdReverse}
+
+Even though \ty{Reverse a} is safely \ty{Coercible} with \ty{a}, it is not the
+case that \ty{Map (Reverse k) v} can be safely coerced to \ty{Map k v}---they
+have completely different layouts in memory! At best, a \ty{Map (Reverse k) v}
+interpreted as a \ty{Map k v} will fail to find keys; at worst, it will crash if
+the container does unsafe things in the name of performance.
+
+Notice however that the layout of \ty{Map k v} does \emph{not} depend on \ty{v};
+we are free to safely coerce \ty{Map k v} as \ty{Map k v'} to our hearts'
+content. Thankfully, Haskell knows both of these facts, and allows us to coerce
+only when it's safe.
+
+\begin{dorepl}{Roles}
+coerce (M.singleton 'S' True) :: M.Map Char (Reverse Bool)
+coerce (M.singleton 'S' True) :: M.Map (Reverse Char) Bool
+\end{dorepl}
+
+\section{Roles}
+
+The question, of course, is what differentiates \ty{k} from \ty{v}? Their
+\defnn{roles}{role} are different. Just as the type system ensures terms are
+used correctly, and the kind system ensures types are logical, the \defn{role
+system} ensures coercions are safe.
+
+Every type parameter for a given type constructor is assigned a role. Roles
+describe how a type's representational equality is related to its parameters'
+coercion-safety. There are three varieties of roles.
+
+\begin{itemize}
+  \item{\defn{nominal}---the everyday notion of type-equality in Haskell,
+    corresponding to the \ty{a \tyeqSpace b} constraint. For example, \ty{Int} is
+    nominally equal \emph{only} to itself.}
+  \item{\defn{representational}---as discussed earlier in this chapter; types
+    \ty{a} and \ty{b} are representationally equal if and only if it's safe to
+    reinterpret the memory of an \ty{a} as a \ty{b}.}
+  \item{\defn{phantom}---two types are always phantom-ly equal to one another.}
+\end{itemize}
+
+In the newtype \ty{Sum a}, we say that \ty{a} \emph{is at role}
+\hs{representational}; which means that if \ty{Coercible a b => Coercible (Sum
+a) (Sum b)}---that \ty{Sum a} and \ty{Sum b} are representationally equal
+whenever \ty{a} and \ty{b} are!
+
+This is also the case for \ty{v} in \ty{Map k v}. However, as we've seen above,
+\ty{Coercible k1 k2} does not imply \ty{Coercible (Map k1 v) (Map k2 v)}, and
+this is because \ty{k} must be at role \hs{nominal}. \ty{Coercible (Map k1
+v) (Map k2 v)} is only the case when \ty{k1 \tyeqSpace k2}, and so this nominal role
+on \ty{k} is what keeps \ty{Map} safe.
+
+The other role is \hs{phantom}, and as you might have guessed, it is reserved
+for phantom parameters. \ty{Proxy}, for example, has a phantom type variable:
+
+\snip{Misc}{Proxy}
+
+The type variable \ty{a} is at role \hs{phantom}, and as expected, \ty{Coercible
+(Proxy a) (Proxy b)} is always true. Since \ty{a} doesn't actually ever exist at
+runtime, it's safe to change it whenever we'd like.
+
+There is an inherent ordering in roles; \hs{phantom} types can be coerced in
+more situations than \hs{representational} types, which themselves can be
+coerced more often than \hs{nominal} types. Upgrading from a weaker role (usable
+in more situations) to a stronger one is known as
+\defnn{strengthening}{strengthen} it.
+
+Just like types, roles are automatically inferred by the compiler, though they
+can be specified explicitly if desired. This inference process is relatively
+simple, and works as follows:
+
+\begin{enumerate}
+  \item{All type parameters are assumed to be at role \hs{phantom}.}
+  \item{The type constructor \ty{(->)} has two \hs{representational} roles; any
+    type parameter applied to a \ty{(->)} gets upgraded to
+    \ty{representational}. Data constructors count as applying \ty{(->)}.}
+  \item{The type constructor \ty{(\tyeq)} has two \hs{nominal} roles; any
+    type parameter applied to a \ty{(\tyeq)} gets upgraded to \hs{nominal}.
+    GADTs and type families count as applying \ty{(\tyeq)}.}
+\end{enumerate}
+
+\begin{exercise}
+  What is the role signature of \ty{Either a b}?
+\end{exercise}
+\begin{solution}
+  \hs{type role Either representational representational}
+\end{solution}
+
+\begin{exercise}
+  What is the role signature of \ty{Proxy a}?
+\end{exercise}
+\begin{solution}
+  \hs{type role Proxy phantom}
+\end{solution}
+
+While it's logical that a GADT counts as an application of \ty{(\tyeq)}, it
+might be less clear why types used by type families must be at role
+\ty{nominal}. Let's look at an example to see why.
+
+Consider a type family that replaces \ty{Int} with \ty{Bool}, but otherwise
+leaves its argument alone.
+
+\snip{Roles}{IntToBool}
+
+Is it safe to say \ty{a} is at role \hs{representational}? Of course
+not---\ty{Coercible a b => Coercible (IntToBool a) (IntToBool b)} doesn't hold
+in general. In particular, it fails whenever \ty{a \tyeqSpace Int}. As a result, any
+type that a type family can potentially match on must be given role
+\hs{nominal}.
+
+While roles are automatically inferred via the compiler, it's possible to
+strengthen an inferred role to a less permissive one by providing a \defn{role
+signature}.
+
+For example, binary search trees, like \ty{Map}s, have an implicit memory
+dependency on their \ty{Ord} instance. Given a data-type:
+
+\snip{Roles}{BST}
+
+After enabling \ext{RoleAnnotations}, we're capable of providing a annotation
+for it to strengthen the inferred role.
+
+\snip{Roles}{role}
+
+The syntax for role annotations is \hs{type role TyCon role1 role2 ...},
+where roles are given for type variables in the same order they're defined.
+
+Note that it's only possible to strengthen inferred roles, never weaken
+them. For example, because the \ty{v} in \ty{BST v} is inferred to be at role
+\hs{representational}, we are unable to assert that it is at role \hs{phantom}.
+Attempting to do so will result in an error at compile-time.
+
+\end{document}
+

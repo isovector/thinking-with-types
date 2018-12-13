@@ -1,0 +1,147 @@
+\documentclass[book.tex]{subfiles}
+\begin{document}
+
+\chapter{Custom Type Errors} \label{type errors}
+\label{TypeError}
+
+\ty{OpenSum} and \ty{OpenProduct} are impressive when used correctly. But the
+type errors that come along with their misuse are nothing short of nightmarish
+and unhelpful. For example:
+
+\begin{dorepl}{OpenSum}
+let foo = inj (Identity True) :: OpenSum Identity '[Bool, String]
+prj foo :: Maybe (Identity Int)
+\end{dorepl}
+
+As a user, when we do something wrong we're barraged by meaningless errors about
+implementation details. As library writers, this breakdown in user experience is
+nothing short of a failure in our library. A type-safe library is of no value if
+nobody knows how to use it.
+
+Fortunately, GHC provides the ability to construct custom type errors. The
+module \ty{GHC.TypeLits} defines the type \ty{TypeError} of kind
+\kind{ErrorMessage -> k}. The semantics of \ty{TypeError} is that if GHC is ever
+asked to solve one, it emits the given type error instead, and refuse to
+compile. Because \ty{TypeError} is polykinded, we can put it anywhere we'd like
+at the type-level.
+
+The following four means of constructing \kind{ErrorMessage}s are available to
+us.
+
+\newcommand{\tyerror}[3]{\item{\ty{'#1} (of kind \kind{#2}.) #3}}
+
+\begin{itemize}
+  \tyerror{Text}{Symbol -> ErrorMessage}{Emits the symbol verbatim. Note that this is \emph{not} \ty{Data.Text.Text}.}
+  \tyerror{ShowType}{k -> ErrorMessage}{Prints the name of the given type.}
+  \tyerror{(:<>:)}{ErrorMessage -> ErrorMessage -> ErrorMessage}{Concatenate two \kind{ErrorMessage}s side-by-side.}
+  \tyerror{(:\$\$:)}{ErrorMessage -> ErrorMessage -> ErrorMessage}{Append one \kind{ErrorMessage} vertically atop another.}
+\end{itemize}
+
+\ty{TypeError} is usually used as a constraint in an instance context, or as the
+result of a type family. As an illustration, we can provide a more helpful error
+message for showing a function. Recall that the usual error message is not
+particularly useful:
+
+\begin{dorepl}{OpenProduct}
+show id
+\end{dorepl}
+
+However, by bringing the following instance into scope:
+
+\snip{Misc}{pragmas}
+\snip{Misc}{showFunc}
+
+Attempting to show a function in GHCi now offers a solution to what might be
+wrong:
+
+\begin{dorepl}{Misc}
+show id
+\end{dorepl}
+
+When evaluating \hs{show} \hs{id}, Haskell matches the instance head of \ty{Show
+(a -> b)}, and then attempts to solve its context. Recall that whenever GHC sees
+a \ty{TypeError}, it fails with the given message. We can use this principle to
+emit a friendlier type error when using \hs{prj} incorrectly.
+
+\snip{OpenSum}{FriendlyFindElem}
+
+Notice that \ty{FriendlyFindElem} is defined as a \emph{type family}, rather
+than a \emph{type synonym} as FCFs usually are. This is to delay the expansion
+of the type error so GHC doesn't emit the error immediately. We now attempt to
+find \ty{t} in \ty{ts}, and use \ty{FromMaybe} to emit a type error in the case
+that we didn't find it.
+
+Rewriting \hs{prj} to use \ty{KnownNat (FriendlyFindElem t ts f ts)} instead of
+\ty{Member t ts} is enough to fix our error messages.
+
+\begin{dorepl}{OpenSum}
+let foo = inj (Identity True) :: OpenSum Identity '[Bool, String]
+friendlyPrj foo :: Maybe (Identity Int)
+\end{dorepl}
+
+Let's return to the example of \hs{insert} for \ty{OpenProduct}. Recall the
+\ty{UniqueKey key ts \tyeqSpace 'True} constraint we added to prevent duplicate keys.
+
+\snipRename{OpenProduct}{oldInsert}{insert}
+
+This is another good place to add a custom type error; it's likely to happen,
+and the default one GHC will emit is unhelpful at best and horrendous at worst.
+Because \ty{UniqueKey} is already a type family that can't get stuck (ie. is
+total), we can write another type family that will conditionally produce the
+error.
+
+\snip{OpenProduct}{RequireUniqueKey}
+
+\ty{RequireUniqueKey} is intended to be called as \ty{RequireUniqueKey
+(UniqueKey key ts) key t ts}. The \kind{Bool} at \ann{1} is the result of
+calling \ty{UniqueKey}, and it is pattern matched on. At \ann{2}, if it's
+\ty{'True}, \ty{RequireUniqueKey} emits the unit constraint \ty{()}
+\footnote{This requires \extension{ConstraintKinds}.}. As a \kind{Constraint},
+\ty{()} is trivially satisfied.
+
+Notice that at \ann{3} we helpfully suggest a solution. This is good form in
+any libraries you write. Your users will thank you for it.
+
+We can now rewrite \hs{insert} with our new constraint.
+
+\snip{OpenProduct}{insert}
+
+\begin{exercise}
+Add helpful type errors to \ty{OpenProduct}'s \hs{update} and
+\hs{delete} functions.
+\end{exercise}
+\begin{solution}
+\unspacedSnip{OpenProduct}{FriendlyFindElem}
+\snipRename{OpenProduct}{friendlyUpdate}{update}
+\snipRename{OpenProduct}{friendlyDelete}{delete}
+
+These functions could be cleaned up a little by moving the \ty{FriendlyFindElem}
+  constraint to \ty{findElem}, which would remove the need for both constraints.
+\end{solution}
+
+\begin{exercise}
+Write a closed type family of kind \kind{[k] -> ErrorMessage} that
+pretty prints a list. Use it to improve the error message from
+\ty{FriendlyFindElem}.
+\end{exercise}
+\begin{solution}
+\unspacedSnip{OpenProduct}{ShowList}
+\snip{OpenProduct}{FriendlyFindElem2}
+\end{solution}
+
+\begin{exercise}
+See what happens when you directly add a \ty{TypeError} to the context
+of a function (eg. \hs{foo :: TypeError ... => a}). What happens? Do you know
+why?
+\end{exercise}
+\begin{solution}
+GHC will throw the error message immediately upon attempting to compile the
+  module.
+
+The reason why is because the compiler will attempt to discharge any extraneous
+  constraints (for example, \ty{Show Int} is always in scope, and so it can
+  automatically be discharged.) This machinery causes the type error to be seen,
+  and thus thrown.
+\end{solution}
+
+\end{document}

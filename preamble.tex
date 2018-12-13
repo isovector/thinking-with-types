@@ -1,0 +1,273 @@
+% packages
+\usepackage[utf8]{inputenc}
+
+\usepackage[paperwidth=6.25in,paperheight=9.25in,inner=1.25in,bmargin=0.75in,tmargin=0.75in,includeheadfoot]{geometry}
+
+\usepackage{xltxtra}
+\usepackage{cancel}
+\usepackage{mathtools}
+\usepackage{fancyvrb}
+\usepackage{ragged2e}
+\usepackage{fancyhdr}
+% \usepackage{palatino}
+\usepackage{alltt}
+\usepackage{minted}
+\usepackage{pdfpages}
+\usepackage{todonotes}
+\usepackage{subfiles}
+% \usepackage{makeidx}
+\usepackage{listings}
+\usepackage{amsmath}
+\usepackage{textcomp}
+% \usepackage[framemethod=tikz]{mdframed}
+\usetikzlibrary{calc}
+\usepackage[titletoc]{appendix}
+\usepackage{dingbat}
+% \usepackage{environ}
+\usepackage{fancyvrb}
+\usepackage{multirow}
+\usepackage[toc]{glossaries}
+\usepackage{babel}
+\usepackage[local,copyexercisesinsolutions]{exsol}
+\usepackage[tikz]{bclogo}
+\usepackage{zref-user}
+% \usepackage[pdfpagelabels,final]{hyperref}
+\usepackage{bookmark}
+
+\makeatletter
+\zref@newprop{chapter}{\thechapter}
+\zref@newprop{chaptertype}{\@chapapp}% as suggested by Danie Els
+\makeatother
+
+% \setmainfont{Ledger} % good one
+% \setmainfont{Ovo}
+\setmainfont[ItalicFont={Merriweather Italic}]{Merriweather}
+\setmonofont{Inconsolata}
+\setsansfont{Cabin}
+
+\makeatletter
+\newlength\fake@f
+\newlength\fake@c
+\def\fakesc#1{%
+  \begingroup%
+  \xdef\fake@name{\csname\curr@fontshape/\f@size\endcsname}%
+  \fontsize{\fontdimen8\fake@name}{\baselineskip}\selectfont%
+  \uppercase{#1}%
+  \endgroup%
+}
+\def\fakersc#1{%
+  \begingroup%
+  \xdef\faker@name{\csname\curr@fontshape/\f@size\endcsname}%
+  \fontsize{\fontdimen10\faker@name}{\baselineskip}\selectfont%
+  \uppercase{#1}%
+  \endgroup%
+}
+\makeatother
+
+\pagestyle{fancy}
+\setlength{\headheight}{13.6pt}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+\fancyhead[LE]{\thepage}
+\fancyhead[LO]{\rightmark}
+\fancyhead[RO]{\thepage}
+% \fancyfoot[C]{\footnotesize revision \texttt{\input{.current-revision}}}
+\fancyfoot[C]{}
+
+\lstset{breaklines=true,basicstyle=\ttfamily,breakatwhitespace=true,postbreak=\mbox{{\textcolor{red}{$\hookrightarrow$}}\space}}
+
+\newlength\longest
+
+
+
+\makeindex
+
+\def\replace#1#2#3{%
+ \def\tmp##1#2{##1#3\tmp}%
+   \tmp#1\stopreplace#2\stopreplace}
+\def\stopreplace#1\stopreplace{}
+
+\newcommand{\snipFile}[1]{\spaceMyBox
+% \immediate\write18{latex-live-snippets code/#1.hs}
+\input{.latex-live-snippets/#1.FILE.tex}\spaceMyBox}
+
+\newcommand{\snip}[2]{\spaceMyBox\unspacedSnip{#1}{#2}\spaceMyBox}
+\newcommand{\unspacedSnip}[2]{
+% \immediate\write18{latex-live-snippets code/#1.hs #2}
+\input{.latex-live-snippets/#1.#2.tex}}
+\newcommand{\snipRename}[3]{\spaceMyBox
+% \immediate\write18{/usr/bin/bash snip.sh #1 #2 #3}
+\input{.latex-live-snippets/#1.#2.tex}\spaceMyBox}
+
+\makeatletter
+\newcommand*\ifcounter[1]{%
+  \ifcsname c@#1\endcsname
+    \expandafter\@firstoftwo
+  \else
+    \expandafter\@secondoftwo
+  \fi
+}
+\makeatother
+
+\newcommand{\doreplparam}{}
+\newcommand{\doreplcounter}{}
+\newcommand{\doreplfile}{}
+\newenvironment{dorepl}[1]{\VerbatimEnvironment
+\renewcommand{\doreplparam}{#1}
+\renewcommand{\doreplcounter}{chapter\arabic{chapter}}
+\renewcommand{\doreplfile}{\doreplparam-\arabic{chapter}-\arabic{\doreplcounter}}
+\ifcounter{\doreplcounter}{}{\newcounter{\doreplcounter}}
+\begin{VerbatimOut}{/tmp/\doreplfile.aux}}{\end{VerbatimOut}
+% \immediate\write18{/usr/bin/bash ghci.sh code/\doreplparam.hs /tmp/\doreplfile.aux \doreplfile}
+\input{.latex-live-snippets/repl/\doreplfile.tex}
+\stepcounter{\doreplcounter}
+}
+
+% book metadata
+\title{Thinking with Types}
+\author{Sandy Maguire}
+\date{}
+
+
+% new environments
+
+
+\newenvironment{repl}{\spaceMyBox\begin{bclogo}[arrondi=0.5,logo=\bcloupe,barre=snake,tailleOndu=1.5,noborder=true,couleurBarre=gray]{\quad GHCi}}{\end{bclogo}\spaceMyBox}
+
+\newcommand{\ghci}[2]{> #1\\
+{#2}}
+\newcommand{\ghcierr}[2]{> #1\\
+#2}
+\newcommand{\ghcisilent}[1]{> #1}
+\newcommand{\ghcicmd}[1]{\texttt{#1}}
+\newcommand{\tyeq}{$\sim\!\!$\;}
+\newcommand{\tyeqSpace}{$\sim$\;}
+% \DeclareMathOperator{\tyeq}{$\sim$}
+
+\newcommand{\spaceMyBox}{\par\addvspace{8mm}}
+\newcommand{\spaceMyBigBox}{\par\addvspace{12mm}}
+
+\input{pygments.tex}
+\newenvironment{code}{\VerbatimEnvironment\begin{minted}[breaklines,breakautoindent,fontfamily=tt,escapeinside=!!]{haskell}}{\end{minted}}
+\newenvironment{python}{\begin{alltt}}{\end{alltt}}
+
+\newenvironment{necessary}[1][FILL IT IN DINGUS]{\begin{bclogo}[arrondi=0.5,logo=\bcoutil,barre=snake,tailleOndu=1.5,noborder=true,couleurBarre=gray]{\quad Necessary #1}}{\end{bclogo}}
+
+\definecolor{exerciseColor}{rgb}{0.9,0.9,0.9}
+
+
+
+% new commands
+
+%% code annotation circle
+\newcommand{\anncirc}[1]{\raisebox{-0.5mm}{\tikz\node[text=white,
+font=\sffamily\bfseries,minimum size=2mm,inner sep=0mm,draw,circle,fill=black]
+{\small #1};}}
+
+\newcommand{\ann}[1]{\hspace{1.5mm}\anncirc{#1}\hspace{1.5mm}}
+
+%% inline code annotation (right aligned, has dots)
+\newcommand{\annotate}[1]{\Dotfill\quad\anncirc{#1}\qquad}
+\newcommand{\json}[1]{\texttt{#1}}
+\newcommand{\pkg}[1]{\texttt{#1}}
+\newcommand{\hs}[1]{\texttt{#1}}
+\newcommand{\cpp}[1]{\texttt{#1}}
+\newcommand{\ty}[1]{\hfil\penalty 100 \hfilneg \hbox{\texttt{#1}}}
+\renewcommand{\ty}[1]{\texttt{#1}}
+\newcommand{\extension}[1]{\texttt{-X#1}}
+\newcommand{\ext}[1]{\extension{#1}}
+\newcommand{\kind}[1]{\fakesc{\replace{#1}{->}{$\to$}}}
+\newcommand{\tykind}[1]{\fakersc{\replace{#1}{->}{$\to$}}}
+\newcommand{\lam}{\textbackslash\!\!}
+\newcommand{\iso}[2]{\ensuremath{\ty{#1} \cong \ty{#2}}}
+\newcommand{\preamble}[1]{\begin{necessary}[Extensions]
+\unspacedSnip{#1}{pragmas}
+\end{necessary}
+
+\begin{necessary}[Imports]
+\unspacedSnip{#1}{imports}
+\end{necessary}}
+
+\renewcommand{\theexercise}{\arabic{chapter}\if0\arabic{section}\else.\arabic{section}\fi\if0\arabic{subsection}\else.\arabic{subsection}\fi\if0\arabic{subsubsection}\else.\arabic{subsubsection}\fi-\roman{exercise}}
+
+% misc shit
+\makeatletter
+\newcommand{\Dotfill}{\leavevmode \cleaders \hb@xt@ .85em{$\hss \cdot\hss $}
+\hfill \kern \z@}
+
+
+
+
+\renewenvironment{exsol@exercise}[1]{\spaceMyBox\begin{bclogo}[arrondi=0,couleur=exerciseColor,logo=\bcplume,barre=snake,tailleOndu=1.5,noborder=true,couleurBarre=gray]{\quad\exercisename{} #1}}
+{\end{bclogo}\nopagebreak[4]\spaceMyBox}
+
+\renewenvironment{exsol@solution}[1]{\nopagebreak[4]\noindent}
+{\spaceMyBigBox\pagebreak[2]}
+
+
+\makeatother
+
+% hot tips
+\tikzset{
+ lampsymbol/.style={%
+   ,scale=2,overlay}}
+
+\newmdenv[nobreak,middlelinewidth=.8pt,
+ frametitlefont=\bfseries,
+ leftmargin=.3cm,rightmargin=.3cm, innerleftmargin=2cm,
+ skipabove=\topsep,skipbelow=\topsep,
+ singleextra={\path let \p1=(P), \p2=(O) in ($(\x2,0)+0.5*(2,\y1)$) node[ lampsymbol] {\leftpointright};
+                          % \draw[line width=.8pt,white,] ($(O|-P)+(.2cm,0)$) -- ($(P)-(.2cm,0)$);
+                          % \draw[line width=.8pt,white,] ($(O)+(.2cm,0)$) -- ($(P|-O)-(.2cm,0)$);
+    },%
+]{lamp}
+
+
+\newenvironment{warning}{\begin{lamp}[frametitle=Warning]}{\end{lamp}}
+
+\newcommand{\lyxia}{Li-yao Xia}
+\newcommand{\hsval}[1]{\mintinline{Haskell}{#1}}
+\newcommand{\defn}[1]{\defnn{#1}{#1}}
+\newcommand{\defnn}[2]{\emph{\glslink{#2}{#1}}\index{#2}\label{#2}\zlabel{#2}}
+
+\newcommand{\possym}{\boldsymbol{+}}
+\newcommand{\posp}[1]{\ensuremath{\overbrace{\ty{#1}}^{\mathclap{\possym}}}}
+\newcommand{\negsym}{\boldsymbol{-}}
+\newcommand{\pmsym}{\boldsymbol{\pm}}
+\newcommand{\negp}[1]{\ensuremath{\overbrace{\ty{#1}}^{\mathclap{\negsym}}}}
+
+\DeclarePairedDelimiter\abs{\lvert}{\rvert}
+\newcommand{\card}[1]{\ensuremath{\abs{\ty{#1}}}}
+
+\let\emph\textit
+
+\newcommand{\chapterNoTOC}[1]{\chapter*{#1}\addcontentsline{toc}{chapter}{#1}}
+\newcommand{\gloss}[2]{\newglossaryentry{#1}{name=#1,description={#2}}}
+\newcommand{\website}[1]{\texttt{#1}}
+\newcommand{\email}[1]{\texttt{#1}}
+\newcommand{\noglossbaby}[1]{#1}
+
+\newcommand{\bigQuote}[2]{
+\centering
+\parbox{\longest}{%
+  \raggedright{\huge\itshape%
+   #2\par\bigskip
+  }
+  \raggedleft\Large\MakeUppercase{#1}\par%
+}
+}
+
+\newcommand{\myRow}[1]{#1}
+\newcommand{\myCol}[1]{#1 &}
+\newcommand{\myLastCol}[1]{#1}
+\newenvironment{myTable}{\begin{center}\begin{tabular}{|c|c|c|}}{\end{tabular}\end{center}}
+
+\newcommand{\myRowSpan}[1]{\multirow{2}{*}{#1} &}
+\newcommand{\myColSpan}[1]{\multicolumn{2}{|c|}{#1}}
+\newcommand{\myEmptyCol}{&}
+
+\newcommand{\apageref}[1]{on page \pageref{#1}}
+\newcommand{\spaceJob}{\;}
+
+\makeglossaries
+

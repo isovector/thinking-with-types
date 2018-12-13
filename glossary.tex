@@ -1,0 +1,221 @@
+\gloss{CPS}{see \emph{continuation-passing style}}
+
+\gloss{Coercible}{a typeclass showing two types have the same representation at runtime}
+
+\gloss{Contravariant}{a typeclass for ``backwards''-\ty{Functor}s}
+
+\gloss{Covariant}{another name for \ty{Functor}}
+
+\gloss{FCF}{see \emph{first class family}}
+
+\gloss{GADTs}{generalized algebraic data types. Useful for giving explicit, restrictive types on data constructors. Enabled via \ext{GADTs}}
+
+\gloss{indexed monad}{a monadic structure which carries a piece of static state along with it. Indexed monads allow you to enforce protocols in the type system}
+
+\gloss{MPTC}{a multi-parameter typeclass. Enabled via \ext{MultiParamTypeClasses}}
+
+\gloss{OverloadedLabels}{syntax for converting \kind{Symbol}s into values. Used via the syntax \hs{#mySymbol}, and desugared in terms of the \hs{GHC.Overloadedlabels.fromLabel} function. Enabled via \ext{OverloadedLabels}}
+
+\gloss{RankNTypes}{an extension which enables writing higher-rank types. Enabled
+via \ext{RankNTypes}}
+
+\gloss{ST trick}{a technique for scoping the lifetime of a piece of data via an existential variable}
+
+\gloss{ScopedTypeVariables}{a language extension which brings type variables into scope if their type had an explicit \hs{forall} quantifier. For example, the type \ty{forall a. a -> Int} brings \ty{a} into scope, but the type \ty{a -> Int} doesn't. Enabled via \ext{ScopedTypeVariables}}
+
+\gloss{TypeInType}{a language extension which allows you to use types as kinds, and vice versa. Enabled via \ext{TypeInType}}
+
+\gloss{ad-hoc polymorphism}{another name for the overloading we get from typeclasses}
+
+\gloss{algebraic data type}{any type made up of sums, products and exponents types}
+
+\gloss{ambiguous type}{a type is an ambiguous when it is unable to be inferred from a callsite. See \ext{AllowAmbiguousTypes} and use \ext{TypeApplications} to disambiguate them}
+
+\gloss{associated type family}{a type family associated with a typeclass.  Instances of the class must provide an instance of the type family}
+
+\gloss{bifunctor}{a type which is a functor over its last two type parameters}
+
+\gloss{canonical product}{another name for \ty{(,)}}
+
+\gloss{canonical representation}{every type is isomorphic to its canonical
+representation---a type defined as a sum of products}
+
+\gloss{canonical sum}{another name for \ty{Either}}
+
+\gloss{canonical unit}{another name for \ty{()}}
+
+\gloss{cardinality}{the number of unique values inhabiting a type. Two types with the same cardinality are always isomorphic}
+
+\gloss{carrier}{informal name for a typeclass whose only purpose is to carry ad-hoc polymorphic implementations for generic methods}
+
+\gloss{closed type family}{a type family with all of its instances provided in its definition. Closed type families are a close analogue of functions at the type-level}
+
+\gloss{constraint synonym}{a technique for turning a type synonym of \kind{Constraint}s into something partially-applicable. Performed by making a new typeclass with a superclass constraint of the synonym, and giving instances of it for free given the superclass constraint. For example, \hs{class c a => Trick a} and \hs{instance c a => Trick a}}
+
+\gloss{constraint synonym}{a technique for constructing constraints that can be
+partially applied. Performed by creating a new typeclass with the desired
+synonym as a superclass constraint, and then by giving a free instance of this
+class for any types that have the constraint}
+
+\gloss{constraint trick}{the transformation of a multiparameter typeclass
+instance from \ty{instance Foo Int b} to \ty{instance (a \tyeqSpace Int) => Foo a b}. Useful for improving type inference when working with MPTCs}
+
+\gloss{constraint}{a type of kind \kind{Constraint}. Constraints are the things
+that exist to the left of the fat context arrow (\hs{=>}).}
+
+\gloss{continuation-passing style}{the technique of taking (and subsequently
+calling) a callback, rather than directly returning a value}
+
+\gloss{contravariant}{a type \ty{T a} is contravariant with respect to \ty{a} if
+it can lift a function \ty{a -> b} into a function \ty{T b -> T a}}
+
+\gloss{correct by construction}{using the type system to ensure that incorrect
+programs are inexpressible}
+
+\gloss{covariant}{a type \ty{T a} is covariant with respect to \ty{a} if
+it can lift a function \ty{a -> b} into a function \ty{T a -> T b}. Another name
+for a \ty{Functor}}
+
+\gloss{defunctionalization}{a technique for replacing a family of functions with an opaque symbol, and moving the original logic into an \hs{eval} function.  Used by \emph{First Class Families}}
+
+\gloss{dependent pair}{a type that pairs a singleton with a value indexed by the
+singleton}
+
+\gloss{dependent type}{a type which isn't known statically, which depends on
+term-level values}
+
+\gloss{endomorphism}{a function of the form \ty{a -> a}}
+
+\gloss{fcf}{a first class (type) family}
+
+\gloss{first class family}{a technique for building reusable, higher-order type
+families via defunctionalization}
+
+\gloss{functional dependency}{an additional invariant added to a multiparameter
+typeclass declaration saying that some of its type varaibles are entirely
+determined by others. Primarily used to improve type inference}
+
+\gloss{higher rank}{another name for a rank-\emph{n} type}
+
+\gloss{higher-kinded type}{a type which is parameterized by something other than
+\kind{Type}}
+
+\gloss{indexed monad}{a monad that passes additional, static information between
+subsequent binds}
+
+\gloss{instance head}{the part of a typeclass instance that comes after the
+context arrow (\hs{=>})}
+
+\gloss{introduction}{another word for constructor}
+
+\gloss{invariant}{a higher-kinded type is said to be invariant in a type parameter if that parameter is in neither positive nor negative position}
+
+\gloss{isomorphism}{an isomorphism is a mapping between two things---primarily
+types in this book. If two types are isomorphic, they are identical for all
+intents and purposes}
+
+\gloss{kind error}{like a type error, but at the kind-level}
+
+\gloss{kind signature}{a declaration (inferred or specified) of a type's kind}
+
+\gloss{negative position}{a type variable which is contravariant with respect to
+its data type}
+
+\gloss{nominal}{a type variable is at role nominal if it is an error to coerce that type into another type}
+
+\gloss{non-injectivity}{a property of type families. Something that is
+non-injective does not have an inverse}
+
+\gloss{overloaded labels}{syntax for converting \kind{Symbol}s into values. Used via the syntax \hs{#mySymbol}, and desugared in terms of the \hs{GHC.Overloadedlabels.fromLabel} function. Enabled via \ext{OverloadedLabels}}
+
+\gloss{parametric polymorphism}{the polymorphism that arises from quantified type
+variables}
+
+\gloss{phantom}{a type variable is at role phantom if it can safely be coerced
+into any other type. Type parameters are called phantom if they aren't used at
+the term-level}
+
+\gloss{positive position}{a type variable which is covariant with respect to its
+data type}
+
+\gloss{product type}{any type that contains several other types simultaneously}
+
+\gloss{profunctor}{a type \ty{T a b} is a profunctor if it is contravariant in
+\ty{a} and covariant with respect to \ty{b}}
+
+\gloss{promoted data constructor}{the type that results from a data constructor
+when lifting its type to the kind level. Enabled via \ext{DataKinds}}
+
+\gloss{propositions as types}{another name for the Curry--Howard isomorphism}
+
+\gloss{rank-n type}{a type that delays the instantiantion of its type variables,
+allowing polymorphism to be preserved through a function call}
+
+\gloss{rank-n}{a rank-\emph{n} type}
+
+\gloss{rank}{a function's degree of polymorphism}
+
+\gloss{reflexivity}{the property that an object has when it is in relationship with itself. For example, equality is reflexive, because something is always equal to itself}
+
+\gloss{representationally equal}{two types are representationally equal if they
+have identical physical layouts in memory}
+
+\gloss{representational}{a type variable is at role representational if it can
+be coerced into other type sthat are representationally equal to it}
+
+\gloss{rigid skolem}{a type variable that is both rigid and a skolem}
+
+\gloss{rigid}{a type that was explicitly specified by a programmer. A type that
+was not inferred}
+
+\gloss{role system}{the system that ensures role annotations are not violated}
+
+\gloss{role}{a property of a type variable that describes how a data constructor
+that owns it is allowed to be coerced}
+
+\gloss{role signature}{the declared roles for a data type's type parameters}
+
+\gloss{sigma type}{another name for dependent pair}
+
+\gloss{singleton}{a type with a single inhabitant. Can be abused to create an
+isomorphism between types and terms}
+
+\gloss{skolem}{an existentially quantified variable}
+
+\gloss{strengthen}{the act of using a stricter role than is necessary}
+
+\gloss{structural polymorphism}{a technique for automating boilerplate code}
+
+\gloss{structural recursion}{tackling a problem by dividing it and conquering
+the pieces}
+
+\gloss{structured logging}{logging real data types rather than only their string
+representations}
+
+\gloss{sum of products}{a possible form that a type can be expressed in}
+
+\gloss{sum type}{a type with multiple data constructors}
+
+\gloss{symmetry}{the property that two objects have in a relationship when it is
+bidirectional. For example, equality is symmetric, because if $a = b$ then
+$b = a$
+}
+
+\gloss{term}{a value of a type. Something that can exist at runtime}
+
+\gloss{tick}{the leading apostrophe in the name of a promoted data constructor}
+
+\gloss{transitivity}{the idea that if
+$a \star b$ and
+$b \star c$ then
+$a \star c$ for any relation
+$\star$
+}
+
+\gloss{type family dependency}{a technique for adding injectivity to a type
+family}
+
+\gloss{value type}{a type with kind \kind{Type}}
+
+\gloss{variance}{the behavior a type has when transforming its type parameters}
+

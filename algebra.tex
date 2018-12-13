@@ -1,0 +1,405 @@
+\documentclass[book.tex]{subfiles}
+\begin{document}
+
+\chapter{The Algebra Behind Types}
+
+\section{Isomorphisms and Cardinalities}
+
+One of functional programming's killer features is pattern matching, as made
+possible by \defnn{algebraic data types}{algebraic data type}. But this term
+isn't just a catchy title for things that we can pattern match on. As their name
+suggests, there is in fact an \emph{algebra} behind algebraic data types.
+
+Being comfortable understanding and manipulating this algebra is a mighty
+superpower---it allows us to analyze types, find more convenient forms for them,
+and determine which operations (eg. typeclasses) are possible to implement.
+
+To start, we can associate each type with its \defn{cardinality}---the number of
+inhabitants it has, ignoring bottoms. Consider the following simple type
+definitions:
+
+\snip{Algebra}{Void}
+\snip{Algebra}{Unit}
+\snip{Algebra}{Bool}
+
+\ty{Void} has zero inhabitants, and so it is assigned cardinality 0. The unit
+type \ty{()} has one inhabitant---thus its cardinality is 1. Not to belabor
+the point, but \ty{Bool} has cardinality 2, corresponding to its constructors
+\hs{True} and \hs{False}.
+
+We can write these statements about cardinality more formally:
+
+$$
+\begin{align*}
+  \card{Void} &= 0 \\
+  \card{()} &= 1 \\
+  \card{Bool} &= 2 \\
+\end{align*}
+$$
+
+Any two types that have the same cardinality will always be isomorphic to one
+another. An \defn{isomorphism} between types \ty{s} and \ty{t} is defined as a
+pair of functions \hs{to} and \hs{from}:
+
+\snip{Algebra}{to}
+
+such that composing either after the other gets you back where you started. In
+other words, such that:
+
+$$
+\begin{align*}
+  \hs{to .\spaceJob{}from = id} \\
+  \hs{from .\spaceJob{}to = id} \\
+\end{align*}
+$$
+
+We sometimes write an isomorphism between types \ty{s} and \ty{t} as \iso{s}{t}.
+
+If two types have the same cardinality, any one-to-one mapping between their
+elements is exactly these \hs{to} and \hs{from} functions. But where does such a
+mapping come from? Anywhere---it doesn't really matter! Just pick an arbitrary
+ordering on each type---not necessarily corresponding to an \ty{Ord}
+instance---and then map the first element under one ordering to the first
+element under the other. Rinse and repeat.
+
+For example, we can define a new type that also has cardinality 2.
+
+\snip{Algebra}{Spin}
+
+By the argument above, we should expect \ty{Spin} to be isomorphic to \ty{Bool}.
+Indeed it is:
+
+\snip{Algebra}{boolToSpin1}
+\snip{Algebra}{spinToBool1}
+
+However, note that there is another isomorphism between \ty{Spin} and
+\ty{Bool}:
+
+\snip{Algebra}{boolToSpin2}
+\snip{Algebra}{spinToBool2}
+
+Which of the two isomorphisms should we prefer? Does it matter?
+
+In general, for any two types with cardinality $n$, there
+are $n!$ unique isomorphisms between them. As far as the math goes, any of these
+is just as good as any other---and for most purposes, knowing that an
+isomorphism \emph{exists} is enough.
+
+An isomorphism between types \ty{s} and \ty{t} is a proof that \emph{for all
+intents and purposes,} \ty{s} and \ty{t} \emph{are the same thing.} They might
+have different instances available, but this is more a statement about Haskell's
+typeclass machinery than it is about the equivalence of \ty{s} and \ty{t}.
+
+Isomorphisms are a particularly powerful concept in the algebra of types.
+Throughout this book we shall reason via isomorphism, so it's best to get
+comfortable with the idea now.
+
+
+\section{Sum, Product and Exponential Types}
+
+In the language of cardinalities, \defnn{sum types}{sum type} correspond to
+addition. The canonical example of these is \ty{Either a b}, which is
+\emph{either} an \ty{a} or a \ty{b}. As a result, the cardinality (remember, the
+number of inhabitants) of \ty{Either a b} is the cardinality of \ty{a} plus the
+cardinality of \ty{b}.
+
+$$
+\card{Either a b} = \card{a} + \card{b}
+$$
+
+As you might expect, this is why such things are called \emph{sum} types. The
+intuition behind adding generalizes to any datatype with multiple
+constructors---the cardinality of a type is always the sum of the cardinalities
+of its constructors.
+
+\snip{Algebra}{Deal}
+
+We can analyze \ty{Deal}'s cardinality;
+
+$$
+\begin{align*}
+  \card{Deal a b} &= \card{a} + \card{b} + \card{Bool} \\
+  &= \card{a} + \card{b} + 2
+\end{align*}
+$$
+
+We can also look at the cardinality of \ty{Maybe a}. Because nullary data
+constructors are uninteresting to construct---there is only one
+\hs{Nothing}---the cardinality of \ty{Maybe a} can be expressed as follows;
+
+$$
+\card{Maybe a} = 1 + \card{a}
+$$
+
+Dual to sum types are the so-called \defnn{product types}{product type}. Again,
+we will look at the canonical example first---the pair type \ty{(a, b)}.
+Analogously, the cardinality of a product type is the \emph{product} of their
+cardinalities.
+
+$$
+\card{(a, b)} = \card{a} \times \card{b}
+$$
+
+To give an illustration, consider mixed fractions of the form $5\frac{1}{2}$. We
+can represent these in Haskell via a product type;
+
+\snip{Algebra}{MixedFraction}
+
+And perform its cardinality analysis as follows:
+
+$$
+\card{MixedFraction a} = \card{Word8} \times \card{a} \times \card{a} = 256
+\times \card{a} \times \card{a}
+$$
+
+An interesting consequence of all of this cardinality stuff is that we find
+ourselves able to express \emph{mathematical truths in terms of types}. For
+example, we can prove that $a \times 1 = a$ by showing an isomorphism between
+\ty{(a, ())} and \ty{a}.
+
+\snip{Algebra}{prodUnitTo}
+\snip{Algebra}{prodUnitFrom}
+
+Here, we can think of the unit type as being a monoidal identity for product
+types---in the sense that ``sticking it in doesn't change anything.'' Because $a
+\times 1 = a$, we can pair with as many unit types as we want.
+
+Likewise, \ty{Void} acts as a monoidal unit for sum types. To convince ourselves
+of this, the trivial statement $a+0 = a$ can be witnessed as an isomorphism
+between \ty{Either a Void} and \ty{a}.
+
+\snip{Algebra}{sumUnitTo}
+\snip{Algebra}{sumUnitFrom}
+
+The function \hs{absurd} at \ann{1} has the type \ty{Void -> a}. It's a sort of
+bluff saying ``if you give me a \ty{Void} I can give you anything you
+want.'' Despite this being a lie, because there are no \ty{Void}s to be had in
+the first place, we can't disprove it.
+
+Function types also have an encoding as statements about cardinality---they
+correspond to exponentialization. To give an example, there are exactly four
+($2^2$) inhabitants of the type \ty{Bool -> Bool}. These functions are \hs{id},
+\hs{not}, \hs{const True} and \hs{const False}. Try as hard as you can, but you
+won't find any other pure functions between \ty{Bool}s!
+
+More generally, the type \ty{a -> b} has cardinality $\card{b}^{\card{a}}$.
+While this might be surprising at first---it always seems backwards to me---the
+argument is straightforward. For every value of \ty{a} in the domain, we need to
+give back a \ty{b}. But we can chose any value of \ty{b} for every value of
+\ty{a}---resulting in the following equality.
+
+$$
+\card{a -> b} = \underbrace{\card{b} \times \card{b} \times \cdots \times
+\card{b}}_{\card{a} \text{times}} = \card{b}^{\card{a}}
+$$
+
+\begin{exercise}
+Determine the cardinality of \ty{Either Bool (Bool, Maybe Bool) -> Bool}.
+\end{exercise}
+\begin{solution}
+$$
+\begin{align*}
+  &  \card{Either Bool (Bool, Maybe Bool) -> Bool} \\
+  &= \card{Bool}^{\card{Either Bool (Bool, Maybe Bool)}} \\
+  &= \card{Bool}^{\card{Bool}+\card{Bool}\times\card{Maybe Bool}} \\
+  &= \card{Bool}^{\card{Bool}+\card{Bool}\times(\card{Bool}+1)} \\
+  &= 2^{2+2\times(2+1)} \\
+  &= 2^{2+2\times 3} \\
+  &= 2^{2+6} \\
+  &= 2^{8} \\
+  &= 256
+\end{align*}
+$$
+\end{solution}
+
+The inquisitive reader might wonder whether subtraction, division and other
+mathematical operations have meaning when applied to types. Indeed they do, but
+such things are hard, if not impossible, to express in Haskell. Subtraction
+corresponds to types with particular values removed, while division of a type
+makes some of its values equal (in the sense of being defined equally---rather
+than having an \ty{Eq} instance which equates them.)
+
+In fact, even the notion of differentiation in calculus has meaning in the
+domain of types. Though we will not discuss it further, the interested reader is
+encouraged to refer to Conor McBride's paper ``The Derivative of a Regular Type
+is its Type of One-Hole Contexts.''\cite{one-hole}.
+
+
+\section{Example: Tic-Tac-Toe}
+
+I said earlier that being able to manipulate the algebra behind types is a
+mighty superpower. Let's prove it.
+
+Imagine we wanted to write a game of tic-tac-toe. The standard tic-tac-toe board
+has nine spaces, which we could naively implement like this:
+
+\snip{Algebra}{TicTacToe}
+
+While such a thing works, it's rather unwieldy to program against. If we wanted
+to construct an empty board for example, there's quite a lot to fill in.
+
+\snip{Algebra}{emptyBoard}
+
+Writing functions like \hs{checkWinner} turn out to be even more involved.
+
+Rather than going through all of this trouble, we can use our knowledge of the
+algebra of types to help. The first step is to perform a cardinality analysis on
+\ty{TicTacToe};
+
+$$
+\begin{align*}
+  \card{TicTacToe a} &= \underbrace{\card{a} \times \card{a} \times \cdots
+  \times \card{a}}_{9 \text{ times}} \\
+    &= \card{a}^{9} \\
+    &= \card{a}^{3\times 3}
+\end{align*}
+$$
+
+When written like this, we see that \ty{TicTacToe} is isomorphic to a function
+\ty{(Three, Three) -> a}, or in its curried form: \ty{Three -> Three -> a}. Of
+course, \ty{Three} is any type with three inhabitants; perhaps it looks like
+this:
+
+\snip{Algebra}{Three}
+
+Due to this isomorphism, we can instead represent \ty{TicTacToe} in this form:
+
+\snip{Algebra}{TicTacToe2}
+
+And thus simplify our implementation of \hs{emptyBoard}:
+
+\snip{Algebra}{emptyBoard2}
+
+Such a transformation doesn't let us do anything we couldn't have done
+otherwise, but it does drastically improve the ergonomics. By making this
+change, we are rewarded with the entire toolbox of combinators for working with
+functions; we gain better compositionality and have to pay less of a cognitive
+burden.
+
+Let us not forget that programming is primarily a human endeavor, and ergonomics
+are indeed a worthwhile pursuit. Your colleagues and collaborators will thank
+you later!
+
+
+\section{The Curry--Howard Isomorphism}
+
+Our previous discussion of the algebraic relationships between types and their
+cardinalities can be summarized in the following table.
+
+\spaceMyBox
+\begin{myTable}
+\hline
+  \myRow{\myCol{\textbf{Algebra}} \myCol{\textbf{Logic}} \myLastCol{\textbf{Types}}} \\ \hline
+  \myRow{\myCol{$a + b$} \myCol{$a \vee b$} \myLastCol{\ty{Either a b}}} \\ \hline
+  \myRow{\myCol{$a \times b$} \myCol{$a \wedge b$} \myLastCol{\ty{(a, b)}}} \\ \hline
+  \myRow{\myCol{$b^a$} \myCol{$a \implies b$} \myLastCol{\ty{a -> b}}} \\ \hline
+  \myRow{\myCol{$a=b$} \myCol{$a \iff b$} \myLastCol{\small\emph{isomorphism}}} \\ \hline
+  \myRow{\myCol{0} \myCol{$\bot$} \myLastCol{\ty{Void}}} \\ \hline
+  \myRow{\myCol{1} \myCol{$\top$} \myLastCol{\ty{()}}} \\ \hline
+\end{myTable}
+\spaceMyBox
+
+This table itself forms a more-general isomorphism between mathematics and
+types. It's known as the \defn{Curry--Howard isomorphism}---loosely stating
+that every statement in logic is equivalent to some computer program, and vice
+versa. Curry--Howard has been popularized by Philip Wadler under the name
+\defn{propositions as types}.
+
+The Curry--Howard isomorphism is a profound insight about our universe. It
+allows us to analyze mathematical theorems through the lens of functional
+programming. What's better is that often even ``boring'' mathematical theorems
+are interesting when expressed as types.
+
+To illustrate, consider the theorem $a^1 = a$. When viewed through
+Curry--Howard, it describes an isomorphism between \ty{() -> a} and \ty{a}.
+Said another way, this theorem shows that there is no distinction between
+having a value and having a (pure) program that computes that value. This
+insight is the core principle behind why writing Haskell is such a joy compared
+with other programming languages.
+
+\begin{exercise}
+Use Curry--Howard to prove the exponent law that $a^b \times a^c =
+a^{b+c}$. That is, provide a function of the type \ty{(b -> a) -> (c -> a) ->
+Either b c -> a} and one of \ty{(Either b c -> a) -> (b -> a, c -> a)}.
+\end{exercise}
+\begin{solution}
+\unspacedSnip{Algebra}{productRule1To}
+\snip{Algebra}{productRule1From}
+
+  Notice that \hs{productRule1To} is the familiar \hs{either} function from \ty{Prelude}.
+\end{solution}
+
+\begin{exercise}
+Prove $(a\times b)^c = a^c \times b^c$.
+\end{exercise}
+\begin{solution}
+\unspacedSnip{Algebra}{productRule2To}
+\snip{Algebra}{productRule2From}
+\end{solution}
+
+\begin{exercise}
+Give a proof of $(a^b)^c = a^{b\times c}$. Does it remind you of
+anything from \ty{Prelude}?
+\end{exercise}
+\begin{solution}
+\unspacedSnip{Algebra}{curry}
+\snip{Algebra}{uncurry}
+
+  Both of these functions already exist in \ty{Prelude}.
+\end{solution}
+
+
+\section{Canonical Representations}
+
+A direct corollary that any two types with the same cardinality are isomorphic,
+is that there are multiple ways to represent any given type. Although you
+shouldn't necessarily let it change the way you model types, it's good to keep
+in mind that you have a choice.
+
+Due to the isomorphism, all of these representations of a type are ``just as
+good'' as any other. However, as we'll see \apageref{ghc.generics}, it's
+often useful to have a conventional form when working with types generically.
+This \defn{canonical representation} is known as a \defn{sum of products}, and
+refers to any type \ty{t} of the form,
+
+$$
+{t = \sum_{m}^{}{\prod_{n}^{}{t_{m,n}}}}
+$$
+
+The big $\Sigma$ means addition, and
+the $\Pi$ means multiplication---so we can read this as ``addition on the
+outside and multiplication on the inside.'' We also make the stipulation that
+all additions must be represented via \ty{Either}, and that multiplications via
+\ty{(,)}. Don't worry, writing out the rules like this makes it seem much more
+complicated than it really is.
+
+All of this is to say that each of following types is in its canonical
+representation:
+
+\begin{itemize}
+  \item{\ty{()}}
+  \item{\ty{Either a b}}
+  \item{\ty{Either (a, b) (c, d)}}
+  \item{\ty{Either a (Either b (c, d))}}
+  \item{\ty{a -> b}}
+  \item{\ty{(a, b)}}
+  \item{\ty{(a, Int)}---we make an exception to the rule for numeric
+    types, as it would be too much work to express them as sums.}
+\end{itemize}
+
+But neither of the following types are in their canonical representation;
+
+\begin{itemize}
+  \item{\ty{(a, Bool)}}
+  \item{\ty{(a, Either b c)}}
+\end{itemize}
+
+As an example, the canonical representation of \ty{Maybe a} is \ty{Either a ()}.
+To reiterate, this doesn't mean you should prefer using \ty{Either a ()} over
+\ty{Maybe a}. For now it's enough to know that the two types are equivalent. We
+shall return to canonical forms in chapter 13.
+
+% \todo{WHAT CHAPTER IS GHC GENERICS}
+
+\end{document}
+

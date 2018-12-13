@@ -1,0 +1,478 @@
+\documentclass[book.tex]{subfiles}
+\begin{document}
+
+\chapter{Dependent Types}
+
+\defnn{Dependent types}{dependent type} are types which depend on the result of
+\emph{runtime values.} This is an odd thing. In Haskell, traditionally terms and
+types on different sides of the phase barrier; terms exist only at runtime, and
+types only at compile-time.
+
+Proponents of dynamic typing are likely less phased by the idea of dependent
+types---their typing mechanisms, if they have any at all, must exist at runtime.
+But as we will see, we don't need to give up type safety in order to work with
+dependent types.
+
+The field of dependent types is fast-growing, and any attempt to describe it
+definitively is doomed to fail. Professor and GHC-contributor Richard Eisenberg
+is actively working on bringing first-class dependent types to Haskell, though
+his projections estimate it to not be available for a few years.
+
+In the meantime, we have no recourse but to abuse language features in order to
+gain an approximation of dependent types, content with the knowledge that the
+process will only get easier as time goes on. While the \emph{techniques} in
+this section will likely be deprecated sooner than later, the \emph{ideas} will
+carry on.
+
+It's also a good culmination of ideas already presented in this book. The
+motivated reader can use this section as a test of their understanding of many
+disparate pieces of the type system, including rank-\emph{n} types, GADTs, type
+families, and data kinds, among others.
+
+
+\section{Overview}
+
+Dependent types in Haskell can be approximated via
+\defnn{singletons}{singleton}, which are to be understood as an \gls{isomorphism}
+between terms and values.
+
+Consider the unit type \ty{()}, whose only inhabitant is the unit value \hs{()}.
+This type has an interesting property; if you know a value's type is unit, you
+know what the value must be. The type \ty{()} is a singleton, because it only
+has a single term. Furthermore, because of this one-to-one representation, we
+can think about the unit type as being able to cross the term--type divide at
+will.
+
+Singleton types are just this idea taken to the extreme; for every inhabitant of
+a type, we create a singleton type capable of bridging the term--type divide. The
+singleton allows us to move between terms to types and vice versa. As a result,
+we are capable of moving types to terms, using them in regular term-level
+Haskell computations, and then lifting them back into types.
+
+Notice that data kinds already give us type-level representations of terms;
+recall that \ty{'True} is the \gls{promoted data constructor} of \hs{True}.
+
+
+\section{Ad-Hoc Implementation}
+
+\preamble{AdHocSingletons}
+
+To wet our whistles, let's first look at a simple implementation of singletons.
+We begin with the singletons themselves.
+
+\snip{AdHocSingletons}{SBool}
+
+The data constructors \hs{STrue} and \hs{SFalse} act as our bridge between the
+term and type-levels. Both are terms, but are the sole inhabitants of their
+types. We thus have isomorphisms \iso{STrue}{'True} and \iso{SFalse}{'False}.
+The next step is to find an isomorphism between \iso{Bool}{SBool b}. This is
+easy in one direction.
+
+\snip{AdHocSingletons}{fromSBool}
+
+The converse however is trickier. Because \ty{SBool 'True} is a different type
+than \ty{SBool 'False}, we are unable to directly write the other side of the
+isomorphism. Instead, we introduce an existential wrapper \ty{SomeSBool} and
+eliminator.
+
+\snip{AdHocSingletons}{SomeSBool}
+\snip{AdHocSingletons}{withSomeSBool}
+
+\hs{toSBool} can now be written in terms of \ty{SomeSBool}.
+
+\snip{AdHocSingletons}{toSBool}
+
+It makes intuitive sense that \hs{toSBool} would need to return an existential
+type, as there is no guarantee its arguments are known at compile-time. Perhaps
+the \ty{Bool} being singletonized came from the user, or across the network. We
+can convince ourselves that \hs{fromSBool} and \hs{toSBool} behave sanely.
+
+\begin{dorepl}{AdHocSingletons}
+withSomeSBool (toSBool True)  fromSBool
+withSomeSBool (toSBool False) fromSBool
+\end{dorepl}
+
+As an example of the usefulness of singletons, we will build a monad stack which
+can conditionally log messages. These messages will only be for debugging, and
+thus should be disabled for production builds. While one approach to this
+problem is to simply branch at runtime depending on whether logging is enabled,
+this carries with it a performance impact. Instead, we can conditionally choose
+our monad stack depending on a runtime value.
+
+We begin with a typeclass indexed over \kind{Bool}. It has an associated type
+family to select the correct monad stack, as well as a few methods for working
+with the stack.
+
+\snip{AdHocSingletons}{MonadLogging}
+
+The \hs{| r -> b} notation at \ann{2} is known as a \defn{type family
+dependency} and acts as an injectivity annotation. In other words, it tells
+Haskell that if it knows \ty{LoggingMonad b} it can infer \ty{b}. The
+\ty{'False} case is uninteresting, as it ignores any attempts to log messages.
+
+\snip{AdHocSingletons}{MonadLoggingFalse}
+
+However, in the case of \ty{'True}, we'd like to introduce a \ty{WriterT
+[String]} transformer over the monad stack. Running a \ty{LoggingMonad 'True}
+should print out all of its logged messages after running the program.
+
+\snip{AdHocSingletons}{MonadLoggingTrue}
+
+With this machinery in place, we are capable of writing a program that logs
+messages. When invoked in \ty{LoggingMonad 'False} it should have no side
+effects, but when run in \ty{LoggingMonad 'True} it will print \hs{"hello
+world"}.
+
+\snip{AdHocSingletons}{program}
+\snip{AdHocSingletons}{badMain}
+
+This function reads a \ty{Bool} from stdin, and lifts it into a singleton at
+\ann{1}. The resulting existential type \ty{b} is bound at \ann{2} and
+type-applied at \ann{3} in order to tell Haskell which monad stack it should use
+to run \hs{program}.
+
+Unfortunately, \hs{main} fails to compile.
+
+\begin{lstlisting}
+<interactive>:87:5: error:
+    • No instance for (MonadLogging b)
+        arising from a use of ‘runLogging’
+\end{lstlisting}
+
+The problem is that typeclasses are implemented in GHC as implicitly passed
+variables. By \ann{3}, GHC doesn't know the type of \ty{b}, and thus can't find
+the appropriate \ty{MonadLogging} dictionary---even though \ty{MonadLogging} is
+total and theoretically GHC should be able to determine this.
+
+We can help GHC along by writing a function that can deliver dictionaries for
+any constraint that is total over \kind{Bool}.
+
+\snip{AdHocSingletons}{dict}
+
+\hs{dict} works by requiring some \kind{Bool -> Constraint} to be satisfied for
+both \ty{'True} and \ty{'False} (\ann{1}). It then takes a singleton (\ann{2})
+and uses that to deliver the appropriate \ty{Dict (c b)} by branching at
+\ann{3}. The fact that both branches simply return \hs{Dict} might be
+confusing---but remember that GHC infers different types for them due to the
+type-equality implicit in the GADT match. \hs{dict} can be invoked with a
+\kind{Bool -> Constraint} type-application to select the desired constraint.
+
+Finally, we can write a working \hs{main} which acquires the correct typeclass
+dictionary using the singleton it lifted.
+
+\snip{AdHocSingletons}{main}
+
+\begin{dorepl}{AdHocSingletons}
+main True
+main False
+\end{dorepl}
+
+Here we have provided an isomorphism \iso{Bool}{SBool a} and from \iso{SBool
+a}{a :: Bool}. Because isomorphisms are \glslink{transitivity}{transitive}, this
+means we have the desired correspondence between terms and types as witnessed by
+\iso{Bool}{a :: Bool}.
+
+
+\section{Generalized Machinery}
+
+\preamble{Singletons}
+
+While the \ty{SBool} approach works well enough for lifting \ty{Bool}s, it's not
+immediately evident how to generalize the pattern to be ergonomic when working
+with many different types.
+
+We begin with a poly-kinded open data family, which is responsible for indexing
+the equivalents of \ty{SBool}.
+
+\snip{Singletons}{Sing}
+
+\ty{SomeSing} and its eliminator carry over as before.
+
+\snip{Singletons}{SomeSing}
+\snip{Singletons}{withSomeSing}
+
+However, it is more ergonomic to package together \hs{toSing} and \hs{fromSing}
+into a typeclass rather than be independent functions.
+
+\snip{Singletons}{SingKind}
+
+Notice that at \ann{2}, the type variable \ty{k} is used \emph{both as a type
+and as a kind.} This requires the \ext{TypeInType} \label{type in type}
+\index{TypeInType} language extension, which removes the distinction between
+types and kinds\footnote{To clarify, this means that types and kinds are no
+longer separate entities. It doesn't however, remove the relationship that types
+\emph{have} kinds.}. Additionally, it makes the type \ty{Type} an inhabitant of
+\kind{Type} (which is now the same thing as \ty{Type} itself!) Mathematician
+readers will likely fear the unsoundities resulting from this change---but
+Richard Eisenberg, the author of this feature, assures us these paradoxes are
+not observable in Haskell.
+
+The associated type family \ty{Demote k} (\ann{1}) is an implementation detail.
+It is almost always equal to \ty{k}, except in cases when GHC already provides a
+type literal (for \kind{Nat} and \kind{Symbol}.) A type family dependency is
+added to \ty{Demote}, allowing GHC to infer \ty{k} from \ty{Demote k}.
+
+Instances of \ty{Sing} and \ty{SingKind} are trivially provided for \ty{Bool}.
+
+\snip{Singletons}{SingBool}
+\snip{Singletons}{SingKindBool}
+
+This machinery is enough to recover our previous round-trip examples.
+
+\begin{dorepl}{Singletons}
+withSomeSing (toSing True) fromSing
+withSomeSing (toSing False) fromSing
+\end{dorepl}
+
+Because singletons are the unique inhabitant of their types, at the term-level
+they are isomorphic with \ty{()}. Therefore, we expect to be able to get this
+unique inhabitant, in the same way we can always conjure a \ty{()} out of thin
+air.
+
+\snip{Singletons}{SingI}
+
+Instances of \ty{SingI} are predictably uninteresting.
+
+\snip{Singletons}{SingITrue}
+\snip{Singletons}{SingIFalse}
+
+The \hs{sing} function can be used with \ext{TypeApplications} in order to
+retrieve the desired singleton.
+
+\begin{dorepl}{Singletons}
+:t sing @'True
+\end{dorepl}
+
+Singletons can also be provided for more interesting types. For example, if we
+have singletons for \ty{a}, we can build singletons for \ty{Maybe a}.
+
+\snip{Singletons}{SingMaybe}
+\snip{Singletons}{SingIJust}
+\snip{Singletons}{SingINothing}
+\snip{Singletons}{SingKindMaybe}
+
+Besides some relatively tricky wrapping of existentials, there is nothing new or
+interesting in this code. If a given data constructor is built out of other
+pieces of data, its singletons are built out of the analogous singletons, and
+its data kinds out of the analogous promoted data constructors.
+
+To get a feel for this transformation, we can also build singletons for lists.
+
+\snip{Singletons}{SingList}
+\snip{Singletons}{SingKindList}
+
+\begin{exercise}
+Provide instances of \ty{SingI} for lists.
+\end{exercise}
+\begin{solution}
+\unspacedSnip{Singletons}{SingINil}
+\snip{Singletons}{SingICons}
+\end{solution}
+
+
+\section{The Singletons Package}
+
+\preamble{SingletonsTH}
+
+The construction of singletons is entirely mechanical. The \pkg{singletons}
+\cite{singletons} package provides TemplateHaskell capable of writing singletons
+for us (as well as automatically promoting term-level functions.)
+
+By enabling \ext{TemplateHaskell} and the other slew of extensions listed above,
+\pkg{singletons} is capable of generating singletons for us. Data definitions
+can be wrapped in the definitions quasiquoter \hs{[d| ... |]}, and run via the
+\hs{singletons} function.
+
+\snip{SingletonsTH}{TimeOfDay}
+
+The resulting splice will be completely equivalent to our hand-rolled code
+above, including instances for \ty{Sing}, \ty{SingKind} and \ty{SingI}. In
+addition, if the definitions have \ty{Eq} instances, \pkg{singletons} will also
+generate \ty{SDecide} instances for them.
+
+\snip{Singletons}{SDecide}
+
+\ty{SDecide} is \gls{nominal} equality for singletons; if two \ty{Sing}s of the
+same kind are equal, \ty{SDecide} allows us to use that fact. Recall the
+definition of \ty{a :\tyeq: b}, which is only constructable if \ty{a \tyeqSpace b}:
+
+\snip{Misc}{Refl}
+
+\ty{Decision} is defined as:
+
+\snip{Singletons}{Decision}
+
+The type \ty{a -> Void} at \ann{1} is the \emph{propositions as types}
+\index{propositions as types} encoding of logical false---because \ty{Void} is
+uninhabited, it can't be constructed. Thus, a function that produces \ty{Void}
+must not be callable, since it can't ever produce a \ty{Void}; and the only way
+a function isn't callable is if its domain is also uninhabited.
+
+A ``free'' instance of \ty{SDecide} can be given for all types with
+well-behaving \ty{Eq} instances by ``cheating'' with our equality proofs. The
+desired \ty{a \tyeqSpace b} proof can be generated via \hs{unsafeCoerce}, which is
+safe due to our term-level equality check.
+
+\snip{Singletons}{FreeSDecide}
+
+This instance doesn't actually exist in \pkg{singletons}, but it's a nice
+demonstration of the old motto ``if it's too hard at the type-level, do it at
+the term-level.''
+
+Of course, real instances can be provided as well.
+
+\snip{Singletons}{SDecideBool}
+
+\begin{exercise}
+Give instances of \ty{SDecide} for \ty{Maybe}.
+\end{exercise}
+\begin{solution}
+\unspacedSnip{Singletons}{SDecideMaybe}
+\end{solution}
+
+
+\section{Dependent Pairs}
+
+\preamble{Sigma}
+
+\defnn{Sigma types}{sigma type} also known as \defnn{dependent pairs}{dependent
+pair}, generalize arbitrarily-deeply nested \ty{Either} types parameterized by a
+type. When viewed through the lens of propositions as types, they correspond to
+the existential quantifier $\exists$.
+
+What does this mean? Sigma types are the pair of an existential singleton and
+\emph{a type indexed by that singleton.} Consider the definition:
+
+\snip{Sigma}{Sigma}
+
+\ty{Sigma} takes a singleton for an existential type \ty{a} (of kind \kind{k}),
+and datatype \ty{f a}. Notice that \ty{f a} is parameterized on the existential
+type \ty{a}; as a result, \ty{Sigma f} might be any number of possible \ty{f
+a}s. However, \ty{a} is not truly existential, as we have its singleton to work
+with.
+
+As usual, we can provide an eliminator for \ty{Sigma}.
+
+\snip{Sigma}{withSigma}
+
+But, using \ty{SingI}, we can also provide an \defn{introduction} for
+\ty{Sigma}. \hs{toSigma} lifts an arbitrary \ty{f a} into a \ty{Sigma f}.
+
+\snip{Sigma}{toSigma}
+
+The singleton inside \ty{Sigma} can additionally be used to help cast a
+\ty{Sigma f} back into a \ty{f a}; assuming the type inside is the same one
+being requested. This is done via \ty{SDecide} to convince the type system such
+a cast is legal.
+
+\snip{Sigma}{fromSigma}
+
+By pattern matching on \hs{Refl} at \ann{1}, GHC learns that \ty{a \tyeqSpace t},
+where \ty{t} is the ``existential'' type inside of the \ty{Sigma}. With this
+equality in hand, it's clearly safe to return the \ty{f t} when asking for a
+\ty{f a}.
+
+The \hs{dict} function from our logging example can also be generalized into a
+typeclass capable of providing total constraints given a singleton.
+
+\snip{Sigma}{Dict1}
+
+\ty{c} has kind \kind{Type -> Constraint} and \ty{f} has kind \kind{k -> Type}.
+Since we have \ty{a} with kind \kind{k} from the singleton, this chain of
+constraints can be traversed to get a \kind{Constraint}. Given a singleton,
+\hs{dict1} will provide the requested dictionary, and it will fail at
+compile-time if the requested constraint isn't total over \ty{f}.
+
+A \ty{Dict1} instance can be used to lift \ty{Eq} over \ty{Sigma}.
+
+\snip{Sigma}{EqSigma}
+
+The \gls{kind signature} at \ann{1} is required to associate \ty{k} and \ty{f}.
+
+\ty{Dict1} can also be used to lift other instances, for example, \ty{Show}.
+
+\snip{Sigma}{ShowSigma}
+
+\begin{exercise}
+Provide an instance of \ty{Ord} for \ty{Sigma} by comparing the
+\ty{f}s if the singletons are equal, comparing the singletons at the term-level
+otherwise.
+\end{exercise}
+\begin{solution}
+\unspacedSnip{Sigma}{OrdSigma}
+\end{solution}
+
+
+\subsection{Structured Logging}
+
+As an example of what good are singletons, consider the common use-case from
+dynamically-typed languages. Often, protocols will attempt ad-hoc type-safety
+by taking two parameters: the first being a string describing the type of the
+second.
+
+This is a clear use for dependent types; the type of the second argument depends
+on the value of the first. In particular, it is a \ty{Sigma} type, because once
+we know the type of the second parameter, the first is no longer of interest to
+us.
+
+To demonstrate the technique, consider the case of \defn{structured logging}.
+When we have information we'd like to log, rather than emitting it as a string,
+we can instead log a datastructure. The resulting log can then be interpreted as
+a string, or it can be mined for more structured data.
+
+For this example, we will assume we have two sorts of data we'd like to be
+able to log: strings and JSON. The approach can be generalized to add more types
+later, and the compiler's warnings will drive us.
+
+While an existentialized GADT approach might suffice---where we stuff proofs of
+each typeclass into the datatype---it requires us to know all of our desired
+dictionaries in advance. Such an approach isn't particularly extensible, since
+it requires us to anticipate everything we might like to do with our log.
+
+Instead, we can pack this structured data into a \ty{Sigma}, and use the
+\ty{Dict1} class to retrieve dictionaries as we need them.
+
+We can begin by writing an enum describing which sort of data we want to log.
+
+\snip{Sigma}{LogType}
+
+An open data family \ty{LogMsg} of kind \kind{LogType -> Type} can then be
+defined. \ty{LogMsg} is indexed by \kind{LogType}, meaning we can build a
+\ty{Sigma} around it.
+
+\snip{Sigma}{LogMsg}
+
+For every inhabitant of \kind{LogType}, we add a \hs{data instance} for
+\ty{LogMsg}, corresponding to the data we'd like to store in that case.
+
+\snip{Sigma}{LogMsgPayloadJson}
+\snip{Sigma}{LogMsgPayloadText}
+
+And a \ty{Dict1} instance can be provided.
+
+\snip{Sigma}{Dict1LogMsgPayload}
+
+Now, given a list of log messages (possibly generated via \ty{WriterT [Sigma
+LogMsg]} or something similar), we can operate over them. For example, perhaps
+we want to just render them to text:
+
+\snip{Sigma}{logs}
+\snip{Sigma}{showLogs}
+
+\begin{dorepl}{Sigma}
+import Data.Foldable
+traverse_ putStrLn (showLogs logs)
+\end{dorepl}
+
+But this approach of structured logging also affords us more interesting
+opportunities for dealing with data. For example, we can filter it, looking only
+for the JSON entries.
+
+\snip{Sigma}{catSigmas}
+\snip{Sigma}{jsonLogs}
+
+\begin{dorepl}{Sigma}
+show jsonLogs
+\end{dorepl}
+
+\end{document}

@@ -1,0 +1,99 @@
+\newcommand{\card}[1]{\ensuremath{\abs{\ty{#1}}}}
+\newcommand{\hs}[1]{<code class="hs">#1</code>}
+\newcommand{\hsval}[1]{<code class="hsval">#1</code>}
+\newcommand{\json}[1]{<code class="json">#1</code>}
+\newcommand{\cpp}[1]{<code class="cpp">#1</code>}
+\newcommand{\ghcicmd}[1]{<span class="ghcicmd">#1</span>}
+\newcommand{\emph}[1]{<em>#1</em>}
+\newcommand{\ty}[1]{<code class="ty">#1</code>}
+\newcommand{\kind}[1]{<span class="kind">#1</span>}
+\newcommand{\tykind}[1]{<span class="kind">#1</span>}
+\newcommand{\tyeq}{~}
+\newcommand{\tyeqSpace}{~}
+\newcommand{\part}[1]{<h1>#1</h1>}
+\newcommand{\chapter}[1]{!BEGIN_NEW_CHAPTER
+!BEGIN_NEW_CHAPTER_NUMBER
+<h2>#1</h2>}
+\newcommand{\chapterNoTOC}[1]{!BEGIN_NEW_CHAPTER
+<h2>#1</h2>}
+\newcommand{\frontmatter}{<h1>Front Matter</h1>}
+\newcommand{\mainmatter}{}
+\newcommand{\justify}{}
+\newcommand{\settowidth}[1]{}
+\newcommand{\thispagestyle}[1]{}
+\newcommand{\pdfbookmark}[2]{}
+\newcommand{\backmatter}{}
+\newcommand{\maketitle}{}
+\newcommand{\vfill}{}
+\newcommand{\raggedright}{}
+\newcommand{\tableofcontents}{}
+\newcommand{\ann}[1]{<img src="static/ann#1.png" />}
+\newcommand{\gls}[1]{#1}
+\newcommand{\pkg}[1]{<span class="pkg">#1</span>}
+\newcommand{\ext}[1]{<span class="ext">-X#1</span>}
+\newcommand{\extension}[1]{<span class="ext">-X#1</span>}
+\newcommand{\section}[1]{<h3>#1</h3>}
+\newcommand{\subsection}[1]{<h4>#1</h4>}
+\newcommand{\subsubsection}[1]{<h5>#1</h5>}
+\newcommand{\lyxia}{Li-yao Xia}
+\newcommand{\index}[1]{}
+\newcommand{\defn}[1]{#1}
+\newcommand{\defnn}[2]{#1}
+\newcommand{\glslink}[2]{#2}
+\newcommand{\item}[1]{<li>#1</li>}
+\newcommand{\label}[1]{<a id="label-#1" />}
+\newcommand{\todo}[1]{}
+\newcommand{\iffalse}{}
+\newcommand{\fi}{}
+\newcommand{\setlength}{}
+\newcommand{\emergencystretch}{}
+\newcommand{\hsize}{}
+\newcommand{\;}{}
+\newcommand{\!}{}
+\newcommand{\clearpage}{<div class="clear-page"></div>}
+\newcommand{\null}{}
+\newcommand{\spaceMyBox}{}
+\newcommand{\textcopyright}{&copy;}
+\newcommand{\email}[1]{<a href="mailto:#1" class="email">#1</a>}
+\newcommand{\website}[1]{<a href="http://#1" class="website">#1</a>}
+\newenvironment{itemize}{<ul class="itemize">}{</ul>}
+\newenvironment{enumerate}{<ul class="enumerate">}{</ul>}
+\newenvironment{alltt}{<pre class="alltt">}{</pre>}
+\newenvironment{exercise}{<hr/><div class="exercise"><h5>Exercise</h5>}{</div><hr/>}
+\newenvironment{solution}{<div class="invisible">}{</div>}
+\newenvironment{python}{<code class="python">}{</code>}
+\newenvironment{thebibliography}{<h2>Bibliography</h2}{}
+\newcommand{\textbf}[1]{<strong>#1</strong>}
+\newcommand{\small}{}
+\newcommand{\qquad}{&emsp;&emsp;}
+\newcommand{\quad}{&emsp;}
+\newcommand{\texttt}[1]{<span class="texttt">#1</span>}
+\newcommand{\annotate}[1]{<span class="annotate"><span class="ann">#1</span></span>}
+
+\newenvironment{necessary}[1]{<div class="necessary"><h5>Necessary #1</h5>}{</div>}
+
+\newenvironment{center}{<div class="center">}{</div>}
+\newenvironment{myTable}{<table border="1">}{</table>}
+\newcommand{\myRow}[1]{<tr>#1</tr>}
+\newcommand{\myRowSpan}[1]{<td rowspan="2">#1</td>}
+\newcommand{\myColSpan}[1]{<td colspan="2">#1</td>}
+\newcommand{\myCol}[1]{<td>#1</td>}
+\newcommand{\myEmptyCol}{}
+\newcommand{\hline}{}
+\newcommand{\cline}[1]{}
+\newcommand{\myLastCol}[1]{<td>#1</td>}
+\newcommand{\footnote}[1]{}
+
+\newcommand{\bigQuote}[2]{<blockquote class="quote">#2<br><br>- #1</blockquote>}
+\newcommand{\longest}[1]{}
+\newcommand{\iso}[2]{\ty{#1} &cong; \ty{#2}}
+\newcommand{\cite}[1]{<a href="#bib-#1">[#1]</a>}
+\newcommand{\bibitem}[2]{<div id="bib-#1" class="bibitem"><strong>[#1]</strong><p>#2</p></div>}
+\newcommand{\addcontentsline}[3]{}
+\newcommand{\zlabel}[1]{}
+\newcommand{\printglossaries}[1]{}
+\newcommand{\gloss}[2]{<div class="gloss"><strong>#1</strong><p>#2</p></div>}
+\newenvironment{warning}{<div class="warning"><h5>Warning</h5>}{</div>}
+\newcommand{\apageref}[1]{<a href="#label-#1">elsewhere</a>}
+\newcommand{\loadSolutions}{Solutions are unfortunately not yet available in the ebook. Feel free to send me an email at \email{sandy@sandymaguire.me} to get a copy.}
+

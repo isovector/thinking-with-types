@@ -1,0 +1,174 @@
+\documentclass[book.tex]{subfiles}
+\begin{document}
+
+\chapter{Variance}
+
+Consider the following type declarations. Which of them have viable \ty{Functor}
+instances?
+
+\snip{PosNeg}{T1}
+\snip{PosNeg}{T2}
+\snip{PosNeg}{T3}
+\snip{PosNeg}{T4}
+\snip{PosNeg}{T5}
+
+\begin{exercise}
+Which of these types are \ty{Functor}s? Give instances for the ones that are.
+\end{exercise}
+\begin{solution}
+  Only \ty{T1} and \ty{T5} are \ty{Functor}s.
+
+\snip{PosNeg}{FunctorT1}
+\snip{PosNeg}{FunctorT5}
+\end{solution}
+
+Despite all of their similarities, only \ty{T1} and \ty{T5} are \ty{Functor}s.
+The reason behind this is one of \defn{variance}: if we can transform an \ty{a}
+into a \ty{b}, does that mean we can necessarily transform a \ty{T a} into a
+\ty{T b}?
+
+As it happens, we can sometimes do this, but it has a great deal to do with what
+\ty{T} looks like. Depending on the shape of \ty{T} (of kind \kind{Type ->
+Type}) there are three possibilities for \ty{T}'s variance:\footnote{Precisely
+speaking, variance is a property of a type in relation to one of its
+type-constructors. Because we have the convention that \hs{map}-like functions
+transform the last type parameter, we can unambiguously say ``\ty{T} is
+contravariant'' as a short-hand for ``\ty{T a} is contravariant with respect to
+\ty{a}.''}
+
+\begin{enumerate}
+  \item{\defnn{Covariant}{covariant}: Any function \ty{a -> b} can be lifted into
+    a function \ty{T a -> T b}.}
+  \item{\defnn{Contravariant}{contravariant}: Any function \ty{a -> b} can be
+    lifted into a function \ty{T b -> T a}.}
+  \item{\defnn{Invariant}{invariant}: In general, no function \ty{a -> b} can be
+    lifted into a function over \ty{T a}.}
+\end{enumerate}
+
+Covariance is the sort we're most familiar with---it corresponds directly to
+\ty{Functor}s. And in fact, the type of \hs{fmap} is exactly witness to this
+``lifting'' motion \ty{(a -> b) -> T a -> T b}. A type \ty{T} is a \ty{Functor}
+if and only if it is covariant.
+
+Before we get to when is a type covariant, let's first look at
+contravariance and invariance.
+
+The \pkg{contravariant}\cite{contravariant} and \pkg{invariant}\cite{invariant}
+packages, both by Ed Kmett, give us access to the \ty{Contravariant} and
+\ty{Invariant} classes. These classes are to their sorts of variance as
+\ty{Functor} is to covariance.
+
+A contravariant type allows you to map a function \emph{backwards} across its
+type constructor.
+
+\snip{PosNeg}{Contravariant}
+
+On the other hand, an invariant type \ty{T} allows you to map from \ty{a} to
+\ty{b} if and only if \ty{a} and \ty{b} are isomorphic. In a very real sense,
+this isn't an interesting property---an \gls{isomorphism} between \ty{a} and
+\ty{b} means they're already the same thing to begin with.
+
+\snip{PosNeg}{Invariant}
+
+The variance of a type \ty{T a} with respect to its type variable \ty{a} is
+fully specified by whether \ty{a} appears solely in \defn{positive position},
+solely in \defn{negative position} or in a mix of both.
+
+Type variables which appear exclusively in positive position are covariant.
+Those exclusively in negative position are contravariant. And type variables
+which find themselves in both become invariant.
+
+But what \emph{is} a positive or negative position? Recall that all types have a
+canonical representation expressed as some combination of \ty{(,)},\;
+\ty{Either} and \ty{(->)}. We can therefore define positive and negative
+positions in terms of these fundamental building blocks, and develop our
+intuition afterwards.
+
+\spaceMyBox
+\begin{myTable}
+\hline
+  \myRow{\myRowSpan{Type} \myColSpan{Position of}} \\ \cline{2-3}
+  \myRow{\myEmptyCol{} \myCol{\ty{a}} \myLastCol{\ty{b}}} \\ \hline
+  \myRow{\myCol{\ty{Either a b}} \myCol{$+$} \myLastCol{$+$}} \\ \hline
+  \myRow{\myCol{\ty{(a, b)}} \myCol{$+$} \myLastCol{$+$}} \\ \hline
+  \myRow{\myCol{\ty{a -> b}} \myCol{$-$} \myLastCol{$+$}} \\ \hline
+\end{myTable}
+\spaceMyBox
+
+The conclusion is clear---our only means of introducing type variables in
+negative position is to put them on the left-side of an arrow. This should
+correspond to your intuition that the type of a function goes ``backwards'' when
+pre-composed with another function.
+
+In the following example, pre-composing with \hs{show :: Bool -> String}
+transforms a type \ty{String -> [String]} into \ty{Bool -> [String]}.
+
+\begin{dorepl}{PosNeg}
+:t words
+:t show :: Bool -> String
+:t words . (show :: Bool -> String)
+\end{dorepl}
+
+Mathematically, things are often called ``positive'' and ``negative'' if their
+signs follow the usual laws of multiplication. That is to say, a positive
+multiplied by a positive remains positive, a negative multiplied with a positive
+is a negative, and so on.
+
+Variances are no different. To illustrate, consider the type \ty{(a, Bool) ->
+Int}. The \ty{a} in the subtype \ty{(a, Bool)} is in positive position, but
+\ty{(a, Bool)} is in negative position relative to \ty{(a, Bool) -> Int}. As we
+remember from grade-school arithmetic, a positive times a negative is negative,
+and so \ty{(a, Bool) -> Int} is contravariant with respect to \ty{a}.
+
+This relationship can be expressed with a simple table---but again, note that
+the mnemonic suggested by the name of positive and negative positions should be
+enough to commit this table to memory.
+
+\spaceMyBox
+\begin{myTable}
+\hline
+  \myRow{\myCol{\ty{a}} \myCol{\ty{b}} \myLastCol{$\ty{a} \circ \ty{b}$}} \\ \hline
+  \myRow{\myCol{$+$} \myCol{$+$} \myLastCol{$+$}} \\ \hline
+  \myRow{\myCol{$+$} \myCol{$-$} \myLastCol{$-$}} \\ \hline
+  \myRow{\myCol{$-$} \myCol{$+$} \myLastCol{$-$}} \\ \hline
+  \myRow{\myCol{$-$} \myCol{$-$} \myLastCol{$+$}} \\ \hline
+\end{myTable}
+\spaceMyBox
+
+We can use this knowledge to convince ourselves why \ty{Functor} instances exist
+only for the \ty{T1} and \ty{T5} types defined above.
+
+\newcommand{\tyAnno}[4]{\ty{#1} \qquad&\cong\qquad #2 & #3 &= #4 \\ \\}
+
+$$
+\begin{align*}
+  \tyAnno{T1}{\ty{Int -> }\posp{\ty{a}}}{\possym}{\possym}
+  \tyAnno{T2}{\negp{\ty{a}}\ty{ -> Int}}{\negsym}{\negsym}
+  \tyAnno{T3}{\negp{\ty{a}}\ty{ -> }\posp{\ty{a}}}{\pmsym}{\pmsym}
+  \tyAnno{T4}{\negp{\ty{(Int -> }\posp{\ty{a}}\ty{)}}\ty{ -> Int}}{\negsym\circ\;\possym}{\negsym}
+  \tyAnno{T5}{\negp{\ty{(}\negp{\ty{a}}\ty{ -> Int)}}\ty{ -> Int}}{\negsym\circ\;\negsym}{\possym}
+\end{align*}
+$$
+
+This analysis also shows us that \ty{T2} and \ty{T4} have \ty{Contravariant}
+instances, and \ty{T3} has an \ty{Invariant} one.
+
+A type's variance also has a more concrete interpretation: variables in positive
+position are \emph{produced} or \emph{owned}, while those in negative position
+are \emph{consumed}. Products, sums and the right-side of an arrow are all
+pieces of data that already exist or are produced, but the type on the left-side
+of an arrow is indeed consumed.
+
+There are some special names for types with multiple type variables. A type that
+is covariant in two arguments (like \ty{Either} and \ty{(,)}) is called a
+\defn{bifunctor}. A type that is contravariant in its first argument, but
+covariant in its second (like \ty{(->)}) is known as a \defn{profunctor}. As you
+might imagine, Ed Kmett has packages which provide both of these
+typeclasses---although \ty{Bifunctor} now exists in \pkg{base}.
+
+Positional analysis like this is a powerful tool---it's quick to eyeball, and
+lets you know at a glance which class instances you need to provide. Better yet,
+it's impressive as hell to anyone who doesn't know the trick.
+
+\end{document}
+

@@ -1,0 +1,381 @@
+\documentclass[book.tex]{subfiles}
+\begin{document}
+
+\chapter{Existential Types}
+
+\section{Existential Types and Eliminators}
+
+Closely related to rank-\emph{n} types are the \emph{existential types}. These
+are types with a sort of identity problem---the type system has forgotten what
+they are! Although it sounds strange at first, existentials are in fact very
+useful.
+
+For the time being, we will look at a simpler example: the \ty{Any} type.
+
+\snip{RankN}{Any}
+
+\ty{Any} is capable of storing a value of any type, and in doing so, forgets
+what type it has. The type constructor doesn't have any type variables, and so
+it \emph{can't} remember anything. There's nowhere for it to store that
+information.
+
+In order to introduce a type variable for \ty{Any} to be polymorphic over, we
+can use the same \hs{forall a.} as when working with rank-\emph{n} types. This
+\ty{a} type exists only within the context of the \hs{Any} data constructor; it
+is existential.
+
+The syntax for defining existential types in data constructors is heavy-handed.
+GADTs provide a more idiomatic syntax for this construction.
+
+\snip{RankN}{GADTAny}
+
+We can use \ty{Any} to define a list with values of any types. At first blush
+this sounds like the \ty{HList} we constructed in chapter 5. However,
+the usefulness of an \ty{Any} list is limited due to the fact that its values
+can never be recovered.
+
+% \todo{index}
+
+\begin{dorepl}{RankN}
+:t [ Any 5, Any True, Any "hello" ]
+\end{dorepl}
+
+Existential types can be \emph{eliminated} (consumed) via continuation-passing.
+An \emph{eliminator} is a rank-2 function which takes an existential type and a
+continuation that can produce a value regardless of what it gets. Elimination
+occurs when our existential type is fed into this rank-2 function.
+
+To clarify, the eliminator for \ty{Any} is \hs{elimAny}:
+
+\snip{RankN}{elimAny}
+
+Pay attention to where the \ty{a} and \ty{r} types are quantified. The caller of
+\hs{elimAny} gets to decide the result \ty{r}, but \ty{a} is determined by the
+type inside of the \ty{Any}.
+
+\begin{exercise}
+Are functions of type \ty{forall a. a -> r} interesting? Why or why
+not?
+\end{exercise}
+\begin{solution}
+  These functions can only ever return constant values, as the polymorphism on
+  their input doesn't allow any form of inspection.
+\end{solution}
+
+This approach of existentializing types and later eliminating them is more
+useful than it seems. As a next step, consider what happens when we
+pack a typeclass dictionary along with our existentialized data.
+
+\snip{RankN}{HasShow}
+
+The definition of \ty{HasShow} is remarkably similar to the GADT definition of
+\ty{Any}, with the addition of the \hs{Show t =>} constraint. This constraint
+requires a \ty{Show} instance whenever constructing a \ty{HasShow}, and Haskell
+will remember this. Because a \ty{Show} instance was required to build a
+\ty{HasShow}, whatever type is inside of \ty{HasShow} must have a \ty{Show}
+instance. Remarkably, Haskell is smart enough to realize this, and allow us to
+call \hs{show} on whatever type exists inside.
+
+We can use this fact to write a \ty{Show} instance for \ty{HasShow}.
+
+\snip{RankN}{hasShowShow}
+
+\begin{exercise}
+What happens to this instance if you remove the \hs{Show t =>}
+constraint from \ty{HasShow}?
+\end{exercise}
+\begin{solution}
+The \ty{Show HasShow} instance can't be written without its \hs{Show t =>}
+  constraint---as the type inside \ty{HasShow} is existential and Haskell
+  doesn't know which instance of \ty{Show} to use for the \hs{show} call.
+\end{solution}
+
+More generally, we are able to write an eliminator for \ty{HasShow} which knows
+we have a \ty{Show} dictionary in scope.
+
+\snip{RankN}{elimHasShow}
+
+\begin{exercise}
+Write the \ty{Show} instance for \ty{HasShow} in terms of
+\hs{elimHasShow}.
+\end{exercise}
+\begin{solution}
+\unspacedSnip{RankN}{showElimHasShow}
+\end{solution}
+
+
+\subsection{Dynamic Types}
+
+This pattern of packing a dictionary alongside an existential type becomes more
+interesting with other typeclasses. The \ty{Typeable} class provides type
+information at runtime, and allows for dynamic casting via \hs{cast :: (Typeable
+a, Typeable b) => a -> Maybe b}. We can existentialize \ty{Typeable} types in
+order to turn Haskell into a dynamically typed language.
+
+Using this approach, we can write Python-style functions that play fast and
+loose with their types. As an illustration, the \json{+} operator in Python
+plays double duty by concatenating strings and adding numbers. And we can
+implement the same function in Haskell with \ty{Dynamic}.
+
+Given the datatype and its eliminator:
+
+\snip{RankN}{Dynamic}
+\snip{RankN}{elimDynamic}
+
+We can implement \ty{fromDynamic} which attempts to cast a \ty{Dynamic} to an
+\ty{a}.
+
+\snip{RankN}{fromDynamic}
+
+A helper function will assist in the implementation.
+
+\snip{RankN}{liftD2}
+
+This function attempts to lift a regular, strongly-typed function into a
+function over dynamic types. It returns a \ty{Maybe Dynamic}, which is returned
+if the cast failed.
+
+Finally, we can present a Haskell version of Python's \json{+} operator:
+
+\snip{RankN}{pyPlus}
+
+In order to easily play with it in GHCi we will need to enable
+\ext{TypeApplications} (to get the right type out), and set the default numeric
+type to \ty{Int} (to construct \ty{Dynamic}s without type signatures.)
+
+\begin{dorepl}{RankN}
+default (Int)
+fromDynamic @Int (pyPlus (Dynamic 1) (Dynamic 2))
+fromDynamic @String (pyPlus (Dynamic "hello") (Dynamic " world"))
+fromDynamic @String (pyPlus (Dynamic 4) (Dynamic " minute"))
+\end{dorepl}
+
+If you were particularly plucky, with this approach you could embed a
+fully-functioning a dynamically typed language inside of Haskell. The
+boilerplate around writing type dependent pattern matches would amortize down to
+$O(1)$ as more of the standard library were implemented.
+
+But, just so we're on the same page: just because you \emph{can}, doesn't mean
+you \emph{should.} However, there is an interesting philosophical takeaway
+here---dynamically typed languages are merely strongly typed languages with a
+single type.
+
+
+\subsection{Generalized Constraint Kinded Existentials}
+
+The definitions of \ty{HasShow} and \ty{Dynamic} are nearly identical. Recall:
+
+\snip{RankN}{HasShow}
+\snip{RankN}{Dynamic}
+
+There is a clear pattern here, that can be factored out by being polymorphic
+over the \kind{Constraint} packed inside. By enabling \ext{ConstraintKinds}, we
+are able to be polymorphic over \kind{Constraint}s:
+
+\snip{RankN}{Has}
+\snip{RankN}{elimHas}
+
+We can thus implement \ty{HasShow} and \ty{Dynamic} as type synonyms.
+
+\snip{RankN}{typeHasShow}
+
+Sometimes we want to be able to talk about multiple constraints at once. Like
+the function which determines if its argument is \hs{mempty}.
+
+\snip{RankN}{isMempty}
+
+Maybe we'd like to construct an \ty{Has} around this constraint, \ty{(Monoid a,
+Eq a)}. Unfortunately, there is no type-level lambda syntax, so we're unable to
+turn this type into something that's curryable. We can try a type synonym:
+
+\snip{RankN}{MonoidAndEq}
+
+But GHC won't allow us to construct a \ty{Has MonoidAndEq}.
+
+\begin{dorepl}{RankN}
+:t Has [True] :: Has MonoidAndEq
+\end{dorepl}
+
+The problem is that type synonyms must always be fully saturated. We're unable
+to talk about \ty{MonoidAndEq} in its unsaturated form---only \ty{MonoidAndEq a}
+is acceptable to the compiler.
+
+Fortunately, there is a solution for \kind{Constraint}-synonyms (though not for
+type synonyms in general.) We can instead define a new class with a superclass
+constraint, and an instance that is comes for free given those same
+constraints.
+
+\snip{RankN}{MonoidEq}
+
+This is known as a \defn{constraint synonym}. While type synonyms are unable to
+be partially applied, classes have no such restriction.
+
+\begin{dorepl}{RankN}
+let foo = Has [True] :: Has MonoidEq
+elimHas isMempty foo
+\end{dorepl}
+
+
+\section{Scoping Information with Existentials}
+
+\preamble{ST}
+
+Existential types can be used to prevent information from leaking outside of a
+desired scope. For example, it means we can ensure that allocated resources
+can't escape a pre-specified region. We can use the type system to prove that a
+HTTP session-token is quarantined within its request context, or that a file
+handle doesn't persist after it's been closed.
+
+Because existential types are unable to exist outside of their quantifier, we
+can use it as a scoping mechanism. By tagging sensitive data with an existential
+type, the type system will refuse any attempts to move this data outside of its
+scope.
+
+Haskell's \ty{ST} monad is the most famous example of this approach, lending its
+name to the approach: the \defn{ST trick}. If you're unfamiliar with it, \ty{ST}
+allows us to write stateful code---including mutable variables---to perform
+computations, so long as the statefulness never leaves the monad. In other
+words, \ty{ST} allows you to compute pure functions using impure means.
+
+The amazing thing is that \ty{ST} is not some magical compiler primitive---it's
+just library code. And we can implement it ourselves, assuming we're comfortable
+using a little \hs{unsafePerformIO}! Of course, this is not a comfortable
+situation---\hs{unsafePerformIO} is \emph{fundamentally unsafe}, but observe
+that there is nothing inherently unsafe about mutable variables.
+
+It's not the presence of mutable variables that makes code hard to reason about.
+So long as all of its mutations are kept local, we know that a computation is
+pure. Mutable variables on their own do not cause us to lose referential
+transparency.
+
+Referential transparency is lost when code relies on \emph{external} mutable
+variables. Doing so creates an invisible data dependency between our code and
+the state of its external variables. It is these cases---and these cases
+alone---that we need worry about.
+
+As such, it's completely safe to have mutable variables so long as you can prove
+they never escape. The ST trick exists to prevent such things from happening.
+Enough jibber-jabber. Let's implement it.
+
+At its heart, \ty{ST} is just the \ty{Identity} monad with a phantom \ty{s}
+parameter.
+
+\snip{ST}{ST}
+
+Notice that at \ann{1} we have a \gls{phantom} type parameter \ty{s}. This
+variable exists only as a place to put our existential type tag. We'll better
+see how it's used in a minute.
+
+\ty{Applicative} and \ty{Monad} instances can be provided for \ty{ST}. To ensure
+that our ``unsafe'' IO is performed while it's actually still safe, these
+instances must be explicitly strict. \emph{This is not necessary in general to
+perform the ST trick}---it's only because we will be using \hs{unsafePerformIO}
+for the example.
+
+\snip{ST}{functor}
+\snip{ST}{applicative}
+\snip{ST}{monad}
+
+Mutable variables can be introduced inside of the \ty{ST} monad. For our
+implementation, we can simply implement these in terms of \ty{IORef}s. We will
+wrap them in a newtype.
+
+\snip{ST}{STRef}
+
+Pay attention to the fact that \ty{STRef} also has a phantom \ty{s} parameter
+(\ann{1}). This is not accidental. \ty{s} acts as a label irrevocably knotting a
+\ty{STRef} with the \ty{ST} context that created it. We'll discuss this after a
+little more boilerplate that it's necessary to get through.
+
+Function wrappers for \ty{STRef} around \ty{IORef} are provided, each of which
+unsafely performs \ty{IO}. For example, we'd like to be able to create new
+\ty{STRef}s.
+
+\snip{ST}{newSTRef}
+
+See here at \ann{1}, that creating a \ty{STRef} gives us one whose \ty{s}
+parameter is the same as \ty{ST}'s \ty{s}. This is the irrevocable linking
+between the two types I mentioned earlier.
+
+There are a few more useful functions to wrap:
+
+\snip{ST}{readSTRef}
+\snip{ST}{writeSTRef}
+\snip{ST}{modifySTRef}
+
+And finally, we provide a function to escape from the \ty{ST} monad. This is
+merely \ty{unsafeRunST}, but with a specialized type signature.
+
+\snip{ST}{runST}
+
+At \ann{1} we see the introduction of the ST trick. The type \hs{(forall s.
+ST s a)} indicates that \hs{runST} is capable of running only those \ty{ST}s
+which do not depend on their \ty{s} parameter.
+
+We will discuss why exactly this works shortly, but let's first convince
+ourselves that \hs{runST} lives up to its promises. We can write a safe usage of
+\ty{ST}---one which uses its state to compute a pure value.
+
+\snip{ST}{safeExample}
+
+\begin{dorepl}{ST}
+runST safeExample
+\end{dorepl}
+
+But the type system now prevents us from \hs{runST}-ing any code that would leak
+a reference to a \ty{STRef}.
+
+\begin{dorepl}{ST}
+runST (newSTRef True)
+\end{dorepl}
+
+Indeed, \hs{runST} seems to work as expected---but how? Let's look again at the
+type of \ty{runST}.
+
+\snip{ST}{runSTType}
+
+The word \hs{forall} here acts as a quantifier over \ty{s}---the type variable
+exists in scope \emph{only} within \ty{ST s a}. Because it's existential,
+without a quantifier, we have no way of talking about the type. It simply
+doesn't exist outside of its \hs{forall}!
+
+And this is the secret to why the ST trick works. We exploit this fact that
+existentials can't leave their quantifier in order to scope our data. The
+``quarantined zone'' is defined with an existential quantifier, we tag our
+quarantined data with the resulting existential type, and the type system does
+the rest.
+
+To really drive this home, let's look at a specific example. Take again the case
+of \hs{runST (newSTRef True)}. If we specialize the type of \hs{runST} here, it
+results in the following:
+
+\snip{ST}{signature}
+
+Written like this, it's more clear what's going wrong. The type variable \ty{s}
+is introduced---and scoped---at \ann{1}. But later \ty{s} is referenced at
+\ann{2}. At this point the type no longer exists---there isn't any type \ty{s}
+in scope!
+
+GHC calls \ty{s} a \defn{rigid skolem} type variable. \defnn{Rigid}{rigid}
+variables are those that are constrained by a type signature written by a
+programmer---in other words, they are not allowed to be type inferred. A human
+has already given them their type.
+
+A \defn{skolem} is, for all intents and purposes, any existential
+type.\footnote{Mathematically, it's an existentially quantified ($\exists$)
+variable expressed in terms of a \hs{forall} quantifier ($\forall$). Since in
+Haskell we have only \hs{forall} quantifiers, all existential variables are
+necessarily skolems.}
+
+The purpose of the phantom \ty{s} variable in \ty{ST} and \ty{STRef} is exactly
+to introduce a rigid skolem. If it weren't rigid (specified), it would be free
+to vary, and Haskell would correctly infer that it is unused. If it weren't
+a skolem, we would be unable to restrict its existence.
+
+This ST trick can be used whenever you want to restrict the existence of some
+piece of data. I've seen it used to tag variables owned by external FFI, and
+used it to implement monadic regions which have more or fewer effect
+capabilities.
+
+\end{document}
+
