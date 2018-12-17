@@ -319,8 +319,8 @@ with other programming languages.
 
 \begin{exercise}
 Use Curry--Howard to prove the exponent law that $a^b \times a^c =
-a^{b+c}$. That is, provide a function of the type \ty{(b -> a) -> (c -> a) ->
-Either b c -> a} and one of \ty{(Either b c -> a) -> (b -> a, c -> a)}.
+a^{b+c}$. That is, provide a function of the type \ty{(b -> a, c -> a) ->
+(Either b c -> a)} and one of \ty{(Either b c -> a) -> (b -> a, c -> a)}.
 \end{exercise}
 \begin{solution}
 \unspacedSnip{Algebra}{productRule1To}
