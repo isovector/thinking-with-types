@@ -6,6 +6,8 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE GADTs #-}
 
+{-# OPTIONS_GHC -fno-warn-missing-methods #-}
+
 module Misc where
 
 import GHC.TypeLits
@@ -13,13 +15,13 @@ import GHC.TypeLits
 -- # showFunc
 instance
     ( TypeError
-        ( Text "Attempting to show a function of type `"
+        ( Text "Attempting to interpret a number as a function "
+     :$$: Text "in the type `"
      :<>: ShowType (a -> b)
      :<>: Text "'"
-     :$$: Text "Did you forget to apply an argument?"
+     :$$: Text "Did you forget to specify the function you wanted?"
         )
-    ) => Show (a -> b) where
-  show = undefined
+    ) => Num (a -> b) where
 
 {-
 

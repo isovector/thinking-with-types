@@ -318,9 +318,20 @@ insight is the core principle behind why writing Haskell is such a joy compared
 with other programming languages.
 
 \begin{exercise}
-Use Curry--Howard to prove the exponent law that $a^b \times a^c =
-a^{b+c}$. That is, provide a function of the type \ty{(b -> a) -> (c -> a) ->
-Either b c -> a} and one of \ty{(Either b c -> a) -> (b -> a, c -> a)}.
+  Use Curry--Howard to prove that $(a^b)^c = a^{b\times c}$. That is, provide a
+  function of type \ty{(b -> c -> a) -> (b, c) -> a}, and one of \ty{((b, c) ->
+  a) -> b -> c -> a}. Do these functions remind you of anything from
+  \ty{Prelude}?
+\end{exercise}
+\begin{solution}
+\unspacedSnip{Algebra}{curry}
+\snip{Algebra}{uncurry}
+
+  Both of these functions already exist in \ty{Prelude}.
+\end{solution}
+
+\begin{exercise}
+Give a proof of the exponent law that $a^b \times a^c = a^{b+c}$.
 \end{exercise}
 \begin{solution}
 \unspacedSnip{Algebra}{productRule1To}
@@ -335,17 +346,6 @@ Prove $(a\times b)^c = a^c \times b^c$.
 \begin{solution}
 \unspacedSnip{Algebra}{productRule2To}
 \snip{Algebra}{productRule2From}
-\end{solution}
-
-\begin{exercise}
-Give a proof of $(a^b)^c = a^{b\times c}$. Does it remind you of
-anything from \ty{Prelude}?
-\end{exercise}
-\begin{solution}
-\unspacedSnip{Algebra}{curry}
-\snip{Algebra}{uncurry}
-
-  Both of these functions already exist in \ty{Prelude}.
 \end{solution}
 
 

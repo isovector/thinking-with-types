@@ -1,5 +1,5 @@
 quick:
-	echo Q | xelatex -shell-escape book
+	echo Q | xelatex -shell-escape print
 
 book:
 	echo Q | xelatex -shell-escape book || echo ""

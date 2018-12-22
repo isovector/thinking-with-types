@@ -12,16 +12,16 @@
 module Linear where
 
 -- # imports
-import           Control.Monad.Indexed
-import           Data.Coerce
-import           Fcf
-import           GHC.TypeLits (Nat)
+import Control.Monad.Indexed
+import Data.Coerce
+import Fcf
+import GHC.TypeLits (Nat)
 import qualified GHC.TypeLits as TL
-import           IxMonad
-import           Language.Haskell.DoNotation
-import           Prelude hiding (Monad (..), pure)
+import IxMonad
+import Language.Haskell.DoNotation
+import Prelude hiding (Monad (..), pure)
 import qualified System.IO as SIO
-import           System.IO hiding (openFile, Handle)
+import System.IO hiding (openFile, Handle)
 
 
 type IsOpen (key :: k) (ts :: [k])

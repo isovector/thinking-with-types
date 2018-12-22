@@ -39,11 +39,12 @@ us.
 
 \ty{TypeError} is usually used as a constraint in an instance context, or as the
 result of a type family. As an illustration, we can provide a more helpful error
-message for showing a function. Recall that the usual error message is not
-particularly useful:
+message when Haskell tries to solve a \ty{Num} instance for functions. Recall
+that the usual error message is not particularly useful:
 
 \begin{dorepl}{OpenProduct}
-show id
+@:set -XFlexibleContexts
+1 True
 \end{dorepl}
 
 However, by bringing the following instance into scope:
@@ -51,16 +52,15 @@ However, by bringing the following instance into scope:
 \snip{Misc}{pragmas}
 \snip{Misc}{showFunc}
 
-Attempting to show a function in GHCi now offers a solution to what might be
-wrong:
+We now get a more helpful solution to what might be wrong:
 
 \begin{dorepl}{Misc}
-show id
+1 True
 \end{dorepl}
 
-When evaluating \hs{show} \hs{id}, Haskell matches the instance head of \ty{Show
-(a -> b)}, and then attempts to solve its context. Recall that whenever GHC sees
-a \ty{TypeError}, it fails with the given message. We can use this principle to
+When evaluating \hs{1 True}, Haskell matches the instance head of \ty{Num (a ->
+b)}, and then attempts to solve its context. Recall that whenever GHC sees a
+\ty{TypeError}, it fails with the given message. We can use this principle to
 emit a friendlier type error when using \hs{prj} incorrectly.
 
 \snip{OpenSum}{FriendlyFindElem}

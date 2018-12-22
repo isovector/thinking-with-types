@@ -9,11 +9,11 @@ One heralded feature of dynamic languages---conspicuously missing in
 Haskell---is their support for ad-hoc objects. Consider Python's dictionary
 datatype:
 
-\begin{code}
+\begin{alltt}
 record = \{ 'foo': 12, 'bar': True \} \annotate{1}
 record['qux'] = "hello" \annotate{2}
 record['foo'] = [1, 2, 3] \annotate{3}
-\end{code}
+\end{alltt}
 
 At \ann{1}, \texttt{record} can be said to have a (Haskell) type
 \hs{\{foo :: Int, bar :: Bool\}}. However, at \ann{2} it also gains a

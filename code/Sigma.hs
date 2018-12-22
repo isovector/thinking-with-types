@@ -19,12 +19,12 @@
 module Sigma where
 
 -- # imports
-import Data.Constraint
-import Data.Maybe (mapMaybe)
 import Data.Aeson
+import Data.Constraint
+import Data.Kind (Type)
+import Data.Maybe (mapMaybe)
 import Data.Singletons.Prelude
 import Data.Singletons.TH
-import Data.Kind (Type)
 
 
 data Sigma (f :: k -> Type) where

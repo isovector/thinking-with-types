@@ -133,11 +133,13 @@ to run \hs{program}.
 
 Unfortunately, \hs{main} fails to compile.
 
+\spaceMyBox
 \begin{lstlisting}
 <interactive>:87:5: error:
     • No instance for (MonadLogging b)
         arising from a use of ‘runLogging’
 \end{lstlisting}
+\spaceMyBox
 
 The problem is that typeclasses are implemented in GHC as implicitly passed
 variables. By \ann{3}, GHC doesn't know the type of \ty{b}, and thus can't find
@@ -173,6 +175,7 @@ means we have the desired correspondence between terms and types as witnessed by
 \iso{Bool}{a :: Bool}.
 
 
+\clearpage
 \section{Generalized Machinery}
 
 \preamble{Singletons}
@@ -302,11 +305,11 @@ definition of \ty{a :\tyeq: b}, which is only constructable if \ty{a \tyeqSpace 
 
 \snip{Singletons}{Decision}
 
-The type \ty{a -> Void} at \ann{1} is the \emph{propositions as types}
-\index{propositions as types} encoding of logical false---because \ty{Void} is
-uninhabited, it can't be constructed. Thus, a function that produces \ty{Void}
-must not be callable, since it can't ever produce a \ty{Void}; and the only way
-a function isn't callable is if its domain is also uninhabited.
+The type \ty{a -> Void} at \ann{1} is the Curry--Howard encoding of logical
+false---because \ty{Void} is uninhabited, it can't be constructed. Thus, a
+function that produces \ty{Void} must not be callable, since it can't ever
+produce a \ty{Void}; and the only way a function isn't callable is if its domain
+is also uninhabited.
 
 A ``free'' instance of \ty{SDecide} can be given for all types with
 well-behaving \ty{Eq} instances by ``cheating'' with our equality proofs. The
@@ -337,8 +340,8 @@ Give instances of \ty{SDecide} for \ty{Maybe}.
 
 \defnn{Sigma types}{sigma type} also known as \defnn{dependent pairs}{dependent
 pair}, generalize arbitrarily-deeply nested \ty{Either} types parameterized by a
-type. When viewed through the lens of propositions as types, they correspond to
-the existential quantifier $\exists$.
+type. When viewed through the lens of the Curry--Howard isomorphism, they
+correspond to the existential quantifier $\exists$.
 
 What does this mean? Sigma types are the pair of an existential singleton and
 \emph{a type indexed by that singleton.} Consider the definition:

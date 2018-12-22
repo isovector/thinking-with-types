@@ -18,9 +18,9 @@ module OpenSum where
 -- # imports
 import Data.Kind (Type)
 import Data.Proxy
+import Fcf
 import GHC.TypeLits hiding (type (+))
 import Unsafe.Coerce
-import Fcf
 
 import Data.Functor.Identity
 
@@ -38,7 +38,9 @@ type FindElem (key :: k) (ts :: [k]) =
 type Member t ts = KnownNat (Eval (FindElem t ts))
 
 findElem :: forall t ts. Member t ts => Int
-findElem = fromIntegral . natVal $ Proxy @(Eval (FindElem t ts))
+findElem = fromIntegral
+         . natVal
+         $ Proxy @(Eval (FindElem t ts))
 
 inj :: forall f t ts. Member t ts => f t -> OpenSum f ts
 inj = UnsafeOpenSum (findElem @t @ts)
@@ -80,7 +82,8 @@ decompose
     :: OpenSum f (t ': ts)
     -> Either (f t) (OpenSum f ts)
 decompose (UnsafeOpenSum 0 t) = Left  $ unsafeCoerce t
-decompose (UnsafeOpenSum n t) = Right $ UnsafeOpenSum (n - 1) t
+decompose (UnsafeOpenSum n t) = Right
+                              $ UnsafeOpenSum (n - 1) t
 
 
 match

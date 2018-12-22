@@ -21,13 +21,13 @@
 module OpenProduct where
 
 -- # imports
-import           Data.Kind (Constraint, Type)
-import           Data.Proxy (Proxy (..))
+import Data.Kind (Constraint, Type)
+import Data.Proxy (Proxy (..))
 import qualified Data.Vector as V
-import           GHC.OverloadedLabels (IsLabel (..))
-import           GHC.TypeLits
-import           Unsafe.Coerce (unsafeCoerce)
-import           Fcf
+import Fcf
+import GHC.OverloadedLabels (IsLabel (..))
+import GHC.TypeLits
+import Unsafe.Coerce (unsafeCoerce)
 
 import Data.Constraint
 
@@ -157,10 +157,16 @@ upsert k ft (OpenProduct v) =
     Just n  -> v V.// [(n, Any ft)]
 
 type FindElem (key :: Symbol) (ts :: [(Symbol, k)]) =
-  Eval (FromMaybe Stuck =<< FindIndex (TyEq key <=< Fst) ts)
+  Eval (FromMaybe Stuck
+    =<< FindIndex (TyEq key <=< Fst) ts)
 
-findElem :: forall key ts. KnownNat (FindElem key ts) => Int
-findElem = fromIntegral . natVal $ Proxy @(FindElem key ts)
+findElem
+    :: forall key ts
+     . KnownNat (FindElem key ts)
+    => Int
+findElem = fromIntegral
+         . natVal
+         $ Proxy @(FindElem key ts)
 
 type LookupType (key :: k) (ts :: [(k, t)]) =
   FromMaybe Stuck =<< Lookup key ts

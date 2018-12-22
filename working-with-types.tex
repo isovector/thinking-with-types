@@ -133,7 +133,7 @@ fundamental extensions in a type-programmer's toolbox. They go together hand in
 hand.
 
 
-\section{Ambiguous Types and Non-Injectivity}
+\section{Ambiguous Types}
 
 Returning again to the example of \ty{Data.Typeable}'s \ty{typeRep} function, we
 can use it to implement a function that will give us the name of a type. And we
@@ -156,8 +156,8 @@ being \defnn{ambiguous}{ambiguous type}.
 
 By default, Haskell will refuse to compile any programs with ambiguous types. We
 can bypass this behavior by enabling the aptly-named \ext{AllowAmbiguousTypes}
-extension anywhere we'd like to define one. Actually \emph{using} code with that
-has ambiguous types, will require \ext{TypeApplications}.
+extension anywhere we'd like to define one. Actually \emph{using} code that has
+ambiguous types, will require \ext{TypeApplications}.
 
 The two extensions are thus either side of the same coin.
 \ext{AllowAmbiguousTypes} allows us to define ambiguously typed functions, and
