@@ -27,7 +27,7 @@
 \newcommand{\vfill}{}
 \newcommand{\raggedright}{}
 \newcommand{\tableofcontents}{}
-\newcommand{\ann}[1]{<img src="static/ann#1.png" />}
+\newcommand{\ann}[1]{\htmlann{#1}}
 \newcommand{\gls}[1]{#1}
 \newcommand{\pkg}[1]{<span class="pkg">#1</span>}
 \newcommand{\ext}[1]{<span class="ext">-X#1</span>}
@@ -68,7 +68,7 @@
 \newcommand{\qquad}{&emsp;&emsp;}
 \newcommand{\quad}{&emsp;}
 \newcommand{\texttt}[1]{<span class="texttt">#1</span>}
-\newcommand{\annotate}[1]{<span class="annotate"><span class="ann">#1</span></span>}
+\newcommand{\annotate}[1]{<span class="annotate">\ann{#1}</span>}
 
 \newenvironment{necessary}[1]{<div class="necessary"><h5>Necessary #1</h5>}{</div>}
 

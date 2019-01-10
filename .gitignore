@@ -21,3 +21,4 @@ _minted-*/
 .current-revision
 *.out
 .fracked/
+*.epub

@@ -14,9 +14,9 @@ Being comfortable understanding and manipulating this algebra is a mighty
 superpower---it allows us to analyze types, find more convenient forms for them,
 and determine which operations (eg. typeclasses) are possible to implement.
 
-To start, we can associate each type with its \defn{cardinality}---the number of
-inhabitants it has, ignoring bottoms. Consider the following simple type
-definitions:
+To start, we can associate each finite type with its \defn{cardinality}---the
+number of inhabitants it has, ignoring bottoms. Consider the following simple
+type definitions:
 
 \snip{Algebra}{Void}
 \snip{Algebra}{Unit}
@@ -37,9 +37,9 @@ $$
 \end{align*}
 $$
 
-Any two types that have the same cardinality will always be isomorphic to one
-another. An \defn{isomorphism} between types \ty{s} and \ty{t} is defined as a
-pair of functions \hs{to} and \hs{from}:
+Any two finite types that have the same cardinality will always be isomorphic to
+one another. An \defn{isomorphism} between types \ty{s} and \ty{t} is defined as
+a pair of functions \hs{to} and \hs{from}:
 
 \snip{Algebra}{to}
 
@@ -172,9 +172,9 @@ between \ty{Either a Void} and \ty{a}.
 \snip{Algebra}{sumUnitFrom}
 
 The function \hs{absurd} at \ann{1} has the type \ty{Void -> a}. It's a sort of
-bluff saying ``if you give me a \ty{Void} I can give you anything you
-want.'' Despite this being a lie, because there are no \ty{Void}s to be had in
-the first place, we can't disprove it.
+bluff saying ``if you give me a \ty{Void} I can give you anything you want.''
+This is a promise that can never be fulfilled, but because there are no
+\ty{Void}s to be had in the first place, we can't disprove such a claim.
 
 Function types also have an encoding as statements about cardinality---they
 correspond to exponentialization. To give an example, there are exactly four
@@ -302,8 +302,7 @@ cardinalities can be summarized in the following table.
 This table itself forms a more-general isomorphism between mathematics and
 types. It's known as the \defn{Curry--Howard isomorphism}---loosely stating
 that every statement in logic is equivalent to some computer program, and vice
-versa. Curry--Howard has been popularized by Philip Wadler under the name
-\defn{propositions as types}.
+versa.
 
 The Curry--Howard isomorphism is a profound insight about our universe. It
 allows us to analyze mathematical theorems through the lens of functional
@@ -312,15 +311,16 @@ are interesting when expressed as types.
 
 To illustrate, consider the theorem $a^1 = a$. When viewed through
 Curry--Howard, it describes an isomorphism between \ty{() -> a} and \ty{a}.
-Said another way, this theorem shows that there is no distinction between
-having a value and having a (pure) program that computes that value. This
-insight is the core principle behind why writing Haskell is such a joy compared
-with other programming languages.
+Said another way, this theorem shows that there is no essential distinction
+between having a value and having a (pure) program that computes that value.
+This insight is the core principle behind why writing Haskell is such a joy
+compared with other programming languages.
 
 \begin{exercise}
   Use Curry--Howard to prove that $(a^b)^c = a^{b\times c}$. That is, provide a
   function of type \ty{(b -> c -> a) -> (b, c) -> a}, and one of \ty{((b, c) ->
-  a) -> b -> c -> a}. Do these functions remind you of anything from
+  a) -> b -> c -> a}. Make sure they satisfy the equalities \hs{to . from = id}
+  and \hs{from . to = id}. Do these functions remind you of anything from
   \ty{Prelude}?
 \end{exercise}
 \begin{solution}

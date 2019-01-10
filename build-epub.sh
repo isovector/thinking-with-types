@@ -92,8 +92,13 @@ sed -i 's_‘_\&lsquo;_g' book8.html
 sed -i 's_’_\&rsquo;_g' book8.html
 sed -i 's/\\_/_/g' book8.html
 sed -i 's/\\%/%/g' book8.html
-sed -i 's_!\\annotate{\([0-9]\+\)}!_<span class="annotate"><img src="static/ann\1.png"/></span>_g' book8.html
-sed -i 's_\\annotate{\([0-9]\+\)}_<span class="annotate"><img src="static/ann\1.png"/></span>_g' book8.html
+sed -i 's_!\\annotate{\([0-9]\+\)}!_<span class="annotate">\\htmlann{\1}</span>_g' book8.html
+sed -i 's_\\annotate{\([0-9]\+\)}_<span class="annotate">\\htmlann{\1}</span>_g' book8.html
+sed -i 's_\\htmlann{1}_\&#x2776;_g' book8.html
+sed -i 's_\\htmlann{2}_\&#x2777;_g' book8.html
+sed -i 's_\\htmlann{3}_\&#x2778;_g' book8.html
+sed -i 's_\\htmlann{4}_\&#x2779;_g' book8.html
+sed -i 's_\\htmlann{5}_\&#x277a;_g' book8.html
 sed -i 's/\\{/{/g' book8.html
 sed -i 's/\\}/}/g' book8.html
 sed -i 's/\\\\/<br>/g' book8.html

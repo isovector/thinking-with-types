@@ -41,8 +41,8 @@ contravariant'' as a short-hand for ``\ty{T a} is contravariant with respect to
     a function \ty{T a -> T b}.}
   \item{\defnn{Contravariant}{contravariant}: Any function \ty{a -> b} can be
     lifted into a function \ty{T b -> T a}.}
-  \item{\defnn{Invariant}{invariant}: In general, no function \ty{a -> b} can be
-    lifted into a function over \ty{T a}.}
+  \item{\defnn{Invariant}{invariant}: In general, functions \ty{a -> b} cannot
+    be lifted into a function over \ty{T a}.}
 \end{enumerate}
 
 Covariance is the sort we're most familiar with---it corresponds directly to
@@ -117,8 +117,8 @@ is a negative, and so on.
 Variances are no different. To illustrate, consider the type \ty{(a, Bool) ->
 Int}. The \ty{a} in the subtype \ty{(a, Bool)} is in positive position, but
 \ty{(a, Bool)} is in negative position relative to \ty{(a, Bool) -> Int}. As we
-remember from grade-school arithmetic, a positive times a negative is negative,
-and so \ty{(a, Bool) -> Int} is contravariant with respect to \ty{a}.
+remember from early arithmetic in school, a positive times a negative is
+negative, and so \ty{(a, Bool) -> Int} is contravariant with respect to \ty{a}.
 
 This relationship can be expressed with a simple table---but again, note that
 the mnemonic suggested by the name of positive and negative positions should be
