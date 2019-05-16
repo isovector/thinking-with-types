@@ -22,3 +22,8 @@ _minted-*/
 *.out
 .fracked/
 *.epub
+
+/.ghc.environment.x86_64-darwin-8.6.4
+/.stack-work/
+/dist-newstyle/
+
