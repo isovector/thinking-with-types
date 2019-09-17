@@ -94,7 +94,7 @@ instance Show (HList '[]) where
 -- # showHCons
 instance (Show t, Show (HList ts))
     => Show (HList (t ': ts)) where
-  show (a :# as) = show a <> " :# " show as
+  show (a :# as) = show a <> " :# " <> show as
 
 -}
 
