@@ -1,33 +1,19 @@
 snippets:
 	mkdir -p .latex-live-snippets/repl
-	xelatex -shell-escape '\newcommand{\updatesnippets}{}\input{prose/book.tex}'
+	xelatex -shell-escape '\newcommand{\updatesnippets}{}\input{en/book.tex}'
 
 quick:
-	xelatex -shell-escape prose/print
+	xelatex -shell-escape en/print
 
-book.pdf:
-	xelatex -shell-escape prose/book || echo ""
-	makeglossaries prose/book || echo ""
-	xelatex -shell-escape prose/book || echo ""
-	makeglossaries prose/book || echo ""
-	xelatex -shell-escape prose/book || echo ""
-	xelatex -shell-escape prose/book || echo ""
+targets = book.pdf sample.pdf print.pdf
 
-sample.pdf:
-	xelatex -shell-escape prose/sample || echo ""
-	makeglossaries prose/sample || echo ""
-	xelatex -shell-escape prose/sample || echo ""
-	makeglossaries prose/sample || echo ""
-	xelatex -shell-escape prose/sample || echo ""
-	xelatex -shell-escape prose/sample || echo ""
-
-print.pdf:
-	xelatex -shell-escape prose/print || echo ""
-	makeglossaries prose/print || echo ""
-	xelatex -shell-escape prose/print || echo ""
-	makeglossaries prose/print || echo ""
-	xelatex -shell-escape prose/print || echo ""
-	xelatex -shell-escape prose/print || echo ""
+$(targets): %.pdf: en/%.tex
+	xelatex -shell-escape en/$* || echo ""
+	makeglossaries en/$* || echo ""
+	xelatex -shell-escape en/$* || echo ""
+	makeglossaries en/$* || echo ""
+	xelatex -shell-escape en/$* || echo ""
+	xelatex -shell-escape en/$* || echo ""
 
 clean:
 	-rm *.aux

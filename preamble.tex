@@ -1,6 +1,8 @@
 % packages
 \usepackage[utf8]{inputenc}
 
+\newcommand{\lang}{en}
+
 \usepackage[paperwidth=6.25in,paperheight=9.25in,inner=1.25in,bmargin=0.75in,tmargin=0.75in,includeheadfoot]{geometry}
 
 \usepackage{xifthen}
@@ -88,12 +90,12 @@
 \newcommand{\runsnipcommand}[1]{\ifthenelse{\isundefined{\updatesnippets}}{}{\immediate\write18{#1}}}
 
 \newcommand{\snipFile}[1]{\spaceMyBox
-\runsnipcommand{latex-live-snippets code/#1.hs}
+\runsnipcommand{latex-live-snippets \lang/code/#1.hs}
 \input{.latex-live-snippets/#1.FILE.tex}\spaceMyBox}
 
 \newcommand{\snip}[2]{\spaceMyBox\unspacedSnip{#1}{#2}\spaceMyBox}
 \newcommand{\unspacedSnip}[2]{
-\runsnipcommand{latex-live-snippets code/#1.hs #2}
+\runsnipcommand{latex-live-snippets \lang/code/#1.hs #2}
 \input{.latex-live-snippets/#1.#2.tex}}
 \newcommand{\snipRename}[3]{\spaceMyBox
 \runsnipcommand{/usr/bin/bash snip.sh #1 #2 #3}
@@ -118,7 +120,7 @@
 \renewcommand{\doreplfile}{\doreplparam-\arabic{chapter}-\arabic{\doreplcounter}}
 \ifcounter{\doreplcounter}{}{\newcounter{\doreplcounter}}
 \begin{VerbatimOut}{/tmp/\doreplfile.aux}}{\end{VerbatimOut}
-\runsnipcommand{/usr/bin/bash ghci.sh code/\doreplparam.hs /tmp/\doreplfile.aux \doreplfile}
+\runsnipcommand{/usr/bin/bash ghci.sh \lang/code/\doreplparam.hs /tmp/\doreplfile.aux \doreplfile}
 \input{.latex-live-snippets/repl/\doreplfile.tex}
 \stepcounter{\doreplcounter}
 }
