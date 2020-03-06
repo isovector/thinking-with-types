@@ -2,12 +2,12 @@ quick:
 	echo Q | xelatex -shell-escape print
 
 book:
-	echo Q | xelatex -shell-escape book || echo ""
-	makeglossaries book || echo ""
-	echo Q | xelatex -shell-escape book || echo ""
-	makeglossaries book || echo ""
-	echo Q | xelatex -shell-escape book || echo ""
-	echo Q | xelatex -shell-escape book || echo ""
+	xelatex -shell-escape prose/book || echo ""
+	# makeglossaries prose/book || echo ""
+	# echo Q | xelatex -shell-escape prose/book || echo ""
+	# makeglossaries prose/book || echo ""
+	# echo Q | xelatex -shell-escape prose/book || echo ""
+	# echo Q | xelatex -shell-escape prose/book || echo ""
 
 sample.pdf:
 	xelatex -shell-escape prose/sample || echo ""

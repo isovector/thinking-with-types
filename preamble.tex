@@ -55,10 +55,15 @@
   \uppercase{#1}%
   \endgroup%
 }
+\newlength\faker@f
+\newlength\faker@c
 \def\fakersc#1{%
   \begingroup%
   \xdef\faker@name{\csname\curr@fontshape/\f@size\endcsname}%
-  \fontsize{\fontdimen10\faker@name}{\baselineskip}\selectfont%
+  % TODO(sandy): this used to be here in the original version, but it fails to
+  % compile without errors if it is set to 10
+  % \fontsize{\fontdimen10\faker@name}{\baselineskip}\selectfont%
+  \fontsize{\fontdimen8\faker@name}{\baselineskip}\selectfont%
   \uppercase{#1}%
   \endgroup%
 }
