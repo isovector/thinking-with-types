@@ -1,0 +1,17 @@
+\begin{repl}\begin{lstlisting}
+> :t runLinear (etcPasswd >>= \f -> closeFile f >> pure f)
+
+<interactive>:1:12: error:
+    • Couldn't match type ‘s1’ with ‘s’ arising from a use of ‘>>=’
+      ‘s1’ is a rigid type variable bound by
+        a type expected by the context:
+          forall s1.
+          Linear s1 ('LinearState 0 '[]) ('LinearState 1 '[]) (Handle s 0)
+        at <interactive>:1:1-53
+      ‘s’ is a rigid type variable bound by
+        the inferred type of it :: IO (Handle s 0)
+        at <interactive>:1:1
+    • In the first argument of ‘runLinear’, namely
+        ‘(etcPasswd >>= \ f -> closeFile f >> pure f)’
+      In the expression:
+        runLinear (etcPasswd >>= \ f -> closeFile f >> pure f)\end{lstlisting}\end{repl}

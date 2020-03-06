@@ -1,0 +1,5 @@
+\begin{code}
+newtype ContT m a = ContT
+  { unContT :: forall r. (a -> m r) -> m r
+  }
+\end{code}

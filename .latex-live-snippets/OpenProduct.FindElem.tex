@@ -1,0 +1,5 @@
+\begin{code}
+type FindElem (key :: Symbol) (ts :: [(Symbol, k)]) =
+  Eval (FromMaybe Stuck
+    =<< FindIndex (TyEq key <=< Fst) ts)
+\end{code}

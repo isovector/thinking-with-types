@@ -1,0 +1,28 @@
+\begin{repl}\begin{lstlisting}
+> pp (schema @Person)
+{
+    "required": [
+        "name",
+        "age",
+        "permissions"
+    ],
+    "title": "Person",
+    "type": "object",
+    "properties": {
+        "phone": {
+            "type": "string"
+        },
+        "age": {
+            "type": "integer"
+        },
+        "name": {
+            "type": "string"
+        },
+        "permissions": {
+            "items": {
+                "type": "boolean"
+            },
+            "type": "array"
+        }
+    }
+}\end{lstlisting}\end{repl}

@@ -1,0 +1,6 @@
+\begin{code}
+productRule2To
+    :: (c -> (a, b))
+    -> (c -> a, c -> b)
+productRule2To f = (fst . f, snd . f)
+\end{code}

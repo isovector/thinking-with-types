@@ -1,0 +1,4 @@
+\begin{code}
+instance (SingI h, SingI t) => SingI (h ': t) where
+  sing = SCons sing sing
+\end{code}

@@ -1,0 +1,6 @@
+\begin{code}
+instance (HasPrintf a, Show param)
+    => HasPrintf ((param :: Type) :<< a) where
+  type Printf (param :<< a) = param -> Printf a
+  format s _ param = format (s <> show param) (Proxy @a)
+\end{code}

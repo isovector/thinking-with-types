@@ -1,0 +1,10 @@
+\begin{code}
+insert
+    :: RequireUniqueKey (Eval (UniqueKey key ts)) key t ts
+    => Key key
+    -> f t
+    -> OpenProduct f ts
+    -> OpenProduct f ('(key, t) ': ts)
+insert _ ft (OpenProduct v) =
+  OpenProduct $ V.cons (Any ft) v
+\end{code}

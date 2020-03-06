@@ -1,0 +1,5 @@
+\begin{code}
+newtype ST s a = ST  !\annotate{1}!
+  { unsafeRunST :: a
+  }
+\end{code}

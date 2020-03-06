@@ -1,0 +1,4 @@
+\begin{code}
+genericEq :: (Generic a, GEq (Rep a)) => a -> a -> Bool
+genericEq a b = geq (from a) (from b)
+\end{code}

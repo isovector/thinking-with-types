@@ -1,0 +1,4 @@
+\begin{code}
+data Pure :: a -> Exp a
+type instance Eval (Pure x) = x
+\end{code}

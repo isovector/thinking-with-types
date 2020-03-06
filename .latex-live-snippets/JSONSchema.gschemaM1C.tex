@@ -1,0 +1,5 @@
+\begin{code}
+instance GSchema a => GSchema (M1 C _1 a) where
+  gschema = gschema @a
+  {-# INLINE gschema #-}
+\end{code}

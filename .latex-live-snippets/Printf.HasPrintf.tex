@@ -1,0 +1,7 @@
+\begin{code}
+class HasPrintf a where
+  type Printf a :: Type
+  format :: String    !\annotate{1}!
+         -> Proxy a   !\annotate{2}!
+         -> Printf a  !\annotate{3}!
+\end{code}

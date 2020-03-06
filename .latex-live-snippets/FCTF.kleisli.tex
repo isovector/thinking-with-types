@@ -1,0 +1,9 @@
+\begin{code}
+data (<=<)
+    :: (b -> Exp c)
+    -> (a -> Exp b)
+    -> a -> Exp c
+type instance Eval ((f <=< g) x) =
+  Eval (f (Eval (g x)))
+infixr 1 <=<
+\end{code}

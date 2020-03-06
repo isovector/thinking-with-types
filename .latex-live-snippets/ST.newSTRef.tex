@@ -1,0 +1,5 @@
+\begin{code}
+newSTRef :: a -> ST s (STRef s a)  !\annotate{1}!
+newSTRef =
+  pure . STRef . unsafePerformIO . newIORef
+\end{code}

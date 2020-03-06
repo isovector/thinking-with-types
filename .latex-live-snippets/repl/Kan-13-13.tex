@@ -1,0 +1,8 @@
+\begin{repl}\begin{lstlisting}
+> :t runCurried @(Yoneda _) @(Yoneda _)
+runCurried @(Yoneda _) @(Yoneda _)
+  :: Curried (Yoneda w1) (Yoneda w2) a
+     -> Yoneda w1 (a -> r) -> Yoneda w2 r
+
+> :t flip (<*>)
+flip (<*>) :: Applicative f => f a -> f (a -> b) -> f b\end{lstlisting}\end{repl}

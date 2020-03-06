@@ -1,0 +1,5 @@
+\begin{code}
+type UpsertLoc (key :: Symbol)
+               (ts :: [(Symbol, k)]) =
+  Eval (FindIndex (TyEq key <=< Fst) ts)
+\end{code}

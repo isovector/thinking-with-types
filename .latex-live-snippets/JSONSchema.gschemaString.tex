@@ -1,0 +1,10 @@
+\begin{code}
+instance {-# OVERLAPPING #-} KnownSymbol nm
+    => GSchema (M1 S ('MetaSel ('Just nm) _1 _2 _3)
+                     (K1 _4 String)) where
+  gschema = do
+    emitRequired @nm
+    pure . makePropertyObj @nm
+         $ makeTypeObj @String
+  {-# INLINE gschema #-}
+\end{code}

@@ -1,0 +1,4 @@
+\begin{code}
+class IxApplicative m => IxMonad m where
+  ibind :: (a -> m j k b) -> m i j a -> m i k b
+\end{code}

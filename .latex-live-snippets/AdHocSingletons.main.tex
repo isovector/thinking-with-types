@@ -1,0 +1,7 @@
+\begin{code}
+main :: Bool -> IO ()
+main bool = do
+  withSomeSBool (toSBool bool) $ \(sb :: SBool b) ->
+    case dict @MonadLogging sb of
+      Dict -> runLogging @b program
+\end{code}

@@ -1,0 +1,5 @@
+\begin{code}
+map :: (a -> b) -> [a] -> [b]
+map _ []       = []
+map f (a : as) = f a : map f as
+\end{code}

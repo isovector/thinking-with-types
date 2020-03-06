@@ -1,0 +1,16 @@
+\begin{repl}\begin{lstlisting}
+> runST (newSTRef True)
+
+<interactive>:2:8: error:
+    • Couldn't match type ‘a’ with ‘STRef s Bool’
+        because type variable ‘s’ would escape its scope
+      This (rigid, skolem) type variable is bound by
+        a type expected by the context:
+          forall s. ST s a
+        at <interactive>:2:1-21
+      Expected type: ST s a
+        Actual type: ST s (STRef s Bool)
+    • In the first argument of ‘runST’, namely ‘(newSTRef True)’
+      In the expression: runST (newSTRef True)
+      In an equation for ‘it’: it = runST (newSTRef True)
+    • Relevant bindings include it :: a (bound at <interactive>:2:1)\end{lstlisting}\end{repl}

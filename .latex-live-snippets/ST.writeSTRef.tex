@@ -1,0 +1,5 @@
+\begin{code}
+writeSTRef :: STRef s a -> a -> ST s ()
+writeSTRef ref =
+  pure . unsafePerformIO . writeIORef (unSTRef ref)
+\end{code}

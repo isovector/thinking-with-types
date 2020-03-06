@@ -1,0 +1,4 @@
+\begin{code}
+class Dict1 c (f :: k -> Type) where
+  dict1 :: Sing (a :: k) -> Dict (c (f a))
+\end{code}

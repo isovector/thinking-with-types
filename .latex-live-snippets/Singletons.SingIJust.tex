@@ -1,0 +1,4 @@
+\begin{code}
+instance SingI a => SingI ('Just a) where
+  sing = SJust sing
+\end{code}

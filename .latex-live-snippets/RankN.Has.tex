@@ -1,0 +1,4 @@
+\begin{code}
+data Has (c :: Type -> Constraint) where
+  Has :: c t => t -> Has c
+\end{code}

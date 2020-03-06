@@ -1,0 +1,7 @@
+\begin{code}
+data instance Sing (a :: [k]) where
+  SNil  :: Sing '[]
+  SCons :: Sing (h :: k)
+        -> Sing (t :: [k])
+        -> Sing (h ': t)
+\end{code}

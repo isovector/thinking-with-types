@@ -1,0 +1,12 @@
+\begin{repl}\begin{lstlisting}
+> let foo = inj (Identity True) :: OpenSum Identity '[Bool, String]
+
+> friendlyPrj foo :: Maybe (Identity Int)
+
+<interactive>:3:1: error:
+    • Attempted to call `friendlyPrj' to produce a `Identity Int'.
+      But the OpenSum can only contain one of:
+        '[Bool, String]
+    • In the expression: friendlyPrj foo :: Maybe (Identity Int)
+      In an equation for ‘it’:
+          it = friendlyPrj foo :: Maybe (Identity Int)\end{lstlisting}\end{repl}

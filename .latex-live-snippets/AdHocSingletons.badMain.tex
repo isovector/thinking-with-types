@@ -1,0 +1,8 @@
+\begin{code}
+main :: IO ()
+main = do
+  bool <- read <$> getLine
+  withSomeSBool (toSBool bool) $  !\annotate{1}!
+    \(_ :: SBool b) ->  !\annotate{2}!
+      runLogging @b program  !\annotate{3}!
+\end{code}

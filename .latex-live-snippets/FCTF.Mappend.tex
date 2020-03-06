@@ -1,0 +1,12 @@
+\begin{code}
+data Mappend :: a -> a -> Exp a
+type instance Eval
+  (Mappend '() '()) = '()
+type instance Eval
+  (Mappend (a :: Constraint)
+           (b :: Constraint)) = (a, b)
+type instance Eval
+  (Mappend (a :: [k])
+           (b :: [k])) = Eval (a ++ b)
+-- etc
+\end{code}

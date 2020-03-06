@@ -1,0 +1,5 @@
+\begin{code}
+readSTRef :: STRef s a -> ST s a
+readSTRef =
+  pure . unsafePerformIO . readIORef . unSTRef
+\end{code}

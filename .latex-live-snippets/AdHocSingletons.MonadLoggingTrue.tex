@@ -1,0 +1,9 @@
+\begin{code}
+instance MonadLogging 'True where
+  type LoggingMonad 'True = WriterT [String] IO
+  logMsg s = tell [s]
+  runLogging m = do
+    (a, w) <- runWriterT m
+    for_ w putStrLn
+    pure a
+\end{code}

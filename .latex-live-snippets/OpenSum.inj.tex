@@ -1,0 +1,4 @@
+\begin{code}
+inj :: forall f t ts. Member t ts => f t -> OpenSum f ts
+inj = UnsafeOpenSum (findElem @t @ts)
+\end{code}

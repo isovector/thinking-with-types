@@ -1,0 +1,7 @@
+\begin{code}
+withSomeSBool
+    :: SomeSBool
+    -> (forall (b :: Bool). SBool b -> r)
+    -> r
+withSomeSBool (SomeSBool s) f = f s
+\end{code}

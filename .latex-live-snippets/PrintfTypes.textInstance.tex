@@ -1,0 +1,5 @@
+\begin{code}
+instance HasPrintf a
+    => HasPrintf ((text :: Symbol) :<< a) where
+  type Printf (text :<< a) = Printf a
+\end{code}

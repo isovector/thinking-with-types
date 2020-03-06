@@ -1,0 +1,7 @@
+\begin{code}
+instance ( c (LogMsg 'JsonMsg)
+         , c (LogMsg 'TextMsg)
+         ) => Dict1 c LogMsg where
+  dict1 SJsonMsg = Dict
+  dict1 STextMsg = Dict
+\end{code}

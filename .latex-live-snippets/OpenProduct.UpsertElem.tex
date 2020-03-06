@@ -1,0 +1,8 @@
+\begin{code}
+type UpsertElem (key :: Symbol)
+                (t :: k)
+                (ts :: [(Symbol, k)]) =
+  FromMaybe ('(key, t) ': ts)
+    =<< Map (Placeholder1Of3 SetIndex '(key, t) ts)  !\annotate{1}!
+    =<< FindIndex (TyEq key <=< Fst) ts
+\end{code}

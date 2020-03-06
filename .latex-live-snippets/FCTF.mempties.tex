@@ -1,0 +1,10 @@
+\begin{code}
+type instance Eval
+  (Mempty '()) = '()
+type instance Eval
+  (Mempty (c :: Constraint))
+    = (() :: Constraint)
+type instance Eval
+  (Mempty (l :: [k])) = '[]
+-- etc
+\end{code}

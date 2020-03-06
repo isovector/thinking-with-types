@@ -1,0 +1,8 @@
+\begin{code}
+productRule2From
+    :: (c -> a)
+    -> (c -> b)
+    -> c
+    -> (a, b)
+productRule2From f g c = (f c, g c)
+\end{code}

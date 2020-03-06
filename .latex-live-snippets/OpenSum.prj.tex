@@ -1,0 +1,7 @@
+\begin{code}
+prj :: forall f t ts. Member t ts => OpenSum f ts -> Maybe (f t)
+prj (UnsafeOpenSum i f) =
+  if i == findElem @t @ts !\annotate{1}!
+     then Just $ unsafeCoerce f !\annotate{2}!
+     else Nothing
+\end{code}

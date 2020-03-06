@@ -1,0 +1,6 @@
+\begin{code}
+modifySTRef :: STRef s a -> (a -> a) -> ST s ()
+modifySTRef ref f = do
+  a <- readSTRef ref
+  writeSTRef ref $ f a
+\end{code}

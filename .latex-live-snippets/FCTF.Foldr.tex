@@ -1,0 +1,6 @@
+\begin{code}
+data Foldr :: (a -> b -> Exp b) -> b -> [a] -> Exp b
+type instance Eval (Foldr _1 b '[]) = b
+type instance Eval (Foldr f b (a ': as)) =
+  Eval (f a (Eval (Foldr f b as)))
+\end{code}

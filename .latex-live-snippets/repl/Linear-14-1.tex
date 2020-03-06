@@ -1,0 +1,5 @@
+\begin{repl}\begin{lstlisting}
+> let etcPasswd = openFile "/etc/passwd" ReadMode
+
+> :t runLinear (etcPasswd >>= closeFile)
+runLinear (etcPasswd >>= closeFile) :: IO ()\end{lstlisting}\end{repl}

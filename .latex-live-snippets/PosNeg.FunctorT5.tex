@@ -1,0 +1,4 @@
+\begin{code}
+instance Functor T5 where
+  fmap f (T5 aii) = T5 $ \bi -> aii $ bi . f
+\end{code}

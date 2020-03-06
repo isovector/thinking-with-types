@@ -1,0 +1,6 @@
+\begin{code}
+showLogs :: [Sigma LogMsg] -> [String]
+showLogs = fmap $ withSigma $ \sa fa ->
+  case dict1 @Show @LogMsg sa of
+    Dict -> show fa
+\end{code}

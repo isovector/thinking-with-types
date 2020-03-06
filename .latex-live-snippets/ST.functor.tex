@@ -1,0 +1,4 @@
+\begin{code}
+instance Functor (ST s) where
+  fmap f (ST a) = seq a . ST $ f a
+\end{code}

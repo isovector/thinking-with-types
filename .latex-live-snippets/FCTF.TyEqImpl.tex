@@ -1,0 +1,5 @@
+\begin{code}
+type family TyEqImpl (a :: k) (b :: k) :: Bool where
+  TyEqImpl a a = 'True
+  TyEqImpl a b = 'False
+\end{code}

@@ -1,0 +1,6 @@
+\begin{code}
+findElem :: forall t ts. Member t ts => Int
+findElem = fromIntegral
+         . natVal
+         $ Proxy @(Eval (FindElem t ts))
+\end{code}

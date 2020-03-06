@@ -1,0 +1,7 @@
+\begin{code}
+withSomeSing
+    :: SomeSing k
+    -> (forall (a :: k). Sing a -> r)
+    -> r
+withSomeSing (SomeSing s) f = f s
+\end{code}

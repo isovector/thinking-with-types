@@ -1,0 +1,8 @@
+\begin{repl}\begin{lstlisting}
+> :set -XPolyKinds
+
+> type Snd2 = Snd <=< Snd
+
+> :kind! Eval (Snd2 '(1, '(2, 3)))
+Eval (Snd2 '(1, '(2, 3))) :: Nat
+= 3\end{lstlisting}\end{repl}

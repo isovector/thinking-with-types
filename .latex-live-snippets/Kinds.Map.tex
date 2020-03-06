@@ -1,0 +1,5 @@
+\begin{code}
+type family Map (x :: a -> b) (i :: [a]) :: [b] where
+  Map f '[]       = '[]
+  Map f (x ': xs) = f x ': Map f xs
+\end{code}

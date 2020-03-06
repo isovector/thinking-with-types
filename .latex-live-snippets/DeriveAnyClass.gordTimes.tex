@@ -1,0 +1,4 @@
+\begin{code}
+instance (GOrd a, GOrd b) => GOrd (a :*: b) where
+  gord (a1 :*: b1) (a2 :*: b2) = gord a1 a2 <> gord b1 b2
+\end{code}

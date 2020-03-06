@@ -1,0 +1,18 @@
+\begin{code}
+type family FriendlyFindElem2 (funcName :: Symbol)
+                             (key :: Symbol)
+                             (ts :: [(Symbol, k)]) where
+  FriendlyFindElem2 funcName key ts =
+    Eval (
+      FromMaybe
+           ( TypeError
+           ( 'Text "Attempted to call `"
+       ':<>: 'Text funcName
+       ':<>: 'Text "' with key `"
+       ':<>: 'Text key
+       ':<>: 'Text "'."
+       ':$$: 'Text "But the OpenProduct only has keys :"
+       ':$$: 'Text "  "
+       ':<>: ShowList (Eval (Map Fst ts))
+           )) =<< FindIndex (TyEq key <=< Fst) ts)
+\end{code}
