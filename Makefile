@@ -3,31 +3,31 @@ snippets:
 	xelatex -shell-escape '\newcommand{\updatesnippets}{}\input{prose/book.tex}'
 
 quick:
-	echo Q | xelatex -shell-escape print
+	xelatex -shell-escape prose/print
 
-book:
+book.pdf:
 	xelatex -shell-escape prose/book || echo ""
-	# makeglossaries prose/book || echo ""
-	# echo Q | xelatex -shell-escape prose/book || echo ""
-	# makeglossaries prose/book || echo ""
-	# echo Q | xelatex -shell-escape prose/book || echo ""
-	# echo Q | xelatex -shell-escape prose/book || echo ""
+	makeglossaries prose/book || echo ""
+	xelatex -shell-escape prose/book || echo ""
+	makeglossaries prose/book || echo ""
+	xelatex -shell-escape prose/book || echo ""
+	xelatex -shell-escape prose/book || echo ""
 
 sample.pdf:
 	xelatex -shell-escape prose/sample || echo ""
-	# makeglossaries prose/sample || echo ""
-	# xelatex -shell-escape prose/sample || echo ""
-	# makeglossaries prose/sample || echo ""
-	# xelatex -shell-escape prose/sample || echo ""
-	# xelatex -shell-escape prose/sample || echo ""
+	makeglossaries prose/sample || echo ""
+	xelatex -shell-escape prose/sample || echo ""
+	makeglossaries prose/sample || echo ""
+	xelatex -shell-escape prose/sample || echo ""
+	xelatex -shell-escape prose/sample || echo ""
 
-print:
-	echo Q | xelatex -shell-escape print || echo ""
-	makeglossaries print || echo ""
-	echo Q | xelatex -shell-escape print || echo ""
-	makeglossaries print || echo ""
-	echo Q | xelatex -shell-escape print || echo ""
-	echo Q | xelatex -shell-escape print || echo ""
+print.pdf:
+	xelatex -shell-escape prose/print || echo ""
+	makeglossaries prose/print || echo ""
+	xelatex -shell-escape prose/print || echo ""
+	makeglossaries prose/print || echo ""
+	xelatex -shell-escape prose/print || echo ""
+	xelatex -shell-escape prose/print || echo ""
 
 clean:
 	-rm *.aux
