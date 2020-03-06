@@ -9,21 +9,17 @@
 \usepackage{fancyvrb}
 \usepackage{ragged2e}
 \usepackage{fancyhdr}
-% \usepackage{palatino}
 \usepackage{alltt}
 \usepackage{minted}
 \usepackage{pdfpages}
 \usepackage{todonotes}
 \usepackage{subfiles}
-% \usepackage{makeidx}
 \usepackage{listings}
 \usepackage{amsmath}
 \usepackage{textcomp}
-% \usepackage[framemethod=tikz]{mdframed}
 \usetikzlibrary{calc}
 \usepackage[titletoc]{appendix}
 \usepackage{dingbat}
-% \usepackage{environ}
 \usepackage{fancyvrb}
 \usepackage{multirow}
 \usepackage[toc]{glossaries}
@@ -31,16 +27,13 @@
 \usepackage[local,copyexercisesinsolutions]{exsol}
 \usepackage[tikz]{bclogo}
 \usepackage{zref-user}
-% \usepackage[pdfpagelabels,final]{hyperref}
 \usepackage{bookmark}
 
 \makeatletter
 \zref@newprop{chapter}{\thechapter}
-\zref@newprop{chaptertype}{\@chapapp}% as suggested by Danie Els
+\zref@newprop{chaptertype}{\@chapapp}
 \makeatother
 
-% \setmainfont{Ledger} % good one
-% \setmainfont{Ovo}
 \setmainfont[ItalicFont={Merriweather Italic}]{Merriweather}
 \setmonofont{Inconsolata}
 \setsansfont{Cabin}
@@ -76,7 +69,6 @@
 \fancyhead[LE]{\thepage}
 \fancyhead[LO]{\rightmark}
 \fancyhead[RO]{\thepage}
-% \fancyfoot[C]{\footnotesize revision \texttt{\input{.current-revision}}}
 \fancyfoot[C]{}
 
 \lstset{breaklines=true,basicstyle=\ttfamily,breakatwhitespace=true,postbreak=\mbox{{\textcolor{red}{$\hookrightarrow$}}\space}}
@@ -147,7 +139,6 @@
 \newcommand{\ghcicmd}[1]{\texttt{#1}}
 \newcommand{\tyeq}{$\sim\!\!$\;}
 \newcommand{\tyeqSpace}{$\sim$\;}
-% \DeclareMathOperator{\tyeq}{$\sim$}
 
 \newcommand{\spaceMyBox}{\par\addvspace{8mm}}
 \newcommand{\spaceMyBigBox}{\par\addvspace{12mm}}
