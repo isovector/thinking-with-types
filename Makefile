@@ -1,3 +1,7 @@
+snippets:
+	mkdir -p .latex-live-snippets/repl
+	xelatex -shell-escape '\newcommand{\updatesnippets}{}\input{prose/book.tex}'
+
 quick:
 	echo Q | xelatex -shell-escape print
 
