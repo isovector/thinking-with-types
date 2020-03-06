@@ -29,13 +29,11 @@ the point, but \ty{Bool} has cardinality 2, corresponding to its constructors
 
 We can write these statements about cardinality more formally:
 
-$$
 \begin{align*}
   \card{Void} &= 0 \\
   \card{()} &= 1 \\
   \card{Bool} &= 2 \\
 \end{align*}
-$$
 
 Any two finite types that have the same cardinality will always be isomorphic to
 one another. An \defn{isomorphism} between types \ty{s} and \ty{t} is defined as
@@ -46,12 +44,10 @@ a pair of functions \hs{to} and \hs{from}:
 such that composing either after the other gets you back where you started. In
 other words, such that:
 
-$$
 \begin{align*}
   \hs{to .\spaceJob{}from = id} \\
   \hs{from .\spaceJob{}to = id} \\
 \end{align*}
-$$
 
 We sometimes write an isomorphism between types \ty{s} and \ty{t} as \iso{s}{t}.
 
@@ -116,12 +112,10 @@ of its constructors.
 
 We can analyze \ty{Deal}'s cardinality;
 
-$$
 \begin{align*}
   \card{Deal a b} &= \card{a} + \card{b} + \card{Bool} \\
   &= \card{a} + \card{b} + 2
 \end{align*}
-$$
 
 We can also look at the cardinality of \ty{Maybe a}. Because nullary data
 constructors are uninteresting to construct---there is only one
@@ -197,7 +191,6 @@ $$
 Determine the cardinality of \ty{Either Bool (Bool, Maybe Bool) -> Bool}.
 \end{exercise}
 \begin{solution}
-$$
 \begin{align*}
   &  \card{Either Bool (Bool, Maybe Bool) -> Bool} \\
   &= \card{Bool}^{\card{Either Bool (Bool, Maybe Bool)}} \\
@@ -209,7 +202,6 @@ $$
   &= 2^{8} \\
   &= 256
 \end{align*}
-$$
 \end{solution}
 
 The inquisitive reader might wonder whether subtraction, division and other
@@ -246,14 +238,12 @@ Rather than going through all of this trouble, we can use our knowledge of the
 algebra of types to help. The first step is to perform a cardinality analysis on
 \ty{TicTacToe};
 
-$$
 \begin{align*}
   \card{TicTacToe a} &= \underbrace{\card{a} \times \card{a} \times \cdots
   \times \card{a}}_{9 \text{ times}} \\
     &= \card{a}^{9} \\
     &= \card{a}^{3\times 3}
 \end{align*}
-$$
 
 When written like this, we see that \ty{TicTacToe} is isomorphic to a function
 \ty{(Three, Three) -> a}, or in its curried form: \ty{Three -> Three -> a}. Of
@@ -398,8 +388,6 @@ As an example, the canonical representation of \ty{Maybe a} is \ty{Either a ()}.
 To reiterate, this doesn't mean you should prefer using \ty{Either a ()} over
 \ty{Maybe a}. For now it's enough to know that the two types are equivalent. We
 shall return to canonical forms in chapter 13.
-
-% \todo{WHAT CHAPTER IS GHC GENERICS}
 
 \end{document}
 

@@ -10,7 +10,7 @@ book:
 	echo Q | xelatex -shell-escape book || echo ""
 
 sample.pdf:
-	echo Q | xelatex -shell-escape prose/sample || echo ""
+	xelatex -shell-escape prose/sample || echo ""
 	# makeglossaries prose/sample || echo ""
 	# xelatex -shell-escape prose/sample || echo ""
 	# makeglossaries prose/sample || echo ""
@@ -36,7 +36,6 @@ clean:
 	-rm -r _minted-*
 	# -rm -r .latex-live-snippets
 	-rm *.pdf
-	git checkout book.pdf
 	git checkout cover.pdf
 	git checkout solutions.pdf
 

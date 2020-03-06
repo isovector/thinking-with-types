@@ -140,7 +140,6 @@ only for the \ty{T1} and \ty{T5} types defined above.
 
 \newcommand{\tyAnno}[4]{\ty{#1} \qquad&\cong\qquad #2 & #3 &= #4 \\ \\}
 
-$$
 \begin{align*}
   \tyAnno{T1}{\ty{Int -> }\posp{\ty{a}}}{\possym}{\possym}
   \tyAnno{T2}{\negp{\ty{a}}\ty{ -> Int}}{\negsym}{\negsym}
@@ -148,7 +147,6 @@ $$
   \tyAnno{T4}{\negp{\ty{(Int -> }\posp{\ty{a}}\ty{)}}\ty{ -> Int}}{\negsym\circ\;\possym}{\negsym}
   \tyAnno{T5}{\negp{\ty{(}\negp{\ty{a}}\ty{ -> Int)}}\ty{ -> Int}}{\negsym\circ\;\negsym}{\possym}
 \end{align*}
-$$
 
 This analysis also shows us that \ty{T2} and \ty{T4} have \ty{Contravariant}
 instances, and \ty{T3} has an \ty{Invariant} one.
