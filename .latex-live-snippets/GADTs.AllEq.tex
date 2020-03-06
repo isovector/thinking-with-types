@@ -1,0 +1,5 @@
+\begin{code}
+type family AllEq (ts :: [Type]) :: Constraint where
+  AllEq '[]       = ()  !\annotate{1}!
+  AllEq (t ': ts) = (Eq t, AllEq ts)  !\annotate{2}!
+\end{code}

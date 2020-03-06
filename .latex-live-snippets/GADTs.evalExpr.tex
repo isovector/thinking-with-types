@@ -1,0 +1,11 @@
+\begin{code}
+evalExpr :: Expr a -> a
+evalExpr (LitInt i)  = i  !\annotate{1}!
+evalExpr (LitBool b) = b  !\annotate{2}!
+evalExpr (Add x y)   = evalExpr x + evalExpr y
+evalExpr (Not x)     = not $ evalExpr x
+evalExpr (If b x y)  =
+  if evalExpr b
+     then evalExpr x
+     else evalExpr y
+\end{code}

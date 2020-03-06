@@ -1,0 +1,9 @@
+\begin{repl}\begin{lstlisting}
+> :t words
+words :: String -> [String]
+
+> :t show :: Bool -> String
+show :: Bool -> String :: Bool -> String
+
+> :t words . (show :: Bool -> String)
+words . (show :: Bool -> String) :: Bool -> [String]\end{lstlisting}\end{repl}

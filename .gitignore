@@ -9,7 +9,6 @@
 *.exc.tex
 *.fc.tex
 *.sol.tex
-.latex-live-snippets/
 _minted-*/
 *.pdf
 *.glg

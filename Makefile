@@ -9,13 +9,13 @@ book:
 	echo Q | xelatex -shell-escape book || echo ""
 	echo Q | xelatex -shell-escape book || echo ""
 
-sample:
-	echo Q | xelatex -shell-escape sample || echo ""
-	makeglossaries sample || echo ""
-	echo Q | xelatex -shell-escape sample || echo ""
-	makeglossaries sample || echo ""
-	echo Q | xelatex -shell-escape sample || echo ""
-	echo Q | xelatex -shell-escape sample || echo ""
+sample.pdf:
+	echo Q | xelatex -shell-escape prose/sample || echo ""
+	# makeglossaries prose/sample || echo ""
+	# xelatex -shell-escape prose/sample || echo ""
+	# makeglossaries prose/sample || echo ""
+	# xelatex -shell-escape prose/sample || echo ""
+	# xelatex -shell-escape prose/sample || echo ""
 
 print:
 	echo Q | xelatex -shell-escape print || echo ""
@@ -34,10 +34,11 @@ clean:
 	-rm *.toc
 	-rm *.gl*
 	-rm -r _minted-*
-	-rm -r .latex-live-snippets
+	# -rm -r .latex-live-snippets
 	-rm *.pdf
 	git checkout book.pdf
 	git checkout cover.pdf
+	git checkout solutions.pdf
 
 cover:
 	convert ebook-cover.png -quality 100 -units PixelsPerInch -density 300x300 cover.pdf
