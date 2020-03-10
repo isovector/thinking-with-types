@@ -14,7 +14,7 @@ $(1)-$(2).pdf: $(1)-%.pdf: share/%.tex
 	xelatex -shell-escape '\newcommand{\lang}{$(1)}\input{share/$$*.tex}' || echo ""
 	makeglossaries share/$$* || echo ""
 	xelatex -shell-escape '\newcommand{\lang}{$(1)}\input{share/$$*.tex}' || echo ""
-	# xelatex -shell-escape '\newcommand{\lang}{$(1)}\input{share/$$*.tex}' || echo ""
+	xelatex -shell-escape '\newcommand{\lang}{$(1)}\input{share/$$*.tex}' || echo ""
 	mv $$*.pdf $(1)-$(2).pdf
 endef
 
