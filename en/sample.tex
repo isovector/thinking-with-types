@@ -7,10 +7,10 @@
 \input{\lang/glossary.tex}
 
 \thispagestyle{empty}
-\includepdf{cover.pdf}
+\includepdf{\lang/cover.pdf}
 \thispagestyle{empty}
 
-\input{frontmatter.tex}
+\input{share/frontmatter.tex}
 
 \tableofcontents
 
@@ -20,7 +20,7 @@
 \subfile{\lang/frontmatter/3-introduction}
 
 
-\part{Fundamentals}
+\part{\fundamentalspart}
 
 \subfile{\lang/fundamentals/1-algebra}
 
@@ -29,7 +29,7 @@
 \subfile{\lang/fundamentals/3-variance}
 
 
-\part{Lifting Restrictions}
+\part{\restrictionspart}
 
 \subfile{\lang/restrictions/1-working-with-types}
 
