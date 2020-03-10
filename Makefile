@@ -5,16 +5,16 @@ define TARGET_RULE =
 # argument 1 is the language
 # argument 2 is the target
 
-$(1)-quick:
-	xelatex -shell-escape '\newcommand{\lang}{$(1)}\input{$(1)/book.tex}' || echo ""
+# $(1)-quick:
+# 	xelatex -shell-escape '\newcommand{\lang}{$(1)}\input{share/book.tex}' || echo ""
 
-$(1)-$(2).pdf: $(1)-%.pdf: $(1)/%.tex
-	xelatex -shell-escape '\newcommand{\lang}{$(1)}\input{$(1)/$$*.tex}' || echo ""
-	makeglossaries $(1)/$$* || echo ""
-	xelatex -shell-escape '\newcommand{\lang}{$(1)}\input{$(1)/$$*.tex}' || echo ""
-	makeglossaries $(1)/$$* || echo ""
-	xelatex -shell-escape '\newcommand{\lang}{$(1)}\input{$(1)/$$*.tex}' || echo ""
-	xelatex -shell-escape '\newcommand{\lang}{$(1)}\input{$(1)/$$*.tex}' || echo ""
+$(1)-$(2).pdf: $(1)-%.pdf: share/%.tex
+	xelatex -shell-escape '\newcommand{\lang}{$(1)}\input{share/$$*.tex}' || echo ""
+	makeglossaries share/$$* || echo ""
+	xelatex -shell-escape '\newcommand{\lang}{$(1)}\input{share/$$*.tex}' || echo ""
+	makeglossaries share/$$* || echo ""
+	xelatex -shell-escape '\newcommand{\lang}{$(1)}\input{share/$$*.tex}' || echo ""
+	# xelatex -shell-escape '\newcommand{\lang}{$(1)}\input{share/$$*.tex}' || echo ""
 	mv $$*.pdf $(1)-$(2).pdf
 endef
 
