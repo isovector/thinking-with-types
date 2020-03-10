@@ -1,8 +1,6 @@
 % packages
 \usepackage[utf8]{inputenc}
 
-\newcommand{\lang}{en}
-
 \usepackage[paperwidth=6.25in,paperheight=9.25in,inner=1.25in,bmargin=0.75in,tmargin=0.75in,includeheadfoot]{geometry}
 
 \usepackage{xifthen}
@@ -125,9 +123,6 @@
 \stepcounter{\doreplcounter}
 }
 
-% book metadata
-\title{Thinking with Types}
-\author{Sandy Maguire}
 \date{}
 
 
@@ -269,6 +264,8 @@ font=\sffamily\bfseries,minimum size=2mm,inner sep=0mm,draw,circle,fill=black]
 
 \newcommand{\apageref}[1]{on page \pageref{#1}}
 \newcommand{\spaceJob}{\;}
+
+\input{\lang/language.tex}
 
 \makeglossaries
 
