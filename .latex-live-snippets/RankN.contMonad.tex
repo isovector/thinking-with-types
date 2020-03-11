@@ -1,0 +1,7 @@
+\begin{code}
+instance Monad Cont where
+  return = pure
+  Cont m >>= f = Cont $ \c ->
+    m $ \a ->
+      unCont (f a) c
+\end{code}

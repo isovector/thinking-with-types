@@ -1,0 +1,12 @@
+\begin{code}
+pyPlus :: Dynamic -> Dynamic -> Dynamic
+pyPlus a b =
+  fromMaybe (error "bad types for pyPlus") $ asum
+    [ liftD2 @String @String a b (++)
+    , liftD2 @Int    @Int    a b (+)
+    , liftD2 @String @Int    a b $ \strA intB ->
+        strA ++ show intB
+    , liftD2 @Int    @String a b $ \intA strB ->
+        show intA ++ strB
+    ]
+\end{code}

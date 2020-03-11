@@ -1,0 +1,4 @@
+\begin{code}
+showBool :: HList '[_1, Bool, _2] -> String
+showBool (_ :# b :# _ :# HNil) = show b
+\end{code}

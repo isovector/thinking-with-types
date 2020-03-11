@@ -1,0 +1,4 @@
+\begin{code}
+weaken :: OpenSum f ts -> OpenSum f (t ': ts)
+weaken (UnsafeOpenSum n t) = UnsafeOpenSum (n + 1) t
+\end{code}

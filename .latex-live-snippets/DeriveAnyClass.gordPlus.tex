@@ -1,0 +1,7 @@
+\begin{code}
+instance (GOrd a, GOrd b) => GOrd (a :+: b) where
+  gord (L1 a1) (L1 a2) = gord a1 a2
+  gord (R1 b1) (R1 b2) = gord b1 b2
+  gord (L1 _)  (R1 _)  = LT
+  gord (R1 _)  (L1 _)  = GT
+\end{code}

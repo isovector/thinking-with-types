@@ -1,0 +1,6 @@
+\begin{code}
+data HList (ts :: [Type]) where !\annotate{1}!
+  HNil :: HList '[]  !\annotate{2}!
+  (:#) :: t -> HList ts -> HList (t ': ts)  !\annotate{3}!
+infixr 5 :#
+\end{code}

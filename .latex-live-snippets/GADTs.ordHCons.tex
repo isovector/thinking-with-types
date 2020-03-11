@@ -1,0 +1,6 @@
+\begin{code}
+instance (Ord t, Ord (HList ts))
+    => Ord (HList (t ': ts)) where
+  compare (a :# as) (b :# bs) =
+    compare a b <> compare as bs
+\end{code}

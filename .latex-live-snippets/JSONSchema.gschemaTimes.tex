@@ -1,0 +1,8 @@
+\begin{code}
+instance (GSchema f, GSchema g)
+      => GSchema (f :*: g) where
+  gschema =
+    mergeObjects <$> gschema @f
+                 <*> gschema @g
+  {-# INLINE gschema #-}
+\end{code}

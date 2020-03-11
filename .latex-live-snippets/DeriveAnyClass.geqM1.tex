@@ -1,0 +1,4 @@
+\begin{code}
+instance GEq a => GEq (M1 _x _y a) where
+  geq (M1 a1) (M1 a2) = geq a1 a2
+\end{code}

@@ -1,0 +1,5 @@
+\begin{code}
+newtype STRef s a = STRef  !\annotate{1}!
+  { unSTRef :: IORef a
+  }
+\end{code}

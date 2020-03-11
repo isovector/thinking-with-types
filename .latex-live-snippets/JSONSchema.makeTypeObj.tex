@@ -1,0 +1,10 @@
+\begin{code}
+makeTypeObj
+    :: forall a
+     . KnownSymbol (ToJSONType a)
+    => Value
+makeTypeObj = object
+  [ "type" .=
+      String (pack . symbolVal $ Proxy @(ToJSONType a))
+  ]
+\end{code}

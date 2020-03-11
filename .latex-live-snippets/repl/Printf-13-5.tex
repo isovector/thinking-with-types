@@ -1,0 +1,6 @@
+\begin{repl}\begin{lstlisting}
+> :t symbolVal
+symbolVal :: KnownSymbol n => proxy n -> String
+
+> symbolVal (Proxy @"i am a symbol")
+"i am a symbol"\end{lstlisting}\end{repl}

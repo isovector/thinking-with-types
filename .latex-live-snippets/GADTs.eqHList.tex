@@ -1,0 +1,5 @@
+\begin{code}
+instance All Eq ts => Eq (HList ts) where
+  HNil      == HNil      = True
+  (a :# as) == (b :# bs) = a == b && as == bs
+\end{code}

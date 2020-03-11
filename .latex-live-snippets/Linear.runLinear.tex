@@ -1,0 +1,9 @@
+\begin{code}
+runLinear
+    :: ( forall s
+       . Linear s ('LinearState 0 '[])
+                  ('LinearState n '[]) a
+       )
+    -> IO a
+runLinear = coerce
+\end{code}

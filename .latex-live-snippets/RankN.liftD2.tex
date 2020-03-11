@@ -1,0 +1,16 @@
+\begin{code}
+liftD2
+    :: forall a b r.
+       ( Typeable a
+       , Typeable b
+       , Typeable r
+       )
+    => Dynamic
+    -> Dynamic
+    -> (a -> b -> r)
+    -> Maybe Dynamic
+liftD2 d1 d2 f =
+    fmap Dynamic . f
+      <$> fromDynamic @a d1
+      <*> fromDynamic @b d2
+\end{code}

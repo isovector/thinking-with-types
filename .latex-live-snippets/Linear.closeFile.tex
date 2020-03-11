@@ -1,0 +1,9 @@
+\begin{code}
+closeFile
+    :: Eval (IsOpen key open) !\tyeq! 'True
+    => Handle s key
+    -> Linear s ('LinearState next open)
+                ('LinearState next (Eval (Close key open)))
+                ()
+closeFile = coerce SIO.hClose
+\end{code}

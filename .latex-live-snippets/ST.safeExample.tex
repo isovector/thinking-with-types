@@ -1,0 +1,7 @@
+\begin{code}
+safeExample :: ST s String
+safeExample = do
+  ref <- newSTRef "hello"
+  modifySTRef ref (++ " world")
+  readSTRef ref
+\end{code}

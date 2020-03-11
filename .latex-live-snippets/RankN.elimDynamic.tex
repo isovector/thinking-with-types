@@ -1,0 +1,7 @@
+\begin{code}
+elimDynamic
+    :: (forall a. Typeable a => a -> r)
+    -> Dynamic
+    -> r
+elimDynamic f (Dynamic a) = f a
+\end{code}

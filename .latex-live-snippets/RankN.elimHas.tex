@@ -1,0 +1,7 @@
+\begin{code}
+elimHas
+    :: (forall a. c a => a -> r)
+    -> Has c
+    -> r
+elimHas f (Has a) = f a
+\end{code}

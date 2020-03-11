@@ -1,0 +1,13 @@
+\begin{repl}\begin{lstlisting}
+> coerce (M.singleton 'S' True) :: M.Map Char (Reverse Bool)
+fromList [('S',Reverse {getReverse = True})]
+
+> coerce (M.singleton 'S' True) :: M.Map (Reverse Char) Bool
+
+<interactive>:3:1: error:
+    • Couldn't match type ‘Char’ with ‘Reverse Char’
+        arising from a use of ‘coerce’
+    • In the expression:
+          coerce (M.singleton 'S' True) :: M.Map (Reverse Char) Bool
+      In an equation for ‘it’:
+          it = coerce (M.singleton 'S' True) :: M.Map (Reverse Char) Bool\end{lstlisting}\end{repl}

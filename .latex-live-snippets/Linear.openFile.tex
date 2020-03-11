@@ -1,0 +1,11 @@
+\begin{code}
+openFile
+    :: FilePath
+    -> IOMode
+    -> Linear s ('LinearState next open)  !\annotate{1}!
+                ('LinearState
+                    (next TL.+ 1)  !\annotate{2}!
+                    (next ': open))  !\annotate{3}!
+                (Handle s next)
+openFile = coerce SIO.openFile
+\end{code}

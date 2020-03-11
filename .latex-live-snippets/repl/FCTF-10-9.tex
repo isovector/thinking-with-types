@@ -1,0 +1,12 @@
+\begin{repl}\begin{lstlisting}
+> :kind! Eval (Map Snd ('Just '(1, 2)))
+Eval (Map Snd ('Just '(1, 2))) :: Maybe Nat
+= 'Just 2
+
+> :kind! Eval (Map Snd '[ '(1, 2) ])
+Eval (Map Snd '[ '(1, 2) ]) :: [Nat]
+= '[2]
+
+> :kind! Eval (Map Snd (Left 'False))
+Eval (Map Snd (Left 'False)) :: Either Bool b
+= 'Left 'False\end{lstlisting}\end{repl}

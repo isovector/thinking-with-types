@@ -1,0 +1,8 @@
+\begin{code}
+class Monad (LoggingMonad b)
+      => MonadLogging (b :: Bool) where
+  type LoggingMonad b = (r :: Type -> Type)  !\annotate{1}!
+         | r -> b  !\annotate{2}!
+  logMsg :: String -> LoggingMonad b ()
+  runLogging :: LoggingMonad b a -> IO a
+\end{code}

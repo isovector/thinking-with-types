@@ -1,0 +1,6 @@
+\begin{code}
+class SingKind k where
+  type Demote k = r | r -> k !\annotate{1}!
+  toSing :: Demote k -> SomeSing k
+  fromSing :: Sing (a :: k) -> Demote k  !\annotate{2}!
+\end{code}

@@ -1,0 +1,5 @@
+\begin{code}
+newtype Yoneda f a = Yoneda
+  { runYoneda :: forall b. (a -> b) -> f b
+  }
+\end{code}

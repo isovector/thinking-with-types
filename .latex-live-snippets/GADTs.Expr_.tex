@@ -1,0 +1,8 @@
+\begin{code}
+data Expr_ a
+  = (a !\tyeq! Int)  => LitInt_  Int
+  | (a !\tyeq! Bool) => LitBool_ Bool
+  | (a !\tyeq! Int)  => Add_ (Expr_ Int) (Expr_ Int)
+  | (a !\tyeq! Bool) => Not_ (Expr_ Bool)
+  | If_ (Expr_ Bool) (Expr_ a) (Expr_ a)
+\end{code}

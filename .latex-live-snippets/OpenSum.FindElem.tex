@@ -1,0 +1,5 @@
+\begin{code}
+type FindElem (key :: k) (ts :: [k]) =
+  FromMaybe Stuck  !\annotate{1}!
+    =<< FindIndex (TyEq key) ts
+\end{code}

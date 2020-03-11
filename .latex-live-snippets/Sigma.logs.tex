@@ -1,0 +1,10 @@
+\begin{code}
+logs :: [Sigma LogMsg]
+logs =
+  [ toSigma $ Text "hello"
+  , toSigma $ Json $
+      object
+        [ "world" .= (5 :: Int) ]
+  , toSigma $ Text "structured logging is cool"
+  ]
+\end{code}

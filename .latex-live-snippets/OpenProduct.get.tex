@@ -1,0 +1,12 @@
+\begin{code}
+get
+    :: forall key ts f
+     . KnownNat (FindElem key ts)
+    => Key key
+    -> OpenProduct f ts
+    -> f (Eval (LookupType key ts)) !\annotate{1}!
+get _ (OpenProduct v) =
+    unAny $ V.unsafeIndex v $ findElem @key @ts
+  where
+    unAny (Any a) = unsafeCoerce a  !\annotate{2}!
+\end{code}

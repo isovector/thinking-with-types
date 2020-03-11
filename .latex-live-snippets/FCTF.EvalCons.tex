@@ -1,0 +1,4 @@
+\begin{code}
+type instance Eval (MapList f (a ': as))
+  = Eval (f a) ': Eval (MapList f as)
+\end{code}

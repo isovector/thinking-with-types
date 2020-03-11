@@ -1,0 +1,11 @@
+\begin{code}
+type family ToJSONType (a :: Type) :: Symbol where
+  ToJSONType Int     = "integer"
+  ToJSONType Integer = "integer"
+  ToJSONType Float   = "number"
+  ToJSONType Double  = "number"
+  ToJSONType String  = "string"
+  ToJSONType Bool    = "boolean"
+  ToJSONType [a]     = "array"
+  ToJSONType a       = TypeName a
+\end{code}

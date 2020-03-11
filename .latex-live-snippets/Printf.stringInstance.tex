@@ -1,0 +1,6 @@
+\begin{code}
+instance {-# OVERLAPPING #-} HasPrintf a
+    => HasPrintf (String :<< a) where
+  type Printf (String :<< a) = String -> Printf a
+  format s _ param = format (s <> param) (Proxy @a)
+\end{code}

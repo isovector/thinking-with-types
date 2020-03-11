@@ -1,0 +1,15 @@
+\begin{code}
+instance ( Dict1 Eq  (f :: k -> Type)
+         , Dict1 Ord f
+         , SDecide k
+         , SingKind k
+         , Ord (Demote k)
+         ) => Ord (Sigma f) where
+  compare (Sigma sa fa) (Sigma sb fb) =
+    case sa %!\tyeq! sb of
+      Proved Refl ->
+        case dict1 @Ord @f sa of
+          Dict -> compare fa fb
+      Disproved _ ->
+        compare (fromSing sa) (fromSing sb)
+\end{code}

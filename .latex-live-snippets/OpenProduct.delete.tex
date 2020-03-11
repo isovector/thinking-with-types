@@ -1,0 +1,11 @@
+\begin{code}
+delete
+    :: forall key ts f
+     . KnownNat (FindElem key ts)
+    => Key key
+    -> OpenProduct f ts
+    -> OpenProduct f (Eval (DeleteElem key ts))
+delete _ (OpenProduct v) =
+  let (a, b) = V.splitAt (findElem @key @ts) v
+   in OpenProduct $ a V.++ V.tail b
+\end{code}

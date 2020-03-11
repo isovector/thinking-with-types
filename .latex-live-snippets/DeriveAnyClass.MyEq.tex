@@ -1,0 +1,10 @@
+\begin{code}
+class MyEq a where
+  eq :: a -> a -> Bool
+  default eq  !\annotate{1}!
+      :: (Generic a, GEq (Rep a))
+      => a
+      -> a
+      -> Bool
+  eq a b = geq (from a) (from b)
+\end{code}

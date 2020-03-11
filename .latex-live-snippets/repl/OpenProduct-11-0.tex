@@ -1,0 +1,9 @@
+\begin{repl}\begin{lstlisting}
+> let result = insert (Key @"key") (Just "hello") nil
+
+> :t result
+result :: OpenProduct Maybe '[ '("key", [Char])]
+
+> :t insert (Key @"another") (Just True) result
+insert (Key @"another") (Just True) result
+  :: OpenProduct Maybe '[ '("another", Bool), '("key", [Char])]\end{lstlisting}\end{repl}

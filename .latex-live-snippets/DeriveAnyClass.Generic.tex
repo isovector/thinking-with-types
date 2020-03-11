@@ -1,0 +1,6 @@
+\begin{code}
+class Generic a where
+  type Rep a :: Type -> Type  !\annotate{1}!
+  from :: a -> Rep a x  !\annotate{2}!
+  to   :: Rep a x -> a  !\annotate{3}!
+\end{code}

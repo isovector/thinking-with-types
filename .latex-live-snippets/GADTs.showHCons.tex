@@ -1,0 +1,5 @@
+\begin{code}
+instance (Show t, Show (HList ts))
+    => Show (HList (t ': ts)) where
+  show (a :# as) = show a <> " :# " show as
+\end{code}

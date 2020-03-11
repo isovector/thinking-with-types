@@ -1,0 +1,9 @@
+\begin{repl}\begin{lstlisting}
+> let foo = inj (Identity True) :: OpenSum Identity '[Bool, String]
+
+> prj foo :: Maybe (Identity Int)
+
+<interactive>:3:1: error:
+    • No instance for (KnownNat Stuck) arising from a use of ‘prj’
+    • In the expression: prj foo :: Maybe (Identity Int)
+      In an equation for ‘it’: it = prj foo :: Maybe (Identity Int)\end{lstlisting}\end{repl}

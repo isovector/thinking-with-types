@@ -1,0 +1,8 @@
+\begin{code}
+decompose
+    :: OpenSum f (t ': ts)
+    -> Either (f t) (OpenSum f ts)
+decompose (UnsafeOpenSum 0 t) = Left  $ unsafeCoerce t
+decompose (UnsafeOpenSum n t) = Right
+                              $ UnsafeOpenSum (n - 1) t
+\end{code}

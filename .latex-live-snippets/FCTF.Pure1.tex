@@ -1,0 +1,4 @@
+\begin{code}
+data Pure1 :: (a -> b) -> a -> Exp b
+type instance Eval (Pure1 f x) = f x
+\end{code}

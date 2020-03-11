@@ -1,0 +1,7 @@
+\begin{code}
+emitRequired
+    :: forall nm
+     . KnownSymbol nm
+    => Writer [Text] ()
+emitRequired = tell . pure . pack . symbolVal $ Proxy @nm
+\end{code}

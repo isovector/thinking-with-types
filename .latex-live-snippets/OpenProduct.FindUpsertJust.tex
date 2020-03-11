@@ -1,0 +1,5 @@
+\begin{code}
+instance KnownNat n => FindUpsertElem ('Just n) where
+  upsertElem =
+    Just . fromIntegral . natVal $ Proxy @n
+\end{code}

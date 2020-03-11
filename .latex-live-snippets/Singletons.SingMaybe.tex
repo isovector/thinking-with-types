@@ -1,0 +1,5 @@
+\begin{code}
+data instance Sing (a :: Maybe k) where
+  SJust    :: Sing (a :: k) -> Sing ('Just a)
+  SNothing :: Sing 'Nothing
+\end{code}

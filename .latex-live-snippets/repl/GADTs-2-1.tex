@@ -1,0 +1,6 @@
+\begin{repl}\begin{lstlisting}
+> evalExpr . If (LitBool False) (LitInt 1) . Add (LitInt 5) $ LitInt 13
+18
+
+> evalExpr . Not $ LitBool True
+False\end{lstlisting}\end{repl}

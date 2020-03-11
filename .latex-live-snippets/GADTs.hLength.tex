@@ -1,0 +1,5 @@
+\begin{code}
+hLength :: HList ts -> Int
+hLength HNil      = 0
+hLength (_ :# ts) = 1 + hLength ts
+\end{code}

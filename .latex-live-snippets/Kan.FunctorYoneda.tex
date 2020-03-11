@@ -1,0 +1,4 @@
+\begin{code}
+instance Functor (Yoneda f) where
+  fmap f (Yoneda y) = Yoneda (\k -> y (k . f))
+\end{code}

@@ -1,0 +1,9 @@
+\begin{code}
+makePropertyObj
+    :: forall name
+     . (KnownSymbol name)
+    => Value -> Value
+makePropertyObj v = object
+  [ pack (symbolVal $ Proxy @name) .= v
+  ]
+\end{code}

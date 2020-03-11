@@ -1,0 +1,4 @@
+\begin{code}
+type All (c :: k -> Constraint) (ts :: [k]) =
+  Collapse =<< MapList (Pure1 c) ts
+\end{code}

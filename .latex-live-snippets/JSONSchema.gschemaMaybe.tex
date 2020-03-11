@@ -1,0 +1,12 @@
+\begin{code}
+instance {-# OVERLAPPING #-}
+  ( KnownSymbol nm
+  , KnownSymbol (ToJSONType a)
+  )
+    => GSchema (M1 S ('MetaSel ('Just nm) _1 _2 _3)
+                     (K1 _4 (Maybe a))) where
+  gschema = pure
+          . makePropertyObj @nm
+          $ makeTypeObj @a
+  {-# INLINE gschema #-}
+\end{code}

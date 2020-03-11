@@ -1,0 +1,4 @@
+\begin{code}
+typeName :: forall a. Typeable a => String !\annotate{1}!
+typeName = show . typeRep $ Proxy @a  !\annotate{2}!
+\end{code}

@@ -1,0 +1,15 @@
+\begin{repl}\begin{lstlisting}
+> :t eq
+eq :: MyEq a => a -> a -> Bool
+
+> eq F0 F0
+True
+
+> eq (F1 "foo") (F1 "foo")
+True
+
+> eq F0 (F1 "hello")
+False
+
+> eq (F1 "foo") (F1 "bar")
+False\end{lstlisting}\end{repl}
