@@ -22,7 +22,7 @@ $(1)-$(2).pdf: $(1)-%.pdf: share/%.tex share/common.tex share/frontmatter.tex sh
 	mv $$*.pdf $(1)-$(2).pdf
 endef
 
-$(foreach lang,$(langs),$(call QUICK_RULE,$(lang)))
+$(foreach lang,$(langs),$(eval $(call QUICK_RULE,$(lang))))
 $(foreach lang,$(langs),$(foreach target,$(targets),$(eval $(call TARGET_RULE,$(lang),$(target)))))
 
 snippets:
