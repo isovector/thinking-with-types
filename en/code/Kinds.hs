@@ -21,6 +21,7 @@ or :: Bool -> Bool -> Bool
 or True  _ = True
 or False y = y
 
+-- # TFOr
 type family Or (x :: Bool) (y :: Bool) :: Bool where
   Or 'True  y = 'True
   Or 'False y = y
@@ -37,6 +38,7 @@ map :: (a -> b) -> [a] -> [b]
 map _ []       = []
 map f (a : as) = f a : map f as
 
+-- # TFMap
 type family Map (x :: a -> b) (i :: [a]) :: [b] where
   Map f '[]       = '[]
   Map f (x ': xs) = f x ': Map f xs
