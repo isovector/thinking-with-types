@@ -111,10 +111,10 @@ A first-class type family can be used to find \ty{t} in \ty{ts}:
 
 \ty{FindElem} works by looking through \ty{ts} and comparing the first element
 of each tuple with \ty{key}. The result of \ty{FindIndex} is a \kind{Maybe k},
-which we then, at \ann{1}, call the type-level equivalent of \hs{fromJust} on.
+which we then, at \ann{1}, call the type-level equivalent of \hs{fromMaybe} on.
 If \ty{FindIndex} returned \ty{'Nothing}, \ty{FindElem} returns \ty{Stuck}. A
 stuck type family is one which can't reduce any further. We can exploit this
-property and ask whether \ty{FindElement} evaluated fully by asking whether it's
+property and ask whether \ty{FindElem} evaluated fully by checking whether it's
 a \ty{KnownNat}.
 
 \snip{OpenSum}{Member}
