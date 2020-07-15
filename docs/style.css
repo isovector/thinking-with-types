@@ -56,6 +56,7 @@ button#buy {
   border-radius: 0;
   padding: 0.5em 0.8em;
   font-size: 16pt;
+  cursor: pointer;
 }
 
 body {
