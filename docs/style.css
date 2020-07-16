@@ -57,6 +57,17 @@ button#buy {
   padding: 0.5em 0.8em;
   font-size: 16pt;
   cursor: pointer;
+  transform-style: preserve3d;
+  transition: 0.15s ease-in-out;
+  box-shadow: 0 1px 10px rgba(0, 0, 0, 0.3);
+}
+
+button#buy:hover {
+  transform: translateY(-2px);
+}
+
+button#buy:active {
+  transform: translateY(0);
 }
 
 body {
