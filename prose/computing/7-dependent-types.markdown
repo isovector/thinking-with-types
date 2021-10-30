@@ -74,6 +74,7 @@ isomorphism. Instead, we introduce an existential wrapper `SomeSBool` and
 eliminator.
 
 [code/AdHocSingletons.hs:SomeSBool](Snip)
+
 [code/AdHocSingletons.hs:withSomeSBool](Snip)
 
 `toSBool`{.haskell} can now be written in terms of `SomeSBool`.
@@ -122,6 +123,7 @@ effects, but when run in `LoggingMonad 'True` it will print `"hello
 world"`{.haskell}.
 
 [code/AdHocSingletons.hs:program](Snip)
+
 [code/AdHocSingletons.hs:badMain](Snip)
 
 This function reads a `Bool` from stdin, and lifts it into a singleton at
@@ -190,6 +192,7 @@ the equivalents of `SBool`.
 `SomeSing` and its eliminator carry over as before.
 
 [code/Singletons.hs:SomeSing](Snip)
+
 [code/Singletons.hs:withSomeSing](Snip)
 
 However, it is more ergonomic to package together `toSing`{.haskell} and `fromSing`{.haskell}
@@ -214,6 +217,7 @@ added to `Demote`, allowing GHC to infer `k` from `Demote k`.
 Instances of `Sing` and `SingKind` are trivially provided for `Bool`.
 
 [code/Singletons.hs:SingBool](Snip)
+
 [code/Singletons.hs:SingKindBool](Snip)
 
 This machinery is enough to recover our previous round-trip examples.
@@ -233,6 +237,7 @@ air.
 Instances of `SingI` are predictably uninteresting.
 
 [code/Singletons.hs:SingITrue](Snip)
+
 [code/Singletons.hs:SingIFalse](Snip)
 
 The `sing`{.haskell} function can be used with `-XTypeApplications` in order to
@@ -246,8 +251,11 @@ Singletons can also be provided for more interesting types. For example, if we
 have singletons for `a`, we can build singletons for `Maybe a`.
 
 [code/Singletons.hs:SingMaybe](Snip)
+
 [code/Singletons.hs:SingIJust](Snip)
+
 [code/Singletons.hs:SingINothing](Snip)
+
 [code/Singletons.hs:SingKindMaybe](Snip)
 
 Besides some relatively tricky wrapping of existentials, there is nothing new or
@@ -258,6 +266,7 @@ its data kinds out of the analogous promoted data constructors.
 To get a feel for this transformation, we can also build singletons for lists.
 
 [code/Singletons.hs:SingList](Snip)
+
 [code/Singletons.hs:SingKindList](Snip)
 
 ```exercise
@@ -266,6 +275,7 @@ Provide instances of `SingI` for lists.
 
 ```solution
 [code/Singletons.hs:SingINil](Snip)
+
 [code/Singletons.hs:SingICons](Snip)
 ```
 

@@ -458,6 +458,7 @@ the kind you write after the `::` is the kind of the type *returned*
 by the type family, *not* the kind of the type family itself.
 
 [code/Kinds.hs:Foo](Snip)
+
 [code/Kinds.hs:Bar](Snip)
 
 Take a moment to think about the kinds of `Foo` and `Bar`. While `Foo`

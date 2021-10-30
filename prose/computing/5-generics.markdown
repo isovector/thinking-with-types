@@ -256,12 +256,19 @@ Provide a generic instance for the `Ord` class.
 
 ```solution
 [code/DeriveAnyClass.hs:GOrd](Snip)
+
 [code/DeriveAnyClass.hs:gordU1](Snip)
+
 [code/DeriveAnyClass.hs:gordV1](Snip)
+
 [code/DeriveAnyClass.hs:gordK1](Snip)
+
 [code/DeriveAnyClass.hs:gordTimes](Snip)
+
 [code/DeriveAnyClass.hs:gordPlus](Snip)
+
 [code/DeriveAnyClass.hs:gordM1](Snip)
+
 [code/DeriveAnyClass.hs:genericOrd](Snip)
 ```
 

@@ -17,7 +17,9 @@ number of inhabitants it has, ignoring bottoms. Consider the following simple
 type definitions:
 
 [code/Algebra.hs:Void](Snip)
+
 [code/Algebra.hs:Unit](Snip)
+
 [code/Algebra.hs:Bool](Snip)
 
 `Void` has zero inhabitants, and so it is assigned cardinality 0. The unit
@@ -69,12 +71,14 @@ By the argument above, we should expect `Spin` to be isomorphic to `Bool`.
 Indeed it is:
 
 [code/Algebra.hs:boolToSpin1](Snip)
+
 [code/Algebra.hs:spinToBool1](Snip)
 
 However, note that there is another isomorphism between `Spin` and
 `Bool`:
 
 [code/Algebra.hs:boolToSpin2](Snip)
+
 [code/Algebra.hs:spinToBool2](Snip)
 
 Which of the two isomorphisms should we prefer? Does it matter?
@@ -156,6 +160,7 @@ example, we can prove that $a \times 1 = a$ by showing an isomorphism between
 `(a, ())` and `a`.
 
 [code/Algebra.hs:prodUnitTo](Snip)
+
 [code/Algebra.hs:prodUnitFrom](Snip)
 
 Here, we can think of the unit type as being a monoidal identity for product
@@ -167,6 +172,7 @@ of this, the trivial statement $a+0 = a$ can be witnessed as an isomorphism
 between `Either a Void` and `a`.
 
 [code/Algebra.hs:sumUnitTo](Snip)
+
 [code/Algebra.hs:sumUnitFrom](Snip)
 
 The function `absurd`{.haskell} at [1](Ann) has the type `Void -> a`. It's a sort of
@@ -339,6 +345,7 @@ compared with other programming languages.
 
 ```solution
 [code/Algebra.hs:curry](Snip)
+
 [code/Algebra.hs:uncurry](Snip)
 
   Both of these functions already exist in `Prelude`.
@@ -351,6 +358,7 @@ Give a proof of the exponent law that $a^b \times a^c = a^{b+c}$.
 
 ```solution
 [code/Algebra.hs:productRule1To](Snip)
+
 [code/Algebra.hs:productRule1From](Snip)
 
   Notice that `productRule1To`{.haskell} is the familiar `either`{.haskell} function from `Prelude`.
@@ -363,6 +371,7 @@ Prove $(a\times b)^c = a^c \times b^c$.
 
 ```solution
 [code/Algebra.hs:productRule2To](Snip)
+
 [code/Algebra.hs:productRule2From](Snip)
 ```
 

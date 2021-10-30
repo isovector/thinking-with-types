@@ -48,6 +48,7 @@ that the usual error message is not particularly useful:
 However, by bringing the following instance into scope:
 
 [code/Misc.hs:pragmas](Snip)
+
 [code/Misc.hs:showFunc](Snip)
 
 We now get a more helpful solution to what might be wrong:
@@ -111,7 +112,9 @@ Add helpful type errors to `OpenProduct`'s `update`{.haskell} and
 
 ```solution
 [code/OpenProduct.hs:FriendlyFindElem](Snip)
+
 !snipRename{OpenProduct}{friendlyUpdate}{update}
+
 !snipRename{OpenProduct}{friendlyDelete}{delete}
 
 These functions could be cleaned up a little by moving the `FriendlyFindElem`
@@ -127,6 +130,7 @@ pretty prints a list. Use it to improve the error message from
 
 ```solution
 [code/OpenProduct.hs:ShowList](Snip)
+
 [code/OpenProduct.hs:FriendlyFindElem2](Snip)
 ```
 

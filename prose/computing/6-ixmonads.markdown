@@ -60,6 +60,7 @@ first two can be implemented in terms of their `Prelude` definitions, since
 their types don't conflict.
 
 [code/IxMonad.hs:IxFunctor](Snip)
+
 [code/IxMonad.hs:IxPointed](Snip)
 
 Applicatives, however, require some special treatment. We notice that since all

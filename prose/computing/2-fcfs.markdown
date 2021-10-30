@@ -50,6 +50,7 @@ Defunctionalize `listToMaybe :: [a] -> Maybe a`{.haskell}.
 
 ```solution
 [code/Defunc.hs:ListToMaybe](Snip)
+
 [code/Defunc.hs:EvalListToMaybe](Snip)
 ```
 
@@ -74,7 +75,7 @@ eval (MapList Fst [("hello", 1), ("world", 2)])
 ```
 
 
-### Type-Level Defunctionalization 
+### Type-Level Defunctionalization
 
 
 
@@ -163,7 +164,7 @@ Behold! A type-level `MapList` is now *reusable*!
 ```
 
 ```exercise
-Defunctionalize `foldr ::`{.haskell} 
+Defunctionalize `foldr ::`{.haskell}
  `(a -> b -> b) -> b -> [a] -> b`.
 ```
 
@@ -178,6 +179,7 @@ Defunctionalize `foldr ::`{.haskell}
 Interestingly, first-class families form a monad at the type-level.
 
 [code/FCTF.hs:Pure](Snip)
+
 [code/FCTF.hs:bind](Snip)
 
 As such, we can compose them in terms of their Kleisli composition.
@@ -206,7 +208,9 @@ programming. For example, we can determine if any two types are the
 same---remember, there is no `Eq` at the type-level.
 
 [code/FCTF.hs:TyEq](Snip)
+
 [code/FCTF.hs:EvalTyEq](Snip)
+
 [code/FCTF.hs:TyEqImpl](Snip)
 
 We also have the ability to collapse lists of `Constraint`s.
@@ -216,6 +220,7 @@ We also have the ability to collapse lists of `Constraint`s.
 Which leads us very naturally to:
 
 [code/FCTF.hs:All](Snip)
+
 [code/FCTF.hs:Pure1](Snip)
 
 And we find ourselves with a much nicer implementation of `All` than we wrote

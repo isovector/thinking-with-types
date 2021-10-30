@@ -348,6 +348,7 @@ This is a particularly involved exercise. We begin by writing a FCF to compute
   this:
 
 [code/OpenProduct.hs:Placeholder1Of3](Snip)
+
 [code/OpenProduct.hs:EvalPlaceholder](Snip)
 
   The actual implementation of `upsert`{.haskell} requires knowing whether we should
@@ -360,7 +361,9 @@ This is a particularly involved exercise. We begin by writing a FCF to compute
   Int`:
 
 [code/OpenProduct.hs:FindUpsertElem](Snip)
+
 [code/OpenProduct.hs:FindUpsertNothing](Snip)
+
 [code/OpenProduct.hs:FindUpsertJust](Snip)
 
   Finally, we're capable of writing `upsert`{.haskell}:

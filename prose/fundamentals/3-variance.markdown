@@ -5,9 +5,13 @@ Consider the following type declarations. Which of them have viable `Functor`
 instances?
 
 [code/PosNeg.hs:T1](Snip)
+
 [code/PosNeg.hs:T2](Snip)
+
 [code/PosNeg.hs:T3](Snip)
+
 [code/PosNeg.hs:T4](Snip)
+
 [code/PosNeg.hs:T5](Snip)
 
 ```exercise
@@ -18,6 +22,7 @@ Which of these types are `Functor`s? Give instances for the ones that are.
   Only `T1` and `T5` are `Functor`s.
 
 [code/PosNeg.hs:FunctorT1](Snip)
+
 [code/PosNeg.hs:FunctorT5](Snip)
 ```
 
