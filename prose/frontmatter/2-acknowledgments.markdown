@@ -1,5 +1,4 @@
-
-## Acknowledgments{.}
+## Acknowledgments {-}
 
 This book couldn't have happened without the support of many, many fantastic
 people. I'd like to thank everyone for their support, their patronage and their

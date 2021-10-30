@@ -1,5 +1,4 @@
-
-## Introduction{.}
+## Introduction {-}
 
 Type-level programming is an uncommon calling. While most programmers are
 concerned with getting more of their code to compile, we type-level programmers

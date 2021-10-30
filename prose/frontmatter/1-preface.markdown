@@ -1,5 +1,4 @@
-
-## Preface{.}
+## Preface {-}
 
 Thinking with Types started, as so many of my projects do, accidentally. I was
 unemployed, bored, and starting to get tired of answering the same questions
