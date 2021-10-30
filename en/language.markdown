@@ -1,3 +1,5 @@
+\title{Thinking with Types}
+\author{Sandy Maguire}
 
 \renewcommand{\appendixname}{Appendix}
 \renewcommand{\bibname}{Bibliography}
@@ -8,10 +10,4 @@
 \renewcommand{\listtablename}{List of Tables}
 \renewcommand{\partname}{Part}
 \renewcommand{\seename}{see}
-
-
-
-
-
-
 

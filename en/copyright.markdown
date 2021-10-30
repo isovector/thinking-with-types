@@ -1,3 +1,5 @@
+Copyright &copy; 2021, Sandy Maguire
+
 All rights reserved.
 
-First Edition
+Second Edition
