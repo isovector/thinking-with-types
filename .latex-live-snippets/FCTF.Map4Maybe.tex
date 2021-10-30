@@ -1,4 +1,0 @@
-\begin{code}
-type instance Eval (Map f 'Nothing)  = 'Nothing
-type instance Eval (Map f ('Just a)) = 'Just (Eval (f a))
-\end{code}

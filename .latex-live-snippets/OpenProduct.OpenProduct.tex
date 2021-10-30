@@ -1,5 +1,0 @@
-\begin{code}
-data OpenProduct (f  :: k -> Type)
-                 (ts :: [(Symbol, k)]) where  !\annotate{1}!
-  OpenProduct :: V.Vector (Any f) -> OpenProduct f ts
-\end{code}

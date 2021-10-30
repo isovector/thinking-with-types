@@ -1,4 +1,0 @@
-\begin{code}
-type UniqueKey (key :: k) (ts :: [(k, t)])
-  = Null =<< Filter (TyEq key <=< Fst) ts
-\end{code}

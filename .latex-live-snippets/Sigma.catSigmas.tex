@@ -1,8 +1,0 @@
-\begin{code}
-catSigmas
-    :: forall k (a :: k) f
-     . (SingI a, SDecide k)
-    => [Sigma f]
-    -> [f a]
-catSigmas = mapMaybe fromSigma
-\end{code}

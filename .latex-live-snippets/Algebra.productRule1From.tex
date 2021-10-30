@@ -1,6 +1,0 @@
-\begin{code}
-productRule1From
-    :: (Either b c -> a)
-    -> (b -> a, c -> a)
-productRule1From f = (f . Left, f . Right)
-\end{code}

@@ -1,7 +1,0 @@
-\begin{code}
-elimHasShow
-    :: (forall a. Show a => a -> r)
-    -> HasShow
-    -> r
-elimHasShow f (HasShow a) = f a
-\end{code}

@@ -1,8 +1,0 @@
-\begin{code}
-match
-    :: forall f ts b
-     . (forall t. f t -> b)  !\annotate{1}!
-    -> OpenSum f ts
-    -> b
-match fn (UnsafeOpenSum _ t) = fn t
-\end{code}

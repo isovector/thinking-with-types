@@ -1,4 +1,0 @@
-\begin{code}
-type instance Eval (Map f ('Left x))  = 'Left x
-type instance Eval (Map f ('Right a)) = 'Right (Eval (f a))
-\end{code}

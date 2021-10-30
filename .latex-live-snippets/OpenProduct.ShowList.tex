@@ -1,7 +1,0 @@
-\begin{code}
-type family ShowList (ts :: [k]) where
-  ShowList '[] = Text ""
-  ShowList (a ': '[]) = ShowType a
-  ShowList (a ': as)  =
-    ShowType a ':<>: Text ", " ':<>: ShowList as
-\end{code}

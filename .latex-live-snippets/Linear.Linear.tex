@@ -1,7 +1,0 @@
-\begin{code}
-newtype Linear s (i :: LinearState)
-                 (j :: LinearState) a = Linear
-  { unsafeRunLinear :: Ix IO i j a
-  }
-  deriving (IxFunctor, IxPointed, IxApplicative, IxMonad)
-\end{code}

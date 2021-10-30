@@ -1,4 +1,0 @@
-\begin{code}
-genericOrd :: (Generic a, GOrd (Rep a)) => a -> a -> Ordering
-genericOrd a b = gord (from a) (from b)
-\end{code}

@@ -1,6 +1,0 @@
-\begin{code}
-instance Eval dfb dft => Eval (MapList dfb a) [dft] where
-  eval (MapList f []) = []
-  eval (MapList f (a : as)) =
-    eval (f a) : eval (MapList f as)  !\annotate{1}!
-\end{code}

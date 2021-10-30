@@ -1,9 +1,0 @@
-\begin{code}
-instance Monad m => IxMonad (Ix m) where
-  ibind
-      :: forall i j k a b
-       . (a -> Ix m j k b)
-      -> Ix m i j a
-      -> Ix m i k b
-  ibind = coerce $ (=<<) @m @a @b
-\end{code}

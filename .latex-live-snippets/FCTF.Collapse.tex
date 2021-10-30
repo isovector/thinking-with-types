@@ -1,7 +1,0 @@
-\begin{code}
-data Collapse :: [Constraint] -> Exp Constraint
-type instance Eval (Collapse '[]) =
-  (() :: Constraint)
-type instance Eval (Collapse (a ': as)) =
-  (a, Eval (Collapse as))
-\end{code}

@@ -1,5 +1,0 @@
-\begin{code}
-instance Applicative (ST s) where
-  pure = ST
-  ST f <*> ST a = seq f . seq a . ST $ f a
-\end{code}

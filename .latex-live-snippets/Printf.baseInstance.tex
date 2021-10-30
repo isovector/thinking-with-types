@@ -1,5 +1,0 @@
-\begin{code}
-instance KnownSymbol text => HasPrintf (text :: Symbol) where
-  type Printf text = String
-  format s _ = s <> symbolVal (Proxy @text)
-\end{code}

@@ -1,9 +1,0 @@
-\begin{code}
-productRule1To
-    :: (b -> a)
-    -> (c -> a)
-    -> Either b c
-    -> a
-productRule1To f _ (Left b)  = f b
-productRule1To _ g (Right c) = g c
-\end{code}

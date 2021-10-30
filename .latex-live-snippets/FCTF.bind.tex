@@ -1,9 +1,0 @@
-\begin{code}
-data (=<<)
-    :: (a -> Exp b)
-    -> Exp a
-    -> Exp b
-type instance Eval (k =<< e) =
-  Eval (k (Eval e))
-infixr 0 =<<
-\end{code}

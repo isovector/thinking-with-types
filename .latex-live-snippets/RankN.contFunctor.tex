@@ -1,5 +1,0 @@
-\begin{code}
-instance Functor Cont where
-  fmap f (Cont c) = Cont $ \c' ->
-    c (c' . f)
-\end{code}

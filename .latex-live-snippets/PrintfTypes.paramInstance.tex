@@ -1,5 +1,0 @@
-\begin{code}
-instance HasPrintf a
-    => HasPrintf ((param :: Type) :<< a) where
-  type Printf (param :<< a) = param -> Printf a
-\end{code}

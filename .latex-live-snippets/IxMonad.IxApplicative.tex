@@ -1,9 +1,0 @@
-\begin{code}
-instance Applicative m => IxApplicative (Ix m) where
-  iap
-      :: forall i j k a b  !\annotate{1}!
-       . Ix m i j (a -> b)
-      -> Ix m j k a
-      -> Ix m i k b
-  iap = coerce $ (<*>) @m @a @b  !\annotate{2}!
-\end{code}

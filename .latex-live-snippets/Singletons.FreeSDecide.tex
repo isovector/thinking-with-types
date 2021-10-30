@@ -1,8 +1,0 @@
-\begin{code}
-instance (Eq (Demote k), SingKind k)
-      => SDecide k where
-  a %!\tyeq! b =
-    if fromSing a == fromSing b
-       then Proved $ unsafeCoerce Refl
-       else Disproved $ const undefined
-\end{code}

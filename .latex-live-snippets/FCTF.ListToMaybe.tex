@@ -1,5 +1,0 @@
-\begin{code}
-data ListToMaybe :: [a] -> Exp (Maybe a)
-type instance Eval (ListToMaybe '[])       = 'Nothing
-type instance Eval (ListToMaybe (a ': _1)) = 'Just a
-\end{code}

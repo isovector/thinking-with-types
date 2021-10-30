@@ -1,4 +1,0 @@
-\begin{code}
-instance Monad (ST s) where
-  ST a >>= f = seq a $ f a
-\end{code}

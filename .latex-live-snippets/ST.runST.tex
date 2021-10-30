@@ -1,6 +1,0 @@
-\begin{code}
-runST
-    :: (forall s. ST s a)  !\annotate{1}!
-    -> a
-runST = unsafeRunST
-\end{code}

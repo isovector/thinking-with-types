@@ -1,7 +1,0 @@
-\begin{code}
-data OpenSum (f :: k -> Type) (ts :: [k]) where !\annotate{1}!
-  UnsafeOpenSum  !\annotate{2}!
-      :: Int
-      -> f t !\annotate{3}!
-      -> OpenSum f ts !\annotate{4}!
-\end{code}

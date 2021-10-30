@@ -1,5 +1,0 @@
-\begin{code}
-data FromMaybe :: a -> Maybe a -> Exp a
-type instance Eval (FromMaybe _1 ('Just a)) = a
-type instance Eval (FromMaybe a 'Nothing)   = a
-\end{code}

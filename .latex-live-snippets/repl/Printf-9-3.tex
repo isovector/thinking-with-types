@@ -1,9 +1,0 @@
-\begin{repl}\begin{lstlisting}
-> printf (Proxy @"test")
-"test"
-
-> printf (Proxy @(Int :<< "+" :<< Int :<< "=3")) 1 2
-"1+2=3"
-
-> printf (Proxy @(String :<< " world!")) "hello"
-"\"hello\" world!"\end{lstlisting}\end{repl}

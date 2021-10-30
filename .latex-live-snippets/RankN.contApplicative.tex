@@ -1,7 +1,0 @@
-\begin{code}
-instance Applicative Cont where
-  pure a = Cont $ \c -> c a
-  Cont f <*> Cont a = Cont $ \br ->
-    f $ \ab ->
-      a $ br . ab
-\end{code}

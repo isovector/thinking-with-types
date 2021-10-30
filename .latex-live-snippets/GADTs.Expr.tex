@@ -1,8 +1,0 @@
-\begin{code}
-data Expr a where  !\annotate{1}!
-  LitInt  :: Int -> Expr Int  !\annotate{2}!
-  LitBool :: Bool -> Expr Bool
-  Add     :: Expr Int -> Expr Int -> Expr Int
-  Not     :: Expr Bool -> Expr Bool
-  If      :: Expr Bool -> Expr a -> Expr a -> Expr a  !\annotate{3}!
-\end{code}

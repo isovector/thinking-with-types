@@ -1,8 +1,0 @@
-\begin{repl}\begin{lstlisting}
-> :kind! Eval (MapList (FromMaybe 0) ['Nothing, ('Just 1)])
-Eval (MapList (FromMaybe 0) ['Nothing, ('Just 1)]) :: [Nat]
-= '[0, 1]
-
-> :kind! Eval (MapList Snd ['(5, 7), '(13, 13)])
-Eval (MapList Snd ['(5, 7), '(13, 13)]) :: [Nat]
-= '[7, 13]\end{lstlisting}\end{repl}

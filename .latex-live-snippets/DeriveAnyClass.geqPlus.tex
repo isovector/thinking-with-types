@@ -1,6 +1,0 @@
-\begin{code}
-instance (GEq a, GEq b) => GEq (a :+: b) where
-  geq (L1 a1) (L1 a2) = geq a1 a2
-  geq (R1 b1) (R1 b2) = geq b1 b2
-  geq _ _             = False
-\end{code}

@@ -1,8 +1,0 @@
-\begin{code}
-releaseString :: String
-releaseString =
-  withVersionNumber $ \version ->
-    withTimestamp $ \date ->
-      withOS $ \os ->
-        os ++ "-" ++ show version ++ "-" ++ show date
-\end{code}

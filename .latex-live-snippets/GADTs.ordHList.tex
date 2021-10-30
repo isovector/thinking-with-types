@@ -1,6 +1,0 @@
-\begin{code}
-instance (All Eq ts, All Ord ts) => Ord (HList ts) where
-  compare HNil HNil = EQ
-  compare (a :# as) (b :# bs) =
-    compare a b <> compare as bs
-\end{code}

@@ -1,8 +1,0 @@
-\begin{code}
-instance SingKind Bool where
-  type Demote Bool = Bool
-  toSing True  = SomeSing STrue
-  toSing False = SomeSing SFalse
-  fromSing STrue  = True
-  fromSing SFalse = False
-\end{code}

@@ -1,6 +1,0 @@
-\begin{code}
-runCont :: (forall r. (a -> r) -> r) -> a
-runCont f =
-  let callback = id
-   in f callback
-\end{code}

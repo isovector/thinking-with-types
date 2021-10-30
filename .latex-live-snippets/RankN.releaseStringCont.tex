@@ -1,8 +1,0 @@
-\begin{code}
-releaseStringCont :: String
-releaseStringCont = runCont $ unCont $ do
-  version <- Cont withVersionNumber
-  date    <- Cont withTimestamp
-  os      <- Cont withOS
-  pure $ os ++ "-" ++ show version ++ "-" ++ show date
-\end{code}

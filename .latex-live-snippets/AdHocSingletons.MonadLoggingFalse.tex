@@ -1,6 +1,0 @@
-\begin{code}
-instance MonadLogging 'False where
-  type LoggingMonad 'False = IO
-  logMsg _ = pure ()
-  runLogging = id
-\end{code}

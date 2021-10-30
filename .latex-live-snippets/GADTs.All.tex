@@ -1,6 +1,0 @@
-\begin{code}
-type family All (c :: Type -> Constraint)
-                (ts :: [Type]) :: Constraint where
-  All c '[]       = ()  !\annotate{1}!
-  All c (t ': ts) = (c t, All c ts)  !\annotate{2}!
-\end{code}

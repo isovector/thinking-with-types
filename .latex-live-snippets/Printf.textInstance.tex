@@ -1,7 +1,0 @@
-\begin{code}
-instance (HasPrintf a, KnownSymbol text)
-    => HasPrintf ((text :: Symbol) :<< a) where
-  type Printf (text :<< a) = Printf a
-  format s _ = format (s <> symbolVal (Proxy @text))
-                      (Proxy @a)
-\end{code}

@@ -1,9 +1,0 @@
-\begin{code}
-findElem
-    :: forall key ts
-     . KnownNat (FindElem key ts)
-    => Int
-findElem = fromIntegral
-         . natVal
-         $ Proxy @(FindElem key ts)
-\end{code}

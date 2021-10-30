@@ -1,7 +1,0 @@
-\begin{code}
-withSigma
-    :: (forall (a :: k). Sing a -> f a -> r)
-    -> Sigma f
-    -> r
-withSigma c (Sigma s f) = c s f
-\end{code}

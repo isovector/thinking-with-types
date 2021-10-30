@@ -1,8 +1,0 @@
-\begin{code}
-instance SDecide a => SDecide (Maybe a) where
-  SJust a %!\tyeq! SJust b =
-    case a %!\tyeq! b of
-      Proved Refl -> Proved Refl
-      Disproved _ -> Disproved $ const undefined
-  SNothing %!\tyeq! SNothing = Proved Refl
-\end{code}

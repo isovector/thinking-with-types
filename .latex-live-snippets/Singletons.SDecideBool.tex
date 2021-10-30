@@ -1,6 +1,0 @@
-\begin{code}
-instance SDecide Bool where
-  STrue  %!\tyeq! STrue  = Proved Refl
-  SFalse %!\tyeq! SFalse = Proved Refl
-  _ %!\tyeq! _ = Disproved $ const undefined
-\end{code}

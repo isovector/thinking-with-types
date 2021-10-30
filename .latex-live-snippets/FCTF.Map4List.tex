@@ -1,4 +1,0 @@
-\begin{code}
-type instance Eval (Map f '[]) = '[]
-type instance Eval (Map f (a ': as)) = Eval (f a) ': Eval (Map f as)
-\end{code}
