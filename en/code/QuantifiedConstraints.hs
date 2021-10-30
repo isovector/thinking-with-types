@@ -1,16 +1,25 @@
 {-# LANGUAGE AllowAmbiguousTypes        #-}
+{-# LANGUAGE ConstraintKinds            #-}
 {-# LANGUAGE DeriveFunctor              #-}
 {-# LANGUAGE DerivingStrategies         #-}
 {-# LANGUAGE DerivingVia                #-}
+{-# LANGUAGE FlexibleContexts           #-}
+{-# LANGUAGE FlexibleInstances          #-}
 {-# LANGUAGE FlexibleInstances          #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE MultiParamTypeClasses      #-}
 {-# LANGUAGE QuantifiedConstraints      #-}
+{-# LANGUAGE RankNTypes                 #-}
+{-# LANGUAGE ScopedTypeVariables        #-}
 {-# LANGUAGE StandaloneDeriving         #-}
 {-# LANGUAGE TypeFamilies               #-}
 {-# LANGUAGE UndecidableInstances       #-}
 
 module QuantifiedConstraints where
 
+import Data.Coerce
+import Control.Monad
+import Data.Maybe
 import Data.Functor.Compose
 import Data.Functor.Identity
 import Data.Bifoldable
@@ -19,80 +28,61 @@ import Control.Applicative
 import Data.Bifunctor
 import Data.Functor.Contravariant
 
-class Profunctor p where
-  lmap :: (a -> c) -> p c b -> p a b
-  rmap :: (b -> c) -> p a b -> p a c
+class (forall m. Monad m => Monad (t m)) => MonadTrans t where
+  lift :: Monad m => m a -> t m a
 
-instance Profunctor (->) where
-  lmap = undefined
-  rmap = undefined
+newtype MaybeT m a = MaybeT
+  { runMaybeT :: m (Maybe a)
+  } deriving Functor
 
+instance Applicative m => Applicative (MaybeT m) where
+  pure = MaybeT . pure . pure
+  liftA2 f (MaybeT a) (MaybeT b) = coerce $ liftA2 (liftA2 f) a b
 
-newtype AppNum f a = AppNum (f a)
-  deriving stock Functor
-  deriving newtype Applicative
-
-
-instance (Applicative f, Num a)
-    => Num (AppNum f a) where
-  (+) = liftA2 (+)
-  (-) = liftA2 (-)
-  (*) = liftA2 (*)
-  abs         = fmap abs
-  signum      = fmap signum
-  fromInteger = AppNum . pure . fromInteger
+instance Monad m => Monad (MaybeT m) where
+  MaybeT m >>= f = MaybeT $ maybe (pure Nothing) (runMaybeT . f) =<< m
 
 
-newtype Validation e a = Validation
-  { toEither :: Either e a
+
+instance MonadTrans MaybeT where
+  lift = MaybeT . fmap pure
+
+getHead :: MonadTrans t => [a] -> t Maybe a
+getHead as = do
+  x <- lift $ listToMaybe as
+  pure x
+
+
+type family HKD f a where
+  HKD Identity a = a
+  HKD f a = f a
+
+
+data Foo f x = Foo
+  { zoo :: HKD f Int
+  , zum :: HKD f Bool
+  , zap :: HKD f x
   }
-  deriving stock Functor
-  deriving newtype Applicative
-  deriving Num via AppNum (Either e) a
-  -- deriving Applicative via _
+
+class    (Eq (HKD f a)) => EqQ f a
+instance (Eq (HKD f a)) => EqQ f a
 
 
-data Pair f g a = Pair (f a) (g a)
-  deriving stock Functor
-  deriving Show
-
-instance (Applicative f, Applicative g) => Applicative (Pair f g) where
-  pure a = Pair (pure a) (pure a)
-  Pair fa fb <*> Pair a b = Pair (fa <*> a) (fb <*> b)
-
-newtype Triple a = Triple
-  { getTriple :: Pair Identity (Pair Identity Identity) a
-  }
-  deriving stock (Functor, Show)
-  deriving newtype Applicative
+deriving instance (Eq (HKD f Int), Eq (HKD f Bool), Eq (HKD f x)) => Eq (Foo f x)
 
 
-newtype Sudoku a = Sudoku
-  { runSudoku :: Triple (Triple a)
-  }
-  deriving stock Functor
-  deriving Applicative via Compose Triple Triple
+-- instance (Eq x, forall a. Eq a => EqQ f a) => Eq (Foo f x) where
+--   Foo a b c == Foo x y z =
+--     with @(EqQ f Int)  $
+--     with @(EqQ f Bool) $
+--     with @(EqQ f x)    $
+--       a == x && b == y && c == z
+
+yo :: Eq a => Foo Identity a -> Foo Identity a -> Bool
+yo = (==)
+
+with :: (c => t) -> (c => t)
+with = id
 
 
-
-newtype Flip p a b = Flip { runFlip :: p b a }
-
-instance Profunctor p => Contravariant (Flip p a) where
-  contramap f = Flip . lmap f . runFlip
-
-instance Bifunctor p => Bifunctor (Flip p) where
-  bimap f g = Flip . bimap g f . runFlip
-
-instance Bifunctor p => Functor (Flip p a) where
-  fmap f = Flip . first f . runFlip
-
-
-newtype Zoom a = Zoom (a -> a)
-  deriving (Semigroup, Monoid) via Endo a
-
-newtype Foo a = Foo (Either a Int)
-  deriving Functor via Flip Either Int
-
-newtype Zoo a = Zoo (a -> Int)
-  deriving Contravariant via Flip (->) Int
 
