@@ -1,0 +1,1 @@
+CodeBlock ("",["haskell","ghci"],[]) "> withSomeSBool (toSBool True)  fromSBool\nTrue\n\n\n> withSomeSBool (toSBool False) fromSBool\nFalse\n\n\n"

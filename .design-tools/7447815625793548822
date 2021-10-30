@@ -1,0 +1,1 @@
+CodeBlock ("",["haskell","ghci"],[]) "> :kind! Eval (Map Snd ('Just '(1, 2)))\nEval (Map Snd ('Just '(1, 2))) :: Maybe Nat\n= 'Just 2\n\n\n> :kind! Eval (Map Snd '[ '(1, 2) ])\nEval (Map Snd '[ '(1, 2) ]) :: [Nat]\n= '[2]\n\n\n> :kind! Eval (Map Snd (Left 'False))\nEval (Map Snd (Left 'False)) :: Either Bool b\n= 'Left 'False\n\n\n"

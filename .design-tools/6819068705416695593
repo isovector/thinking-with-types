@@ -1,0 +1,1 @@
+CodeBlock ("",["haskell","ghci"],[]) "> genericEq True False\nFalse\n\n\n> genericEq \"ghc.generics\" \"ghc.generics\"\nTrue\n\n\n"

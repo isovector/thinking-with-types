@@ -1,57 +1,69 @@
-targets = book sample print
-langs = en fr
+RULES := pdf print
+CONTENT := frontmatter fundamentals restrictions computing appendices new
+IMAGES := $(addprefix build/,$(wildcard images/*.png))
+DESIGN_IMAGES := $(addprefix build/,$(wildcard .design-tools/*.png))
 
-define QUICK_RULE =
-# argument 1 is the language
+PANDOC_OPTS := --highlight-style theme/highlighting.theme \
+               --syntax-definition=theme/haskell.xml \
+               --filter design-tools-exe \
+               -F pandoc-crossref \
+               -F pandoc-citeproc \
+               --from markdown+fancy_lists \
+               -s \
+               --top-level-division=part
 
-$(1)-quick:
-	xelatex -shell-escape '\newcommand{\lang}{$(1)}\input{share/book.tex}' || echo ""
-endef
+               # --bibliography=prose/bib.bib \
 
-define TARGET_RULE =
-# argument 1 is the language
-# argument 2 is the target
+PANDOC_PDF_OPTS := --template format/tex/template.tex \
+                   -t latex
 
-$(1)-$(2).pdf: $(1)-%.pdf: share/%.tex share/common.tex share/frontmatter.tex share/preamble.tex $$(wildcard $(1)/*.tex) $$(wildcard $(1)/**/*.tex)
-	xelatex -shell-escape '\newcommand{\lang}{$(1)}\input{share/$$*.tex}' || echo ""
-	makeglossaries share/$$* || echo ""
-	xelatex -shell-escape '\newcommand{\lang}{$(1)}\input{share/$$*.tex}' || echo ""
-	makeglossaries share/$$* || echo ""
-	xelatex -shell-escape '\newcommand{\lang}{$(1)}\input{share/$$*.tex}' || echo ""
-	xelatex -shell-escape '\newcommand{\lang}{$(1)}\input{share/$$*.tex}' || echo ""
-	mv $$*.pdf $(1)-$(2).pdf
-endef
+$(RULES): %: build/%.pdf
+sample: build/sample.pdf
+epub: build/epub.epub
+all: $(RULES) sample epub
+lp: epub pdf sample
 
-$(foreach lang,$(langs),$(eval $(call QUICK_RULE,$(lang))))
-$(foreach lang,$(langs),$(foreach target,$(targets),$(eval $(call TARGET_RULE,$(lang),$(target)))))
+build/images:
+	mkdir build/images
 
-snippets:
-	mkdir -p .latex-live-snippets/repl
-	xelatex -shell-escape '\newcommand{\lang}{en}\newcommand{\updatesnippets}{}\input{share/book.tex}'
+build/.design-tools: $(prose)
+	mkdir build/.design-tools || echo ""
+	# pandoc $(PANDOC_OPTS) $(PANDOC_PDF_OPTS) -o /tmp/blah $(filter %.markdown,$(prose))
+	# cp .design-tools/*.png build/.design-tools
+
+# $(IMAGES): build/images/%.png: images/%.png build/images
+# 	cp $(filter %.png,$^) $@
+
+targets = $(addsuffix .pdf,$(addprefix build/,$(RULES)))
+$(targets): build/%.pdf: build/tex/%.tex
+	make -C build $*.pdf
+
+build/missing-from-sample.pdf:
+	make -C build missing-from-sample.pdf
+
+sources = $(addsuffix .tex,$(addprefix build/tex/,$(RULES)))
+prose = $(addsuffix /*.markdown,$(addprefix prose/,$(CONTENT)))
+$(sources): build/tex/%.tex: prose/metadata.markdown prose/%.markdown $(prose) format/tex/template.tex theme/* format/tex/cover.pdf
+	pandoc $(PANDOC_OPTS) $(PANDOC_PDF_OPTS) -o $@ $(filter %.markdown,$^)
+	# cp .design-tools/*.png build/.design-tools
+	sed -i 's/\CommentTok{{-}{-} ! \([0-9]\)}/annotate{\1}/g' $@
+	sed -i 's/\CommentTok{{-}{-} .via \([^}]\+\)}/reducevia{\1}/g' $@
+	sed -i 's/\(\\KeywordTok{law} \\StringTok\){"\([^"]\+\)"}/\1{\\lawname{\2}}/g' $@
+
+build/epub.epub: build/%.epub: prose/metadata.markdown prose/%.markdown $(prose) theme/* prose/bib.bib $(IMAGES) format/epub.css
+	pandoc $(PANDOC_OPTS) --epub-embed-font=Katibeh.ttf -t epub -o $@ $(filter %.markdown,$^)
+
+.PHONY: clean clean-images very-clean all $(RULES) epub lp sketches
+
+sketches:
+	./scripts/sync-httw.sh
 
 clean:
-	-rm *.aux
-	-rm *.idx
-	-rm *.ilg
-	-rm *.ind
-	-rm *.log
-	-rm *.toc
-	-rm *.gl*
-	# -rm -r _minted-*
-	# -rm -r .latex-live-snippets
-	-rm *.pdf
-	-rm *.exc.tex
-	-rm *.fc.tex
-	-rm *.sol.tex
-	-rm *.ist
-	-rm *.pyg
-	-git checkout solutions.pdf
+	make -C build clean
 
-cover:
-	convert ebook-cover.png -quality 100 -units PixelsPerInch -density 300x300 cover.pdf
+clean-images:
+	grep -l .png .design-tools/* | xargs rm
+	rm .design-tools/*.png
 
-ebook:
-	pandoc --toc --toc-depth=2 -f markdown --epub-metadata=metadata.xml --css=base.css --highlight-style pygments --epub-cover-image=ebook-cover.png -o book.epub book.tex
-
-.PHONY: snippets clean cover ebook $(addsuffix -quick,$(langs))
-
+very-clean: clean
+	rm -r .design-tools

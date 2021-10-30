@@ -1,0 +1,1 @@
+CodeBlock ("",["haskell","ghci"],[]) "> :t Has [True] :: Has MonoidAndEq\nLeaving GHCi.\n\n\n"

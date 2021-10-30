@@ -1,0 +1,1 @@
+CodeBlock ("",["haskell","ghci"],[]) "> :set -XPolyKinds\nEval (Snd2 '(1, '(2, 3))) :: Nat\n= 3\n\n\n> type Snd2 = Snd <=< Snd\nLeaving GHCi.\n\n\n"

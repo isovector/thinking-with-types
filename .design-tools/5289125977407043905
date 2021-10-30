@@ -1,0 +1,1 @@
+CodeBlock ("",["haskell","ghci"],[]) "> let foo = inj (Identity True) :: OpenSum Identity '[Bool, String]\nLeaving GHCi.\n\n\n"

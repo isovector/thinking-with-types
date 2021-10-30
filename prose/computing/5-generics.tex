@@ -1,0 +1,709 @@
+\documentclass[book.tex]{subfiles}
+\begin{document}
+
+\chapter{Generics}
+
+When writing Haskell, we have two tools in our belt for introducing
+polymorphism: parametric and ad-hoc polymorphism.
+
+\defnn{Parametric polymorphism}{parametric polymorphism} gives one definition
+for every possible type (think \hs{head :: [a] -> a}.) It's what you get when
+you write a standard Haskell function with type variables. This flavor of
+polymorphism is predictable---the same function must always do the same thing,
+regardless of the types it's called with.
+
+\defnn{Ad-hoc polymorphism}{ad-hoc polymorphism}, like its name implies, allows
+us to write a different implementation for every type---as made possible by
+typeclasses.
+
+But for our purposes, there's also a third category---a sort of no man's land
+between the parametric and the ad-hoc: \defn{structural polymorphism}.
+Structural polymorphism is ad-hoc in the sense of being different for each type,
+but it is also highly regular and predictable. It's what's colloquially known as
+``boilerplate.'' It's the boring, uninteresting code that is repetitive but just
+different enough to be hard to automate away. While structural polymorphism
+doesn't have any formal definition, it's the sort of thing you recognize when
+you see it.
+
+\ty{Eq}, \ty{Show} and \ty{Functor} instances are good examples of structural
+polymorphism---there's nothing interesting about writing these instances. The
+tedium of writing boilerplate polymorphism is somewhat assuaged by the
+compiler's willingness to write some of them for us.
+
+Consider the \ty{Eq} typeclass; while every type needs its own implementation of
+\hs{(==)}, these implementations are always of the form:
+
+\snip{DeriveAnyClass}{eqFoo}
+
+There's no creativity involved in writing an \ty{Eq} instance, nor should there
+be. The same data constructors are equal if and only if all of their components
+are equal.
+
+Structural polymorphism is mindless work to write, but needs to be done. In the
+case of some of the standard Haskell typeclasses, GHC is capable of writing
+these instances for you via the \hs{deriving} machinery. Unfortunately, for
+custom typeclasses we're on our own, without any direct support from the
+compiler.\footnote{With the new \ext{DerivingVia} machinery, we now have
+first-class support to derive some typeclasses in terms of others.}
+
+As terrible as this situation appears, all hope is not lost. Using
+\hs{GHC.Generics}, we're capable of writing our own machinery for helping GHC
+derive our typeclasses, all in regular Haskell code.
+
+
+\section{Generic Representations}
+
+Recall that all types have a canonical representation as a
+sum-of-products---that they can all be built from \ty{Either}s of \ty{(,)}s. For
+example, \ty{Maybe a}, which is defined as:
+
+\snip{Misc}{Maybe}
+
+\ty{Maybe a} has a canonical sum-of-products form as \ty{Either () a}. This can
+be proven via an \gls{isomorphism}:
+
+\snip{DeriveAnyClass}{toCanonical}
+\snip{DeriveAnyClass}{fromCanonical}
+
+\hs{toCanonical} and \hs{fromCanonical} convert between \ty{Maybe a} and
+\ty{Either () a} without losing any information. This witnesses an isomorphism
+between the two types.
+
+Why is this an interesting fact? Well, if we have a small number of primitive
+building blocks, we can write code that is generic over those primitives.
+Combined with the ability to convert to and from canonical representations, we
+have the workings for dealing with structural polymorphism.
+
+How can such a thing be possible? The secret is in the \ext{DeriveGeneric}
+extension, which will automatically derive an instance of \ty{Generic} for you:
+
+\snip{DeriveAnyClass}{Generic}
+
+The associated type \hs{Rep a} at \ann{1} corresponds to the canonical form of
+the type \ty{a}. Notice however the kinds; while \ty{a} has kind \kind{Type},
+\ty{Rep a} is of kind \kind{Type -> Type}. We will investigate why this is the
+case in a moment.
+
+The functions \hs{from} and \hs{to} at \ann{2} and \ann{3} form the isomorphism
+between \ty{a} and \ty{Rep a}. Somewhat confusingly, their implied
+directionality might be the opposite of what you'd expect. \hs{to} converts
+\emph{to} the usual (type \hs{a}) form, and \hs{from} converts \emph{from} the
+usual form.
+
+Let's look at \ty{Rep Bool} for inspiration about what this thing might look
+like.
+
+\begin{dorepl}{DeriveAnyClass}
+:kind! Rep Bool
+\end{dorepl}
+
+Quite a mouthful, but at it's heart the interesting parts of this are the
+\ty{(:+:)} and \ty{U1} types. These correspond to the \defn{canonical sum} and
+\defn{canonical unit}, respectively. Cutting out some of the excess data for a
+second, we can see the gentle shape of \ty{Bool} peeking out.
+
+\snip{DeriveAnyClass}{RepBool}
+
+Compare this against the definition of \ty{Bool} itself.
+
+\snip{DeriveAnyClass}{Bool}
+
+The \ty{(:+:)} type is the canonical analogue of the \hs{|} that separates data
+constructors from one another. And because \hs{True} and \hs{False} contain no
+information, each is isomorphic to the unit type \hs{()}. As a result, the
+canonical representation of \hs{Bool} is conceptually just \ty{Either () ()}, or
+in its \ty{GHC.Generics} form as \ty{... (... U1 :+: ... U1)}.
+
+With some idea of what's going on, let's look again at \ty{Rep Bool}.
+
+\begin{dorepl}{DeriveAnyClass}
+:kind! Rep Bool
+\end{dorepl}
+
+The \ty{D1} and \ty{C1} types contain metadata about \ty{Bool}'s definition in
+source code as promoted \ext{DataKinds}. \ty{D1} describes its \emph{type}---its
+name, where it was defined, and whether or not it's a newtype.
+
+\ty{C1} describes a data constructor---its name, fixity definition, and whether
+or not it has record selectors for its data.
+
+Structural polymorphism that is interested in any of this information is capable
+of extracting it statically from these data kinds, and code that isn't can
+easily ignore it. In my experience, very rarely will you need access to these
+things, but it's nice to have the option.
+
+
+\section{Deriving Structural Polymorphism}
+\label{ghc.generics}
+
+\preamble{DeriveAnyClass}
+
+Armed with the knowledge of \ty{Rep}, we can write an illustrative example of
+generically deriving \ty{Eq}. Of course, it's unnecessary because \ty{Eq} is one
+of those classes the compiler can write for us. Nevertheless, it's a good
+introduction to the topic, and we must walk before we can run. We will look at
+more challenging classes afterwards.
+
+The approach to generically deriving structural polymorphism is threefold:
+
+\begin{enumerate}
+  \item{Define a typeclass to act as a \defn{carrier}.}
+  \item{Provide inductive instances of the class for the generic constructors.}
+  \item{Finally, write a helper function to map between the \ty{Rep} and the
+    desired type.}
+\end{enumerate}
+
+We begin by defining our carrier typeclass. The carrier mirrors the typeclass
+we'd like to derive, but is shaped to be able to give instances for the \ty{Rep}
+constructors.
+
+A good convention is add a \hs{G} prefix to the carrier typeclass---if you want
+to derive \ty{Eq} generically, call your carrier typeclass \ty{GEq}.
+
+\snip{DeriveAnyClass}{GEq}
+
+Our \ty{GEq} class has a single method, \hs{geq}, whose signature closely
+matches \hs{(==) :: a -> a -> Bool}.
+
+Notice that the type parameter \ty{a} to \ty{GEq} has kind \kind{Type -> Type}.
+This is a quirk of \ty{GHC.Generics}, and allows the same \ty{Rep} machinery
+when dealing with higher-kinded classes. When writing carrier classes for types
+of kind \kind{Type}, we will always saturate \ty{a} with a dummy type \ty{x}
+whose only purpose is to make the whole thing kind check.
+
+With our carrier defined, the next step is to provide instances for the generic
+\ty{Rep} constructors. A good approach when writing generic instances is to work
+``inside-out.'' Start with the innermost constructors (\ty{U1}, \ty{V1}, and
+\ty{K1},) as these are the base cases of our structural induction.
+
+In this case, \ty{U1} is the simplest, so we will start there. Recall that
+\ty{U1} represents a data constructor with no parameters, in which case it's
+just \ty{()} with a different name. Since \ty{()} is always equal to itself, so
+too should \ty{U1} be.
+
+\snip{DeriveAnyClass}{geqU1}
+
+Similarly for \ty{V1} which corresponds to types that can't be constructed.
+\ty{V1} is the generic representation of \ty{Void}---the \kind{Type} with no
+inhabitants. It might seem silly to provide an \ty{Eq} instance for such types,
+but it costs us nothing. Consider instances over \ty{V1} as being vacuous; if
+you \emph{could} give me a value of \ty{V1}, I claim that I could give you back
+a function comparing it for equality. Since you \emph{can't} actually construct
+a \ty{V1}, then my claim can never be tested, and so we might as well consider
+it true.
+
+Strictly speaking, \ty{V1} instances usually aren't necessary, but we might as
+well provide one if we can.
+
+\snip{DeriveAnyClass}{geqV1}
+
+The one other case we need to consider is what should happen for concrete types
+inside of data constructors? Such things are denoted via \ty{K1}, and in this
+case, we want to fall back on an \ty{Eq} (\emph{not} \ty{GEq}!) instance to
+compare the two. The analogous non-generic behavior for this is how the \ty{Eq}
+instance for \ty{Maybe a} is \ty{Eq a => Eq (Maybe a)}; most datatypes simply
+want to lift equality over their constituent fields.
+
+\snip{DeriveAnyClass}{geqK1}
+
+But why should we use an \ty{Eq} constraint rather than \ty{GEq}? Well we're
+using \ty{GEq} to help derive \ty{Eq}, which implies \ty{Eq} is the actual type
+we care about. If we were to use a \ty{GEq} constraint, we'd remove the ability
+for anyone to write a non-generic instance of \ty{Eq}!
+
+With our base cases complete, we're ready to lift them over sums. Two sums are
+equal if and only if they are the same data constructor (left or right), and if
+their internal data is equal.
+
+\snip{DeriveAnyClass}{geqPlus}
+
+We will also want to provide \ty{GEq} instances for products---two pieces of
+data side-by-side. Products are represented with the \ty{(:*:)} type and data
+constructors.
+
+\snip{DeriveAnyClass}{geqTimes}
+
+Finally, we want to lift all of our \ty{GEq} instances through the \ty{Rep}'s
+metadata constructors, since the names of things aren't relevant for defining
+\ty{Eq}. Fortunately, all of the various types of metadata (\ty{D1}, \ty{C1} and
+\ty{S1}) provided by \ty{GHC.Generics} are all type synonyms of \ty{M1}. Because
+we don't care about any metadata, we can simply provide a \ty{M1} instance and
+ignore it.
+
+\snip{DeriveAnyClass}{geqM1}
+
+This completes step two; we're now capable of getting \ty{Eq} instances for
+free. However, to convince ourselves that what we've done so far works, we can
+write a function that performs our generic equality test.
+
+\snip{DeriveAnyClass}{genericEq}
+
+\begin{dorepl}{DeriveAnyClass}
+genericEq True False
+genericEq "ghc.generics" "ghc.generics"
+\end{dorepl}
+
+\hs{genericEq} is powerful step in the right direction. We can define actual
+\ty{Eq} instances in terms of it. Given our \ty{Foo} datatype from earlier:
+
+\snip{DeriveAnyClass}{Foo1}
+
+We can give an \ty{Eq} instance with very little effort.
+
+\snip{DeriveAnyClass}{EqFoo}
+
+\begin{exercise}
+Provide a generic instance for the \ty{Ord} class.
+\end{exercise}
+\begin{solution}
+\unspacedSnip{DeriveAnyClass}{GOrd}
+\snip{DeriveAnyClass}{gordU1}
+\snip{DeriveAnyClass}{gordV1}
+\snip{DeriveAnyClass}{gordK1}
+\snip{DeriveAnyClass}{gordTimes}
+\snip{DeriveAnyClass}{gordPlus}
+\snip{DeriveAnyClass}{gordM1}
+\snip{DeriveAnyClass}{genericOrd}
+\end{solution}
+
+\begin{exercise}
+  Use \ty{GHC.Generics} to implement the function \hs{exNihilo :: Maybe
+  a}. This function should give a value of \ty{Just a} if \ty{a} has exactly one
+  data constructor which takes zero arguments. Otherwise, \hs{exNihilo} should
+  return \hs{Nothing}.
+\end{exercise}
+\begin{solution}
+\unspacedSnip{DeriveAnyClass}{GExNihilo}
+\snip{DeriveAnyClass}{gexNihiloU1}
+\snip{DeriveAnyClass}{gexNihiloV1}
+\snip{DeriveAnyClass}{gexNihiloK1}
+\snip{DeriveAnyClass}{gexNihiloTimes}
+\snip{DeriveAnyClass}{gexNihiloPlus}
+\snip{DeriveAnyClass}{gexNihiloM1}
+\end{solution}
+
+This is about as good as we can do for classes we haven't defined ourselves.
+However, for our own typeclasses we can go further and have the compiler
+actually write that last piece of boilerplate for us too. We'll get full access
+to the \hs{deriving} machinery.
+
+To illustrate the point, let's define a new typeclass \ty{MyEq}. For all intents
+and purposes \ty{MyEq} is exactly the same as \ty{Eq}, except that we've defined
+it ourselves.
+
+\snip{DeriveAnyClass}{MyEq}
+
+Using \ext{DefaultSignatures}, at \ann{1} we can provide a default
+implementation of \hs{eq} in terms of \hs{genericEq}. \ext{DefaultSignatures} is
+necessary to provides the correct \ty{GEq (Rep a)} context.
+
+Finally, by enabling \ext{DeriveAnyClass}, we can convince the compiler to give
+us an instance of \ty{MyEq} for free!
+
+\snip{DeriveAnyClass}{Foo}
+
+Notice how at \ann{1}, we simply ask for a derived instance of \ty{MyEq}, and
+the compiler happily gives it to us. We can fire up the REPL to see how we did:
+
+\begin{dorepl}{DeriveAnyClass}
+:t eq
+eq F0 F0
+eq (F1 "foo") (F1 "foo")
+eq F0 (F1 "hello")
+eq (F1 "foo") (F1 "bar")
+\end{dorepl}
+
+
+\section{Using Generic Metadata}
+
+\preamble{JSONSchema}
+
+JavaScript's lack of a proper type system is widely known. However, in an
+attempt to add some degree of type-safety, its proponents recommend a thing
+called JSON Schema. If you're unfamiliar with it, JSON Schema is, in its own,
+words ``a vocabulary that allows you to annotate and validate JSON documents.''
+It's sort of like a type system, but described in JSON itself.
+
+For example, the following Haskell type:
+
+\snip{JSONSchema}{Person}
+
+would be described in JSON Schema as:
+
+\begin{alltt}
+  \{ "title": "Person"
+  , "type": "object"
+  , "properties":
+      \{ "name":  \{ "type": "string"  \}
+      , "age":   \{ "type": "integer" \}
+      , "phone": \{ "type": "string"  \}
+      , "permissions":
+          \{ "type": "array", "items": \{ "type": "boolean" \}\}
+      \}
+  , "required": ["name" , "age", "permissions"]
+  \}
+\end{alltt}
+
+When sharing data between Haskell and JavaScript, providing JSON Schema as a
+common format between the two languages seems like it might help mitigate
+JavaScript's weak typing. But writing JSON Schema by hand is no fun, and so we
+find ourselves with a motivating example of generating code generically.
+
+As always, we begin with a definition of the carrier typeclass. Such a thing
+needs to produce a \ty{Value} (\pkg{aeson}'s \cite{aeson} representation of a
+JSON value.) However, we'll also need to propagate information in order to fill
+the \json{required} property. As such, we decide on a single method of type
+\ty{Writer [Text] Value}. The \ty{[Text]} will be used to track the required
+properties, and the \ty{Value} is the schema we're building.
+
+\snip{JSONSchema}{GSchema}
+
+Notice that \hs{gschema} doesn't reference the \ty{a} type parameter anywhere.
+While we \emph{could} use a \ty{Proxy} to drive the instance lookups the way we
+did for \ty{HasPrintf}, a cleaner interface is to enable
+\ext{AllowAmbiguousTypes} and later use \ext{TypeApplications} to fill in the
+desired variable.
+
+For our purposes, we will assume we only want to generate JSON Schema for
+Haskell records. In fact, it will be an error to ask for a schema for any
+sum-types, since it's not clear how to embed them into JSON.
+
+Before diving in, we'll need some helper functions for manipulating JSON
+objects. For example, we'll want to merge two of them by taking the union of
+their properties.
+
+\snip{JSONSchema}{mergeObjects}
+
+We will also write a helper function that takes a \ty{KnownSymbol nm} and
+\hs{tell}s the corresponding term-level string.
+
+\snip{JSONSchema}{emitRequired}
+
+\begin{dorepl}{JSONSchema}
+runWriter (emitRequired @"required property")
+\end{dorepl}
+
+\hs{symbolVal} is a function that converts a \kind{Symbol} into a \ty{String}.
+It comes from \ty{GHC.TypeLits}. For example:
+
+\begin{dorepl}{Printf}
+:t symbolVal
+symbolVal (Proxy @"i am a symbol")
+\end{dorepl}
+
+The \ty{KnownSymbol} stuff in \hs{symbolVal}'s type is simply a proof that GHC
+knows what \kind{Symbol} we're talking about; it will automatically generate the
+\ty{KnownSymbol} instance for us, so it's nothing we need to worry about.
+
+Anyway, in JSON Schema, the boolean type \ty{Bool} is represented via
+\json{"boolean"}.  Along the same vein, integral types are \json{"integer"}, but
+all other numeric types are simply \json{"number"}. User types should be
+serialized with their given name. This is a good opportunity to use a closed
+type family to convert from Haskell type names to their JSON Schema
+counterparts.
+
+\snip{JSONSchema}{ToJSONType}
+
+Unfortunately, there is no straightforward means of getting the name of a type
+as a symbol. We can use generic metadata to retrieve a type's name.
+
+\snip{JSONSchema}{RepName}
+\snip{JSONSchema}{TypeName}
+
+\begin{dorepl}{JSONSchema}
+:kind! ToJSONType Double
+:kind! ToJSONType String
+:kind! ToJSONType [Int]
+:kind! ToJSONType Person
+\end{dorepl}
+
+Something we'll find ourselves generating often are objects of the form
+\json{\{"type": "foo"\}}. The function \hs{makeTypeObj} is type-applicable, and
+will use the \ty{ToJSONType} of the applied type.
+
+\snip{JSONSchema}{makeTypeObj}
+
+\begin{dorepl}{JSONSchema}
+makeTypeObj @Int
+\end{dorepl}
+
+One last helper function we'll need before getting to the meat of the
+\ty{GHC.Generics} code is to be able to wrap an object with the name of a
+property. This will be used to build the \json{"properties"} property in the
+JSON Schema document.
+
+\snip{JSONSchema}{makePropertyObj}
+
+Like \hs{makeTypeObj}, \hs{makePropertyObj} also is intended to be called with a
+type application. In this case, it takes a \kind{Symbol} corresponding to the
+name of the property to emit. These \kind{Symbol}s will come directly from the
+\ty{Rep} of the data-structure's record selectors.
+
+In order to get access to the record name, it's insufficient to simply define an
+instance of \ty{GSchema} for \ty{K1}. By the time we get to \ty{K1} we've lost
+access to the metadata---the metadata is stored in an outer wrapper.  Instead,
+we can do type-level pattern matching on \ty{M1 S meta (K1 \_ a)}. The \ty{S}
+type is used as a parameter to \ty{M1} to describe \emph{record selector
+metadata}.
+
+\snip{JSONSchema}{gschemaK1}
+
+At \ann{1}, this instance says that the property \ty{nm} is required. It then
+builds and returns a property object.
+
+\begin{dorepl}{JSONSchema}
+import qualified Data.ByteString.Lazy.Char8 as LC8
+import Data.Aeson.Encode.Pretty (encodePretty)
+let pp = LC8.putStrLn . encodePretty
+pp (makePropertyObj @"myproperty" (makeTypeObj @Bool))
+\end{dorepl}
+
+There are other base cases of \ty{M1 .. K1} we still need to handle, but we will
+build the rest of the machinery first. If we have a product of fields, we need
+to merge them together.
+
+\snip{JSONSchema}{gschemaTimes}
+
+For coproduct types, we will simply error out as the JSON Schema documentation
+is conspicuously quiet about the encoding of sums.
+
+\snip{JSONSchema}{gschemaPlus}
+
+Because sum-types are not allowed, information about data constructors isn't
+interesting to us. We simply lift a \ty{GSchema} instance through \ty{M1 C}
+(metadata for data constructors.)
+
+\snip{JSONSchema}{gschemaM1C}
+
+To close out our induction cases, we need an instance of \ty{GSchema} for \ty{M1
+D}---type constructors. Here we have access to the type's name, and all of its
+properties.
+
+\snip{JSONSchema}{gschemaM1D}
+
+Finally, we need to run our \ty{Writer [Text]} and transform that into the list
+of required properties \json{"required"}. We'll use the opportunity to also act
+as our interface between \ty{a} and \ty{Rep a}.
+
+\snip{JSONSchema}{schema}
+
+\hs{schema} already works quite well. It will dump out a JSON Schema for our
+\ty{Person} type, though the encoding won't work correctly with optional values,
+lists or strings. Each of these corresponds to a different base case of \ty{M1
+.. K1}, and so we can provide some overlapping instances to clear them up.
+
+The easiest case is that of \ty{Maybe a}, which we'd like to describe as a field
+of \ty{a}, though without calling \hs{emitRequired}.
+
+\snip{JSONSchema}{gschemaMaybe}
+
+This instance is identical to \ty{K1 \_ a} except for the omission of
+\hs{emitRequired}.
+
+Lists are serialized oddly in JSON Schema; their type is \json{"array"}, but the
+descriptor object comes with an extra property \json{"items"} which \emph{also}
+contains a \json{"type"} property:
+
+\begin{alltt}
+\{ "type": "array", "items": \{ "type": "boolean" \}\}
+\end{alltt}
+
+We can implement this with an overlapping instance which targets \ty{K1 \_ [a]}.
+
+\snip{JSONSchema}{gschemaList}
+
+This works well, but because in Haskell, \ty{String}s are simply lists of
+\ty{Char}s, our emitted JSON Schema treats \ty{String}s as arrays. The correct
+behavior for \ty{String} is the same as the default \ty{K1 \_ a} case, so we add
+yet another overlapping instance.
+
+\snip{JSONSchema}{gschemaString}
+
+This instance overrides the behavior for \ty{[a]}, which in itself overrides the
+behavior for \ty{a}. Programming with typeclass instances is not always the
+most elegant experience.
+
+And we're done. We've successfully used the metadata in \ty{GHC.Generics} to
+automatically marshall a description of our Haskell datatypes into JSON Schema.
+We didn't need to resort to using code generation---which would have complicated
+our compilation pipeline---and we've written nothing but everday Haskell in
+order to accomplish it.
+
+We can admire our handiwork:
+
+\begin{dorepl}{JSONSchema}
+@import qualified Data.ByteString.Lazy.Char8 as LC8
+@import Data.Aeson.Encode.Pretty (encodePretty)
+@let pp = LC8.putStrLn . encodePretty
+pp (schema @Person)
+\end{dorepl}
+
+And, as expected, sum types fail to receive a schema with a helpful error
+message.
+
+\begin{dorepl}{JSONSchema}
+schema @Bool
+\end{dorepl}
+
+
+\section{Performance}
+
+With all of the fantastic things we're capable of doing with \ty{GHC.Generics},
+it's worth wondering whether or not we need to pay a runtime cost to perform
+these marvels. After all, converting to and from \ty{Rep}s probably isn't free.
+
+If there is indeed a hefty cost for using \ty{GHC.Generics}, the convenience to
+the programmer might not be worthwhile. After all, code gets executed much more
+often than it gets written. Writing boilerplate by hand is annoying and tedious,
+but at least it gives us some understanding of what's going on under the hood.
+With \ty{GHC.Generics}, these things are certainly less clear.
+
+There is good and bad news here. The good news is that usually adding
+\hs{INLINE} pragmas to each of your class' methods is enough to optimize away
+all usage of \ty{GHC.Generics} at compile-time.
+
+The bad news is that this is only \emph{usually} enough to optimize them away.
+Since there is no separate compilation step when working with \ty{GHC.Generics},
+it's quite a lot of work to actually determine whether or not your generic code
+is being optimized away.
+
+Thankfully, we have tools for convincing ourselves our performance isn't being
+compromised. Enter the \pkg{inspection-testing}\cite{inspection-testing}
+library. \pkg{inspection-testing} provides a plugin to GHC which allows us to
+make assertions about our generated code. We can use it to ensure GHC optimizes
+away all of our usages of \ty{GHC.Generics}, and generates the exact same code
+that we would have written by hand.
+
+We can use \pkg{inspection-testing} like so:
+
+
+\begin{enumerate}
+  \item{Enable the \hs{\{-\# OPTIONS\_GHC -O -fplugin Test.Inspection.Plugin
+    \#-\}} pragma.}
+  \item{Enable \ext{TemplateHaskell}.}
+  \item{Import \ty{Test.Inspection}.}
+  \item{Write some code that exercises the generic code path. Call it \hs{foo},
+    for example.}
+  \item{Add \hs{inspect \$ hasNoGenerics 'foo} to your top level module.}
+\end{enumerate}
+
+For example, if we wanted to show that the \hs{schema} function successfully
+optimized away all of its generics, we could add a little test to our project
+like this:
+
+[code/InspectionTesting.hs](Snip)
+
+Easy as that. Now in the course of compiling your module, if your generic code
+has any runtime overhead, GHC will refuse to continue. Unfortunately for us,
+\pkg{inspection-testing} isn't magic and can't guarantee our implementation is
+as good as a hand-written example, but at least it can prove the generic
+representations don't exist at runtime.
+
+In order to prove two implementations (eg. one written generically and one
+written by hand) \emph{are} equal, you can use \pkg{inspection-testing}'s
+\hs{(===)} combinator. \hs{(===)} causes a compile-time error if the actual
+generate Core isn't identical. This is often impractical to do for complicate
+usages of \ty{GHC.Generics}, but it's comforting to know that it's possible in
+principle.
+
+There is a particularly egregious case that GHC is unable to optimize, however.
+It's described colloquially as "functions that are too polymorphic." But what
+does it mean to be \emph{too polymorphic}?
+
+This class of problems sets in when GHC requires knowing about the
+functor/applicative/monad laws in order to perform the inlining, but the type
+itself is polymorphic. That is to say, a generic function that produces a
+\ty{forall m. m a} will perform poorly, but \ty{Maybe a} is fine. A good rule of
+thumb is that if you have a polymorphic higher-kinded type, your performance is
+going to go into the toolies.
+
+
+\section{Kan Extensions}
+
+\preamble{Kan}
+
+On the grasping hand, there is still good news to be found. Reclaiming our
+performance from the clutches of too-polymorphic generic code isn't a
+challenging exercise. The secret is to rewrite our types in terms of kan
+extensions.
+
+\begin{itemize}
+  \item{Rather than \ty{forall f. Functor f => f a}, instead use \ty{forall f.
+    Yoneda f a}}
+  \item{Instead of \ty{forall f. Applicative f => f a}, use \ty{forall f.
+    Curried (Yoneda f) (Yoneda f) a}}
+  \item{Instead of \ty{forall f. Monad f => f a}, use \ty{forall f. Codensity f a}}
+\end{itemize}
+
+These types \ty{Yoneda}, \ty{Curried} and \ty{Codensity} all come from the
+\pkg{kan-extensions}\cite{kan-extensions} package. We'll talk more about these
+transformations in a moment.
+
+In essence, the trick here is to write our ``too polymorphic'' code in a form
+more amenable to GHC's inlining abilities, and then transform it back into the
+desired form at the very end. \ty{Yoneda}, \ty{Curried} and \ty{Codensity} are
+tools that can help with this transformation.
+
+Consider the definition of \ty{Yoneda}:
+
+\snip{Kan}{Yoneda}
+
+When we ask GHCi about the type of \hs{runYoneda}, an interesting similarity to
+\hs{fmap} emerges:
+
+\begin{dorepl}{Kan}
+:t runYoneda
+:t flip fmap
+\end{dorepl}
+
+\ty{Codensity}---our transformation for polymorphic \ty{Monad}ic code---also
+bears a similar resemblance.
+
+\begin{dorepl}{Kan}
+:t runCodensity
+:t (>>=)
+\end{dorepl}
+
+And \ty{Curried} which we used to transform polymorphic \ty{Applicative} code
+also shows this pattern, although it's a little trickier to see.
+
+\begin{dorepl}{Kan}
+:t runCurried @(Yoneda _) @(Yoneda _)
+:t flip (<*>)
+\end{dorepl}
+
+This is not an accident. The \ty{Functor} instance for \ty{Yoneda}
+is particularly enlightening:
+
+\snip{Kan}{FunctorYoneda}
+
+Note the lack of a \ty{Functor f} constraint on this instance! \ty{Yoneda f} is
+a \ty{Functor} \emph{even when} \ty{f} \emph{isn't.} In essence, \ty{Yoneda f}
+gives us a instance of \ty{Functor} for free. Any type of kind \kind{Type ->
+Type} is eligible. There's lots of interesting category theory behind all of
+this, but it's not important to us.
+
+But how does \ty{Yoneda} work? Keep in mind the functor law that \hs{fmap f .
+fmap g = fmap (f . g)}. The implementation of \ty{Yoneda}'s \ty{Functor}
+instance abuses this fact. All it's doing is accumulating all of the functions
+we'd like to \hs{fmap} so that it can perform them all at once.
+
+As interesting as all of this is, the question remains: how does \ty{Yoneda}
+help GHC optimize our programs? GHC's failure to inline ``too polymorphic''
+functions is due to it being unable to perform the functor/etc. laws while
+inlining polymorphic code. But \ty{Yoneda f} is a functor even when \ty{f}
+isn't---exactly by implementing the \ty{Functor} laws by hand. \ty{Yoneda}'s
+\ty{Functor} instance can't possibly depend on \ty{f}. That means \ty{Yoneda f}
+is never ``too polymorphic,'' and as a result, acts as a fantastic carrier for
+our optimization tricks.
+
+Finally, the functions \hs{liftYoneda :: Functor f => f a -> Yoneda f a} and
+\hs{lowerYoneda :: Yoneda f a -> f a} witness an \gls{isomorphism} between \ty{Yoneda
+f a} and \ty{f a}. Whenever your generic code needs to do something in \ty{f},
+it should use \hs{liftYoneda}, and the final interface to your generic code
+should make a call to \hs{lowerYoneda} to hide it as an implementation detail.
+
+This argument holds exactly when replacing \ty{Functor} with \ty{Applicative} or
+\ty{Monad}, and \ty{Yoneda} with \ty{Curried} or \ty{Codensity} respectively.
+
+\end{document}

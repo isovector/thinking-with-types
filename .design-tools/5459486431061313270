@@ -1,0 +1,1 @@
+CodeBlock ("",["haskell","ghci"],[]) "> :kind '(2, \"tuple\")\n'(2, \"tuple\") :: (Nat, Symbol)\n\n\n"

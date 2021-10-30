@@ -1,0 +1,1 @@
+CodeBlock ("",["haskell","ghci"],[]) "> @import qualified Data.ByteString.Lazy.Char8 as LC8\nLeaving GHCi.\n\n\n"

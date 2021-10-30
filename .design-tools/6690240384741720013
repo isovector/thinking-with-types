@@ -1,0 +1,1 @@
+CodeBlock ("",["haskell","ghci"],[]) "> let foo = Has [True] :: Has MonoidEq\nFalse\n\n\n> elimHas isMempty foo\nLeaving GHCi.\n\n\n"

@@ -1,0 +1,1 @@
+CodeBlock ("",["haskell","ghci"],[]) "> :t snd\nsnd :: (a, b) -> b\n\n\n> :kind Snd\nSnd :: (a, b) -> b -> Type\n\n\n"

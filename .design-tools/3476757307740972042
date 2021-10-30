@@ -1,0 +1,1 @@
+CodeBlock ("",["haskell","ghci"],[]) "> :set -XTypeApplications\nfmap :: Functor f => (a -> b) -> f a -> f b\n\n\n> :t fmap\nfmap @Maybe :: (a -> b) -> Maybe a -> Maybe b\n\n\n> :t fmap @Maybe\nLeaving GHCi.\n\n\n"

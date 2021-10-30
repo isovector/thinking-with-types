@@ -1,0 +1,1 @@
+CodeBlock ("",["haskell","ghci"],[]) "> import qualified Data.ByteString.Lazy.Char8 as LC8\n{\n    \"myproperty\": {\n        \"type\": \"boolean\"\n    }\n}\n\n\n> import Data.Aeson.Encode.Pretty (encodePretty)\nLeaving GHCi.\n\n\n"

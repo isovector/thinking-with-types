@@ -1,0 +1,1 @@
+CodeBlock ("",["haskell","ghci"],[]) "> :kind Foo\nFoo :: Bool -> Bool -> Bool\n\n\n> :kind Bar\nBar :: Type -> Type -> Bool -> Bool -> Bool\n\n\n"

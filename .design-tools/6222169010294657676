@@ -1,0 +1,1 @@
+CodeBlock ("",["haskell","ghci"],[]) "> :set -XDataKinds\n\"hello\" :: Symbol\n\n\n> :kind \"hello\"\nLeaving GHCi.\n\n\n"

@@ -1,0 +1,1 @@
+CodeBlock ("",["haskell","ghci"],[]) "> runWriter (emitRequired @\"required property\")\n((),[\"required property\"])\n\n\n"
