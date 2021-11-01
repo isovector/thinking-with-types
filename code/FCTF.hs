@@ -1,10 +1,11 @@
 -- # pragmas
-{-# LANGUAGE DataKinds              #-}
-{-# LANGUAGE KindSignatures         #-}
-{-# LANGUAGE PolyKinds              #-}
-{-# LANGUAGE TypeFamilies           #-}
-{-# LANGUAGE TypeInType             #-}
-{-# LANGUAGE UndecidableInstances   #-}
+{-# LANGUAGE DataKinds            #-}
+{-# LANGUAGE KindSignatures       #-}
+{-# LANGUAGE PolyKinds            #-}
+{-# LANGUAGE TypeFamilies         #-}
+{-# LANGUAGE TypeInType           #-}
+{-# LANGUAGE TypeOperators        #-}
+{-# LANGUAGE UndecidableInstances #-}
 
 module FCTF where
 

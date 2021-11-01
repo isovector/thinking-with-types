@@ -1,18 +1,19 @@
 -- # pragmas
-{-# LANGUAGE ConstraintKinds       #-}
-{-# LANGUAGE EmptyCase             #-}
-{-# LANGUAGE FlexibleInstances     #-}
-{-# LANGUAGE GADTs                 #-}
-{-# LANGUAGE InstanceSigs          #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE RankNTypes            #-}
-{-# LANGUAGE ScopedTypeVariables   #-}
-{-# LANGUAGE StandaloneDeriving    #-}
-{-# LANGUAGE TemplateHaskell       #-}
-{-# LANGUAGE TypeApplications      #-}
-{-# LANGUAGE TypeFamilies          #-}
-{-# LANGUAGE TypeInType            #-}
-{-# LANGUAGE UndecidableInstances  #-}
+{-# LANGUAGE ConstraintKinds          #-}
+{-# LANGUAGE EmptyCase                #-}
+{-# LANGUAGE FlexibleInstances        #-}
+{-# LANGUAGE GADTs                    #-}
+{-# LANGUAGE InstanceSigs             #-}
+{-# LANGUAGE MultiParamTypeClasses    #-}
+{-# LANGUAGE RankNTypes               #-}
+{-# LANGUAGE ScopedTypeVariables      #-}
+{-# LANGUAGE StandaloneDeriving       #-}
+{-# LANGUAGE StandaloneKindSignatures #-}
+{-# LANGUAGE TemplateHaskell          #-}
+{-# LANGUAGE TypeApplications         #-}
+{-# LANGUAGE TypeFamilies             #-}
+{-# LANGUAGE TypeInType               #-}
+{-# LANGUAGE UndecidableInstances     #-}
 
 {-# LANGUAGE OverloadedStrings  #-}
 
@@ -86,7 +87,7 @@ logs =
 
 showLogs :: [Sigma LogMsg] -> [String]
 showLogs = fmap $ withSigma $ \sa fa ->
-  case dict1 @Show @LogMsg sa of
+  case dict1 @_ @Show @LogMsg sa of
     Dict -> show fa
 
 jsonLogs :: [LogMsg 'JsonMsg]
@@ -99,8 +100,13 @@ catSigmas
     -> [f a]
 catSigmas = mapMaybe fromSigma
 
-class Dict1 c (f :: k -> Type) where
-  dict1 :: Sing (a :: k) -> Dict (c (f a))
+type Dict1
+    :: forall k
+     . (Type -> Constraint)
+    -> (k -> Type)
+    -> Constraint
+class Dict1 c f where
+  dict1 :: Sing a -> Dict (c (f a))
 
 -- # Dict1LogMsgPayload
 instance ( c (LogMsg 'JsonMsg)
@@ -116,7 +122,7 @@ instance ( Dict1 Show (f :: k -> Type)
          , SingKind k
          ) => Show (Sigma f) where
   show (Sigma sa fa) =
-    case dict1 @Show @f sa of
+    case dict1 @_ @Show @f sa of
       Dict -> mconcat
         [ "Sigma "
         , show $ fromSing sa
@@ -133,7 +139,7 @@ instance ( Dict1 Eq (f :: k -> Type)  -- ! 1
   Sigma sa fa == Sigma sb fb =
     case sa %~ sb of
       Proved Refl ->
-        case dict1 @Eq @f sa of
+        case dict1 @_ @Eq @f sa of
           Dict -> fa == fb
       Disproved _ -> False
 
@@ -147,7 +153,7 @@ instance ( Dict1 Eq  (f :: k -> Type)
   compare (Sigma sa fa) (Sigma sb fb) =
     case sa %~ sb of
       Proved Refl ->
-        case dict1 @Ord @f sa of
+        case dict1 @_ @Ord @f sa of
           Dict -> compare fa fb
       Disproved _ ->
         compare (fromSing sa) (fromSing sb)

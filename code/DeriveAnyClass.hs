@@ -6,7 +6,7 @@
 {-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE TypeOperators      #-}
 
-module Generics where
+module DeriveAnyClass where
 
 -- # imports
 import GHC.Generics

@@ -32,7 +32,7 @@ source-repository head
   location: https://github.com/isovector/book-of-types.git
 
 library
-  exposed-modules: OpenProduct, IxMonad, Linear, JSONSchema
+  exposed-modules: OpenProduct, IxMonad, Linear, JSONSchema, AdHocSingletons, Algebra, Commander, Constraints, Database, Defunc, DeriveAnyClass, FCTF, GADTs, HKD, Kan, Kinds, Misc, OpenSum, PosNeg, Printf, PrintfTypes, QuantifiedConstraints, RankN, Roles, Sigma, Singletons, SingletonsTH, ST, TypeApps
   --                , Data.Ecstasy.Types
   --                , Data.Ecstasy.Internal
   --                , Data.Ecstasy.Internal.Deriving

@@ -9,6 +9,7 @@
 {-# LANGUAGE PolyKinds               #-}
 {-# LANGUAGE StandaloneDeriving      #-}
 {-# LANGUAGE TypeFamilies            #-}
+{-# LANGUAGE TypeOperators           #-}
 {-# LANGUAGE UndecidableInstances    #-}
 {-# LANGUAGE UndecidableSuperClasses #-}
 

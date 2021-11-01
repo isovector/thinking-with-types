@@ -2,8 +2,9 @@
 {-# LANGUAGE LambdaCase          #-}
 {-# LANGUAGE PolyKinds           #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TypeApplications    #-}
 
-module Command where
+module Commander where
 
 type Point = (Int, Int)
 type Guy = String

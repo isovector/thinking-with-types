@@ -11,6 +11,8 @@
 {-# LANGUAGE TypeApplications           #-}
 {-# LANGUAGE TypeFamilies               #-}
 
+module Cover where
+
 import Diagrams.TwoD.Layout.Grid
 import Diagrams.TwoD.Arrow
 import Diagrams.Backend.SVG.CmdLine

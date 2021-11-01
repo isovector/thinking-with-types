@@ -24,7 +24,7 @@ module OpenProduct where
 import Data.Kind (Constraint, Type)
 import Data.Proxy (Proxy (..))
 import qualified Data.Vector as V
-import Fcf
+import Fcf hiding (Any)
 import GHC.OverloadedLabels (IsLabel (..))
 import GHC.TypeLits
 import Unsafe.Coerce (unsafeCoerce)
