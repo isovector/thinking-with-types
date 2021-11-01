@@ -2,6 +2,7 @@
 {-# LANGUAGE ConstraintKinds         #-}
 {-# LANGUAGE DataKinds               #-}
 {-# LANGUAGE DeriveGeneric           #-}
+{-# LANGUAGE EmptyCase               #-}
 {-# LANGUAGE FlexibleContexts        #-}
 {-# LANGUAGE FlexibleInstances       #-}
 {-# LANGUAGE KindSignatures          #-}
@@ -142,10 +143,13 @@ instance GInsert (K1 _1 a) (K1 _1 (Seq a)) where
     sq S.|> a
 
 instance GInsert U1 U1 where
-  gInsert _ _ _ = U1
+  gInsert _ U1 U1 = U1
 
 instance GInsert V1 V1 where
-  gInsert _ _ _ = undefined
+  gInsert _ v _ = absurdV1 v
+
+absurdV1 :: V1 x -> a
+absurdV1 v = case v of {}
 
 instance (GInsert a a', GInsert b b')
     => GInsert (a :*: b) (a' :*: b') where
@@ -181,7 +185,7 @@ instance GUpdate U1 U1 where
   gUpdate _ _ _ = U1
 
 instance GUpdate V1 V1 where
-  gUpdate _ _ _ = undefined
+  gUpdate _ v _ = absurdV1 v
 
 instance (GUpdate a a', GUpdate b b') => GUpdate (a :*: b) (a' :*: b') where
   gUpdate idx (a :*: b) (ca :*: cb) =
@@ -208,9 +212,6 @@ instance (GEmpty a, GEmpty b) => GEmpty (a :*: b) where
 
 instance GEmpty U1 where
   gEmpty = U1
-
-instance GEmpty V1 where
-  gEmpty = undefined
 
 instance GEmpty a => GEmpty (M1 _1 _2 a) where
   gEmpty = M1 gEmpty
