@@ -1,43 +1,45 @@
 -- # pragmas
-{-# LANGUAGE AllowAmbiguousTypes   #-}
-{-# LANGUAGE ConstraintKinds       #-}
-{-# LANGUAGE DataKinds             #-}
-{-# LANGUAGE FlexibleContexts      #-}
-{-# LANGUAGE FlexibleInstances     #-}
-{-# LANGUAGE GADTs                 #-}
-{-# LANGUAGE KindSignatures        #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE OverloadedLabels      #-}
-{-# LANGUAGE PolyKinds             #-}
-{-# LANGUAGE RankNTypes            #-}
-{-# LANGUAGE ScopedTypeVariables   #-}
-{-# LANGUAGE TypeApplications      #-}
-{-# LANGUAGE TypeFamilies          #-}
-{-# LANGUAGE TypeOperators         #-}
-{-# LANGUAGE UndecidableInstances  #-}
-
-{-# LANGUAGE TypeInType  #-}
+{-# LANGUAGE AllowAmbiguousTypes      #-}
+{-# LANGUAGE ConstraintKinds          #-}
+{-# LANGUAGE DataKinds                #-}
+{-# LANGUAGE FlexibleContexts         #-}
+{-# LANGUAGE FlexibleInstances        #-}
+{-# LANGUAGE GADTs                    #-}
+{-# LANGUAGE KindSignatures           #-}
+{-# LANGUAGE MultiParamTypeClasses    #-}
+{-# LANGUAGE OverloadedLabels         #-}
+{-# LANGUAGE PolyKinds                #-}
+{-# LANGUAGE RankNTypes               #-}
+{-# LANGUAGE ScopedTypeVariables      #-}
+{-# LANGUAGE StandaloneKindSignatures #-}
+{-# LANGUAGE TypeApplications         #-}
+{-# LANGUAGE TypeFamilies             #-}
+{-# LANGUAGE TypeOperators            #-}
+{-# LANGUAGE UndecidableInstances     #-}
 
 module OpenProduct where
 
 -- # imports
-import Data.Kind (Constraint, Type)
-import Data.Proxy (Proxy (..))
+import           Data.Constraint
+import           Data.Kind (Constraint, Type)
+import           Data.Proxy (Proxy (..))
 import qualified Data.Vector as V
-import Fcf hiding (Any)
-import GHC.OverloadedLabels (IsLabel (..))
-import GHC.TypeLits
-import Unsafe.Coerce (unsafeCoerce)
-
-import Data.Constraint
+import           Fcf hiding (Any)
+import           GHC.OverloadedLabels (IsLabel (..))
+import           GHC.TypeLits
+import           Unsafe.Coerce (unsafeCoerce)
 
 
 data Any (f :: k -> Type) where
   Any :: f t -> Any f
 
 
-data OpenProduct (f  :: k -> Type)
-                 (ts :: [(Symbol, k)]) where  -- ! 1
+type OpenProduct
+    :: (k -> Type)
+    -> [(Symbol, k)]
+    -> Type
+-- TODO(sandy): this annotation is probably wrong
+data OpenProduct f ts where  -- ! 1
   OpenProduct :: V.Vector (Any f) -> OpenProduct f ts
 
 nil :: OpenProduct f '[]
@@ -52,7 +54,8 @@ instance (key ~ key') -- ! 1
       => IsLabel key (Key key') where
   fromLabel = Key
 
-type UniqueKey (key :: k) (ts :: [(k, t)])
+type UniqueKey :: k -> [(k, t)] -> Exp Bool
+type UniqueKey key ts
   = Null =<< Filter (TyEq key <=< Fst) ts
 
 badInsert
@@ -72,11 +75,13 @@ oldInsert
 oldInsert _ ft (OpenProduct v) =
   OpenProduct $ V.cons (Any ft) v
 
-type family RequireUniqueKey
-      (result :: Bool)  -- ! 1
-      (key :: Symbol)
-      (t :: k)
-      (ts :: [(Symbol, k)]) :: Constraint where
+type RequireUniqueKey
+    :: Bool
+    -> Symbol
+    -> k
+    -> [(Symbol, k)]
+    -> Constraint
+type family RequireUniqueKey result key t ts where
   RequireUniqueKey 'True  key t ts = ()  -- ! 2
   RequireUniqueKey 'False key t ts =
     TypeError
@@ -120,8 +125,11 @@ data Placeholder1Of3
 type instance Eval (Placeholder1Of3 f b c a) =
   Eval (f a b c)
 
-type UpsertLoc (key :: Symbol)
-               (ts :: [(Symbol, k)]) =
+type UpsertLoc
+    :: Symbol
+    -> [(Symbol, k)]
+    -> Maybe Nat
+type UpsertLoc key ts =
   Eval (FindIndex (TyEq key <=< Fst) ts)
 
 
@@ -137,9 +145,12 @@ instance KnownNat n => FindUpsertElem ('Just n) where
   upsertElem =
     Just . fromIntegral . natVal $ Proxy @n
 
-type UpsertElem (key :: Symbol)
-                (t :: k)
-                (ts :: [(Symbol, k)]) =
+type UpsertElem
+    :: Symbol
+    -> k
+    -> [(Symbol, k)]
+    -> Exp [(Symbol, k)]
+type UpsertElem key t ts =
   FromMaybe ('(key, t) ': ts)
     =<< Map (Placeholder1Of3 SetIndex '(key, t) ts)  -- ! 1
     =<< FindIndex (TyEq key <=< Fst) ts
@@ -156,7 +167,11 @@ upsert k ft (OpenProduct v) =
     Nothing -> V.cons (Any ft) v
     Just n  -> v V.// [(n, Any ft)]
 
-type FindElem (key :: Symbol) (ts :: [(Symbol, k)]) =
+type FindElem
+    :: Symbol
+    -> [(Symbol, k)]
+    -> Nat
+type FindElem key ts =
   Eval (FromMaybe Stuck
     =<< FindIndex (TyEq key <=< Fst) ts)
 
@@ -168,7 +183,11 @@ findElem = fromIntegral
          . natVal
          $ Proxy @(FindElem key ts)
 
-type LookupType (key :: k) (ts :: [(k, t)]) =
+type LookupType
+    :: k
+    -> [(k, t)]
+    -> Exp t
+type LookupType key ts =
   FromMaybe Stuck =<< Lookup key ts
 
 get
@@ -183,13 +202,17 @@ get _ (OpenProduct v) =
     unAny (Any a) = unsafeCoerce a  -- ! 2
 
 
-type UpdateElem (key :: Symbol) (t :: k) (ts :: [(Symbol, k)]) =
+type UpdateElem
+    :: Symbol
+    -> k
+    -> [(Symbol, k)]
+    -> Exp [(Symbol, k)]
+type UpdateElem key t ts =
   SetIndex (FindElem key ts) '(key, t) ts
 
 
-type family FriendlyFindElem (funcName :: Symbol)
-                             (key :: Symbol)
-                             (ts :: [(Symbol, k)]) where
+type FriendlyFindElem :: Symbol -> Symbol -> [(Symbol, k)] -> k
+type family FriendlyFindElem funcName key ts where
   FriendlyFindElem funcName key ts =
     Eval (
       FromMaybe
@@ -204,15 +227,15 @@ type family FriendlyFindElem (funcName :: Symbol)
        ':<>: 'ShowType (Eval (Map Fst ts))
            )) =<< FindIndex (TyEq key <=< Fst) ts)
 
-type family ShowList (ts :: [k]) where
+type ShowList :: [k] -> ErrorMessage
+type family ShowList ts where
   ShowList '[] = Text ""
   ShowList (a ': '[]) = ShowType a
   ShowList (a ': as)  =
     ShowType a ':<>: Text ", " ':<>: ShowList as
 
-type family FriendlyFindElem2 (funcName :: Symbol)
-                             (key :: Symbol)
-                             (ts :: [(Symbol, k)]) where
+type FriendlyFindElem2 :: Symbol -> Symbol -> [(Symbol, k)] -> k
+type family FriendlyFindElem2 funcName key ts where
   FriendlyFindElem2 funcName key ts =
     Eval (
       FromMaybe

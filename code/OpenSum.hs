@@ -1,17 +1,18 @@
 -- # pragmas
-{-# LANGUAGE AllowAmbiguousTypes   #-}
-{-# LANGUAGE ConstraintKinds       #-}
-{-# LANGUAGE DataKinds             #-}
-{-# LANGUAGE FlexibleContexts      #-}
-{-# LANGUAGE FlexibleInstances     #-}
-{-# LANGUAGE GADTs                 #-}
-{-# LANGUAGE PolyKinds             #-}
-{-# LANGUAGE RankNTypes            #-}
-{-# LANGUAGE ScopedTypeVariables   #-}
-{-# LANGUAGE TypeApplications      #-}
-{-# LANGUAGE TypeFamilies          #-}
-{-# LANGUAGE TypeOperators         #-}
-{-# LANGUAGE UndecidableInstances  #-}
+{-# LANGUAGE AllowAmbiguousTypes      #-}
+{-# LANGUAGE ConstraintKinds          #-}
+{-# LANGUAGE DataKinds                #-}
+{-# LANGUAGE FlexibleContexts         #-}
+{-# LANGUAGE FlexibleInstances        #-}
+{-# LANGUAGE GADTs                    #-}
+{-# LANGUAGE PolyKinds                #-}
+{-# LANGUAGE RankNTypes               #-}
+{-# LANGUAGE ScopedTypeVariables      #-}
+{-# LANGUAGE StandaloneKindSignatures #-}
+{-# LANGUAGE TypeApplications         #-}
+{-# LANGUAGE TypeFamilies             #-}
+{-# LANGUAGE TypeOperators            #-}
+{-# LANGUAGE UndecidableInstances     #-}
 
 module OpenSum where
 
@@ -24,14 +25,15 @@ import Unsafe.Coerce
 
 import Data.Functor.Identity
 
-
-data OpenSum (f :: k -> Type) (ts :: [k]) where -- ! 1
+type OpenSum :: (k -> Type) -> [k] -> Type
+data OpenSum f ts where -- ! 1
   UnsafeOpenSum  -- ! 2
       :: Int
       -> f t -- ! 3
       -> OpenSum f ts -- ! 4
 
-type FindElem (key :: k) (ts :: [k]) =
+type FindElem :: k -> [k] -> Exp Nat
+type FindElem key ts =
   FromMaybe Stuck  -- ! 1
     =<< FindIndex (TyEq key) ts
 
@@ -46,7 +48,8 @@ inj :: forall f t ts. Member t ts => f t -> OpenSum f ts
 inj = UnsafeOpenSum (findElem @t @ts)
 
 
-type family FriendlyFindElem (f :: k -> Type) (t :: k) (ts :: [k]) where
+type FriendlyFindElem :: (k -> Type) -> k -> [k] -> Exp Nat
+type family FriendlyFindElem f t ts where
   FriendlyFindElem f t ts =
     FromMaybe
          ( TypeError
