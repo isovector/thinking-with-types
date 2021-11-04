@@ -2,8 +2,8 @@
 ## Associated Type Families
 
 
-Let's return to our earlier discussion about `printf`{.cpp}. Recall, the concern
-was that despite `printf`{.cpp} having a type that humans can understand, its many
+Let's return to our earlier discussion about `printf`. Recall, the concern
+was that despite `printf` having a type that humans can understand, its many
 bugs come from our inability to convince the compiler about this type.
 
 One of Haskell's most profound lessons is a deep appreciation for types. With it
@@ -11,23 +11,23 @@ comes the understanding that `String`s are suitable only for
 *unstructured* text. Our format "strings" most certainly *are*
 structured, and thus, as the argument goes, they should not be `String`s.
 
-But, if `printf`{.cpp}'s format string isn't really a string, what is it?
+But, if `printf`'s format string isn't really a string, what is it?
 
 When we look only at the specifiers in the format string, we see that they're a
 kind of type signature themselves. They describe not only the number of
 parameters, but also the types of those parameters.
 
-For example, the format string `"\%c\%d\%d"`{.cpp} could be interpreted in
+For example, the format string `"\%c\%d\%d"` could be interpreted in
 Haskell as a function that takes a character, two integers, and returns a
 string---the concatenation of pushing all of those parameters together. In
-other words, `"\%c\%d\%d"`{.cpp} corresponds to the type `Char -> Int -> Int
+other words, `"\%c\%d\%d"` corresponds to the type `Char -> Int -> Int
 -> String`.
 
 But, a format string is not only specifiers; it can also contain arbitrary text
 that is to be strung together between the arguments. In our earlier example,
-this corresponds to format strings like `"some number: \%d"`{.cpp}. The type
+this corresponds to format strings like `"some number: \%d"`. The type
 corresponding to this function is still just `Int -> String`, but its actual
-implementation should be `\textbackslash s -> "some number: " <> show s`{.haskell}.
+implementation should be `\textbackslash s -> "some number: " <> show s`.
 
 After some thinking, the key insight here turns out that these format strings
 are nothing more than a sequence of types and text to intersperse between them.
@@ -38,16 +38,14 @@ literal pieces of text to output.
 
 ### Building Types from a Schema
 
-
-
-We'll need a data-structure to store the format schema of a `printf`{.haskell} call.
+We'll need a data-structure to store the format schema of a `printf` call.
 This can be done by building a binary type constructor which is polykinded in
 both of its parameters. The goal is to build a type-safe, heterogeneously-kinded
 linked-list.
 
 [code/Printf.hs:typeList](Snip)
 
-The `(:<<)` symbol was chosen due to the similarly it has with C++'s `<<`{.cpp}
+The `(:<<)` symbol was chosen due to the similarly it has with C++'s `<<`
 output stream operator, but has no other special meaning to Haskell or to us.
 
 Notice here that `(:<<)` doesn't have any data constructors, so we are unable
@@ -65,8 +63,8 @@ together indefinitely and store everything we want at the type-level:
 :kind! "hello " :<< String :<< "!"
 ```
 
-Because of our `infixr 5 :<<`{.haskell} declaration, repeated applications of
-`(:<<)` associate to the right as we'd expect.
+Because of our `infixr 5 :<<` declaration, repeated applications of `(:<<)`
+associate to the right as we'd expect.
 
 Armed with a means of storing our format schema, our next step is to use it to
 construct the proper type signature of our formatting function. Which is to say,
@@ -107,22 +105,19 @@ producing something by tearing a recursive structure apart into smaller and
 smaller pieces, until you find a case simple enough you know how to handle. It's
 really just a fancy name for "divide and conquer."
 
-In our `printf`{.cpp} example, we will require three cases:
+In our `printf` example, we will require three cases:
 
-<ol>
-  * `HasPrintf (text :: Symbol)`{.haskell}
-  * `HasPrintf a => HasPrintf ((text :: Symbol) :<< a)`{.haskell}
-  * `HasPrintf a => HasPrintf ((param :: Type) :<< a)`{.haskell}
-</ol>
+1. `HasPrintf (text :: Symbol)`
+2. `HasPrintf a => HasPrintf ((text :: Symbol) :<< a)`
+3. `HasPrintf a => HasPrintf ((param :: Type) :<< a)`
 
 With these three cases, we can tear down any right-associative sequence of
 `(:<<)`s via case 2 or 3 until we run out of `(:<<)` constructors. At that
-point, we will finally be left with a `Symbol` that we can handle via case
-1.
+point, we will finally be left with a `Symbol` that we can handle via case 1.
 
 Case 1 corresponds to having no more parameters. Here there is not any
-type-level recursion to be done, and so we should just return our desired
-output type---a `String`.
+type-level recursion to be done, and so we should just return our desired output
+type---a `String`.
 
 [code/PrintfTypes.hs:baseInstance](Snip)
 
@@ -138,8 +133,8 @@ of `Printf a` comes from an instance of `HasPrintf a`---which we have as a
 constraint on this instance of `HasPrintf`.
 
 Case 3 is the most interesting; here we want to add our `param` type as a
-parameter to the generated function. We can do that by defining `Printf` as
-an arrow type that takes the desired parameter, and recurses.
+parameter to the generated function. We can do that by defining `Printf` as an
+arrow type that takes the desired parameter, and recurses.
 
 [code/PrintfTypes.hs:paramInstance](Snip)
 
@@ -179,18 +174,19 @@ command:
 
 Much easier.
 
+
 ### Generating Associated Terms
 
 Building the type `Printf a` is wonderful and all, but producing a type
 without any corresponding terms won't do us much good. Our next step is to
-update the definition of `HasPrintf` to also provide a `format`{.haskell} function.
+update the definition of `HasPrintf` to also provide a `format` function.
 
 [code/Printf.hs:HasPrintf](Snip)
 
-The type of `format`{.haskell} is a little odd, and could use an explanation. Looking
-at the [2](Ann), we find a term of type `Proxy a`. This `Proxy`{.haskell} exists only
+The type of `format` is a little odd, and could use an explanation. Looking
+at the [2](Ann), we find a term of type `Proxy a`. This `Proxy` exists only
 to allow Haskell to find the correct instance of `HasPrintf` from the
-call-site of `format`{.haskell}. You might think Haskell would be able to find an
+call-site of `format`. You might think Haskell would be able to find an
 instance based on the `a` in `Printf a`, but this isn't so for reasons we
 will discuss soon.
 
@@ -198,12 +194,12 @@ The parameter [1](Ann) is an implementation detail, and will act as an
 accumulator where we can keep track of all of the formatting done by earlier
 steps in the recursion.
 
-Finally, `format`{.haskell} results in a `Printf a` at [3](Ann). Recall that
+Finally, `format` results in a `Printf a` at [3](Ann). Recall that
 `Printf` will expand to arrow types if the formatting schema contains
 parameters, and thus all of our additional formatting is hiding inside [3](Ann).
 
 Our instance definitions for each of the three cases can be updated so they
-correctly implement `format`{.haskell}.
+correctly implement `format`.
 
 In the first case, we have no work to do, so the only thing necessary is to
 return the accumulator and append the final text to it.
@@ -211,9 +207,8 @@ return the accumulator and append the final text to it.
 [code/Printf.hs:baseInstance](Snip)
 
 Case 2 is very similar; here we want to update our accumulator with the
-`symbolVal`{.haskell} of `text`, but also structurally recursively call `format`{.haskell}.
-This requires conjuring up a `Proxy a`, which we can do via
-`-XTypeApplications`:
+`symbolVal` of `text`, but also structurally recursively call `format`. This
+requires conjuring up a `Proxy a`, which we can do via `-XTypeApplications`:
 
 [code/Printf.hs:textInstance](Snip)
 
@@ -221,7 +216,7 @@ All that's left is case 3, which should look familiar to the attentive reader.
 
 [code/Printf.hs:paramInstance](Snip)
 
-Notice the `param`{.haskell} parameter to our `format`{.haskell} function here---this
+Notice the `param` parameter to our `format` function here---this
 corresponds to the `param` parameter in case 3's `Printf` instance. For
 any specifier, we use its `Show` instance to convert the parameter into a
 string, and append it to our accumulator.
@@ -242,14 +237,14 @@ printf (Proxy @(Int :<< "+" :<< Int :<< "=3")) 1 2
 
 It works pretty well for our first attempt, all things considered. One
 noticeable flaw is that `String`s gain an extra set of quotes due to being
-`show`{.haskell}n. We can fix this infelicity by providing a special instance of
+`show`n. We can fix this infelicity by providing a special instance of
 `HasPrintf` just for `String`s:
 
 [code/Printf.hs:stringInstance](Snip)
 
 Writing this instance will require the `-XFlexibleInstances` extension,
 since the instance head is no longer just a single type constructor and type
-variables. We mark the instance with the `{-\# OVERLAPPING \#-}`{.haskell} pragma
+variables. We mark the instance with the `{-\# OVERLAPPING \#-}` pragma
 because we'd like to select this instance instead of case 3 when the parameter
 is a `String`.
 
@@ -265,7 +260,7 @@ families---that, in general, they're not allowed. The reason we can overlap
 type family instance. When `param ~ String`, both instances give
 `Printf (param :<< a)` to be `String -> Printf a`.
 
-What we've accomplished here is a type-safe version of `printf`{.cpp}, but by
+What we've accomplished here is a type-safe version of `printf`, but by
 recognizing that C++'s "format string" is better thought of as a "structured
 type signature." Using type-level programming, we were able to convert such a
 thing into a function with the correct type, that implements nontrivial logic.
@@ -274,5 +269,4 @@ This technique is widely-applicable. For example, the popular
 `servant`@cite:servant library uses a similar type-level schema to describe
 web APIs, and will generate typesafe servers, clients and interop specs for
 them.
-
 

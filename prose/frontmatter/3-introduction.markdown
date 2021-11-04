@@ -17,21 +17,21 @@ inscrutable, then this book is probably not for you. Not yet.
 So whom is this book for? The target audience I've been trying to write for are
 intermediate-to-proficient with the language. They're capable of solving real
 problems in Haskell, and doing it without too much hassle. They need not have
-strong opinions on `ExceptT` vs throwing exceptions in `IO`, nor do they
-need to know how to inspect generated Core to find performance bottlenecks.
+strong opinions on `ExceptT` vs throwing exceptions in `IO`, nor do they need to
+know how to inspect generated Core to find performance bottlenecks.
 
 But the target reader should have a healthy sense of unease about the programs
 they write. They should look at their comments saying "don't call this function
 with $n=5$ because it will crash," and wonder if there's some way to teach the
-compiler about that. The reader should nervously eyeball their calls to
-`error`{.haskell} that they're convinced can't possibly happen, but are required to
-make the type-checker happy.
+compiler about that. The reader should nervously eyeball their calls to `error`
+that they're convinced can't possibly happen, but are required to make the
+type-checker happy.
 
-In short, the reader should be looking for opportunities to make *less*
-code compile. This is not out of a sense of masochism, anarchy, or any such
-thing. Rather, this desire comes from a place of benevolence---a little
-frustration with the type-checker now is preferable to a hard-to-find bug making
-its way into production.
+In short, the reader should be looking for opportunities to make *less* code
+compile. This is not out of a sense of masochism, anarchy, or any such thing.
+Rather, this desire comes from a place of benevolence---a little frustration
+with the type-checker now is preferable to a hard-to-find bug making its way
+into production.
 
 Type-level programming, like anything, is best in moderation. It comes with its
 own costs in terms of complexity, and as such should be wielded with care. While
@@ -47,12 +47,12 @@ we know how to teach. Unfortunately, when to use type-level programming is
 largely a matter of style. It's easy to take the ball and run with it, but
 discretion is divine.
 
-When in doubt, err on the side of *not* doing it at the type-level. Save
-these techniques for the cases where it'd be catastrophic to get things wrong,
-for the cases where a little type-level stuff goes a long way, and for the cases
-where it will drastically improve the API. If your use-case isn't obviously one
-of these, it's a good bet that there is a cleaner and easier means of doing it
-with values.
+When in doubt, err on the side of *not* doing it at the type-level. Save these
+techniques for the cases where it'd be catastrophic to get things wrong, for the
+cases where a little type-level stuff goes a long way, and for the cases where
+it will drastically improve the API. If your use-case isn't obviously one of
+these, it's a good bet that there is a cleaner and easier means of doing it with
+values.
 
 But let's talk more about types themselves.
 
@@ -65,14 +65,14 @@ connect our head to the table, I think this is a criticism worth keeping in
 mind.
 
 As Haskellers, we certainly have strong opinions about the value of types. They
-*are* useful, and they *do* carry their weight in gold when coding,
-debugging and refactoring. While we can dismiss our colleague's complaints with
-a wave of the hand and the justification that they've never seen a "real" type
-system before, we are doing them and ourselves a disservice both. Such a
-flippant response is to ignore the spirit of their unhappiness---types
-*often do* get in the way.  We've just learned to blind ourselves to these
-shortcomings, rather than to bite the bullet and entertain that maybe types
-aren't always the solution to every problem.
+*are* useful, and they *do* carry their weight in gold when coding, debugging
+and refactoring. While we can dismiss our colleague's complaints with a wave of
+the hand and the justification that they've never seen a "real" type system
+before, we are doing them and ourselves a disservice both. Such a flippant
+response is to ignore the spirit of their unhappiness---types *often do* get in
+the way.  We've just learned to blind ourselves to these shortcomings, rather
+than to bite the bullet and entertain that maybe types aren't always the
+solution to every problem.
 
 Simon Peyton Jones, one of the primary authors of Haskell, is quick to
 acknowledge the fact that there are plenty of error-free programs ruled out by a
@@ -83,72 +83,66 @@ type-error, but never actually evaluates it:
 fst ("no problems", True <> 17)
 ```
 
-Because the type error gets ignored lazily by `fst`{.haskell}, evaluation of such an
-expression will happily produce `"no problems"`{.haskell} at runtime. Despite the fact
+Because the type error gets ignored lazily by `fst`, evaluation of such an
+expression will happily produce `"no problems"` at runtime. Despite the fact
 that we consider it to be ill-typed, it is in fact, well-behaved. The usefulness
 of such an example is admittedly low, but the point stands; types often do get
 in the way of perfectly reasonable programs.
 
-Sometimes such an obstruction comes under the guise of "it's not clear what
-type this thing should have." One particularly poignant case of this is C's
-`printf`{.cpp} function:
+Sometimes such an obstruction comes under the guise of "it's not clear what type
+this thing should have." One particularly poignant case of this is C's
+`printf` function:
+
+```c
+int printf (const char *format, ...)
+```
 
 
-`int printf (const char *format, ...)`{.cpp}
-
-
-If you've never before had the pleasure of using `printf`{.cpp}, it works like
-this: it parses the `format`{.cpp} parameter, and uses its structure to pop
+If you've never before had the pleasure of using `printf`, it works like
+this: it parses the `format` parameter, and uses its structure to pop
 additional arguments off of the call-stack. You see, it's the shape of
-`format`{.cpp} that decides what parameters should fill in the `...`{.cpp} above.
+`format` that decides what parameters should fill in the `...` above.
 
-For example, the format string `"hello \%s"`{.cpp} takes an additional string and
-interpolates it in place of the `\%s`{.cpp}. Likewise, the specifier `\%d`{.cpp}
+For example, the format string `"hello %s"` takes an additional string and
+interpolates it in place of the `%s`. Likewise, the specifier `%d`
 describes interpolation of a signed decimal integer.
 
-The following calls to `printf`{.cpp} are all valid:
+The following calls to `printf` are all valid:
 
-<ul>
-  * `printf("hello \%s", "world")`{.cpp}, producing "hello world",
-  * `printf("\%d + \%d = \%s", 1, 2, "three")`{.cpp}, producing "1 + 2 =
-    three",
-  * `printf("no specifiers")`{.cpp}, producing "no specifiers".
-</ul>
+* `printf("hello %s", "world")`, producing "hello world",
+* `printf("%d + %d = %s", 1, 2, "three")`, producing "1 + 2 = three",
+* `printf("no specifiers")`, producing "no specifiers".
 
 Notice that, as written, it seems impossible to assign a Haskell-esque type
-signature to `printf`{.cpp}. The additional parameters denoted by its ellipsis are
+signature to `printf`. The additional parameters denoted by its ellipsis are
 given types by the value of its first parameter---a string. Such a pattern is
-common in dynamically typed languages, and in the case of `printf`{.cpp}, it's
+common in dynamically typed languages, and in the case of `printf`, it's
 inarguably useful.
 
-The documentation for `printf`{.cpp} is quick to mention that the format string
-must not be provided by the user---doing so opens up vulnerabilities in which an
+The documentation for `printf` is quick to mention that the format string must
+not be provided by the user---doing so opens up vulnerabilities in which an
 attacker can corrupt memory and gain access to the system. Indeed, this is
 hugely widespread problem---and crafting such a string is often the first
 homework in any university lecture on software security.
 
-To be clear, the vulnerabilities in `printf`{.cpp} occur when the format string's
+To be clear, the vulnerabilities in `printf` occur when the format string's
 specifiers do not align with the additional arguments given. The following,
-innocuous-looking calls to `printf`{.cpp} are both malicious.
+innocuous-looking calls to `printf` are both malicious.
 
-<ul>
-  * `printf("\%d")`{.cpp}, which will probably corrupt the stack,
-  * `printf("\%s", 1)`{.cpp}, which will read an arbitrary amount of memory.
-</ul>
+* `printf("%d")`, which will probably corrupt the stack,
+* `printf("%s", 1)`, which will read an arbitrary amount of memory.
 
-C's type system is insufficiently expressive to describe `printf`{.cpp}. But
-because `printf`{.cpp} is such a useful function, this is not a persuasive-enough
-reason to exclude it from the language. Thus, type-checking is effectively
-turned off for calls to `printf`{.cpp} so as to have ones cake and eat it too.
-However, this opens a hole through which type errors can make it all the way to
-runtime---in the form of undefined behavior and security issues.
+C's type system is insufficiently expressive to describe `printf`. But because
+`printf` is such a useful function, this is not a persuasive-enough reason to
+exclude it from the language. Thus, type-checking is effectively turned off for
+calls to `printf` so as to have ones cake and eat it too.  However, this opens a
+hole through which type errors can make it all the way to runtime---in the form
+of undefined behavior and security issues.
 
 My opinion is that preventing security holes is a much more important aspect of
-the types, over "`null` is the billion dollar mistake" or whichever
-other arguments are in vogue today. We will return to the problem of
-`printf`{.cpp} in chapter 9.
-
-
+the types, over "`null` is the billion dollar mistake" or whichever other
+arguments are in vogue today. We will return to the problem of `printf` in
+chapter 9.
 
 With very few exceptions, the prevalent attitude of Haskellers has been to
 dismiss the usefulness of ill-typed programs. The alternative is an
@@ -156,9 +150,8 @@ uncomfortable truth: that our favorite language can't do something useful that
 other languages can.
 
 But all is not lost. Indeed, Haskell *is* capable of expressing things as
-oddly-typed as `printf`{.cpp}, for those of us willing to put in the effort to
-learn how. This book aims to be *the* comprehensive manual for getting you
-from here to there, from a competent Haskell programmer to one who convinces the
-compiler to do their work for them.
-
+oddly-typed as `printf`, for those of us willing to put in the effort to learn
+how. This book aims to be *the* comprehensive manual for getting you from here
+to there, from a competent Haskell programmer to one who convinces the compiler
+to do their work for them.
 
