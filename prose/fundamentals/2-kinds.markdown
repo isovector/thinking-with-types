@@ -1,4 +1,3 @@
-
 ## Terms, Types and Kinds
 
 ### The Kind System
@@ -17,13 +16,11 @@ The kind system, if you're unfamiliar with it, can be reasonably described as
 "the type system for types." By that line of reasoning, then, kinds are
 loosely "the types of types."
 
-
-
-Consider the numbers `4`{.haskell} and `5`{.haskell}, both of type `Int`. As far as the
-compiler is concerned, we could replace every instance of `4`{.haskell} with `5`{.haskell} in
+Consider the numbers `4` and `5`, both of type `Int`. As far as the
+compiler is concerned, we could replace every instance of `4` with `5` in
 our program, and the whole thing would continue to compile. The program itself
 might do something different, but by virtue of both being of type `Int`,
-`4`{.haskell} and `5`{.haskell} are interchangeable---at least as far as the type checker is
+`4` and `5` are interchangeable---at least as far as the type checker is
 concerned.
 
 
@@ -49,7 +46,7 @@ types.
 
 In this book, we will typeset kinds in `SmallCaps` in order to
 differentiate them from regular types. Note that this is merely a convention of
-the printing process---the kind `Type` should be still written as `Type`{.haskell}
+the printing process---the kind `Type` should be still written as `Type`
 in a Haskell source file.
 
 
@@ -81,7 +78,7 @@ naturally as the type checking rules do.
 #### Constraint Kinds
 
 However, kinds apply to everything at the type-level, not just the things we
-traditionally think of as "types." For example, the type of `show`{.haskell} is
+traditionally think of as "types." For example, the type of `show` is
 `Show a => a -> String`. This `Show` thing exists as part of the type
 signature, even though it's clearly not a `Type`. Does `Show a` also
 have a kind?
@@ -89,41 +86,39 @@ have a kind?
 Yes! Its kind is `Constraint`. More generally, `Constraint` is the
 kind of any fully-saturated typeclass.
 
-```exercise
-If `Show Int` has kind `Constraint`, what's the kind of
-`Show`?
-```
+Exercise
 
-```solution
-  `Type -> Constraint`
-```
+:   If `Show Int` has kind `Constraint`, what's the kind of `Show`?
+
+Solution
+:   `Type -> Constraint`
 
 
-```exercise
-What is the kind of `Functor`?
-```
+Exercise
 
-```solution
-  `(Type -> Type) -> Constraint`
-```
+:   What is the kind of `Functor`?
 
+Solution
 
-```exercise
-What is the kind of `Monad`?
-```
-
-```solution
-  `(Type -> Type) -> Constraint`
-```
+:   `(Type -> Type) -> Constraint`
 
 
-```exercise
-What is the kind of `MonadTrans`?
-```
+Exercise
 
-```solution
-  `((Type -> Type) -> Type -> Type) -> Constraint`
-```
+:   What is the kind of `Monad`?
+
+Solution
+
+:   `(Type -> Type) -> Constraint`
+
+
+Exercise
+
+:   What is the kind of `MonadTrans`?
+
+Solution
+
+:   `((Type -> Type) -> Type -> Type) -> Constraint`
 
 
 We will discuss the `Constraint` kind in much further detail later
@@ -141,57 +136,52 @@ extensions.
 
 ### Data Kinds
 
-By enabling the `-XDataKinds` extension, we gain the ability to talk about
-kinds other than `Type`, `Constraint`, and their arrow derivatives. In
-particular, `-XDataKinds` lifts data constructors into *type
-constructors* and types into *kinds.*
+By enabling the `-XDataKinds` extension, we gain the ability to talk about kinds
+other than `Type`, `Constraint`, and their arrow derivatives. In particular,
+`-XDataKinds` lifts data constructors into *type constructors* and types into
+*kinds.*
 
 What does that mean? As an example, let's look at a familiar type definition:
 
 [code/Kinds.hs:Bool](Snip)
 
-When `-XDataKinds` is enabled, the above *type* definition of `Bool`
-*also* gives us the following *kind* definition---though note that
-this is not legal Haskell syntax:
+When `-XDataKinds` is enabled, the above *type* definition of `Bool` *also*
+gives us the following *kind* definition---though note that this is not legal
+Haskell syntax:
 
 [code/Kinds.hs:kind](Snip)
 
-In other words, via `-XDataKinds` we have now declared the types `'True`
-and `'False`---both of kind `Bool`. We call `'True` and `'False`
-promoted data constructors. To be clear the
-`data Bool`{.haskell} definition above introduces the following things into scope (as
-usual):
+In other words, via `-XDataKinds` we have now declared the types `'True` and
+`'False`---both of kind `Bool`. We call `'True` and `'False` promoted data
+constructors. To be clear the `data Bool` definition above introduces the
+following things into scope (as usual):
 
-<ul>
-  * A type constructor `Bool` of kind `Type`
-  * A data constructor `True`{.haskell} of type `Bool`
-  * A data constructor `False`{.haskell} of type `Bool`
-</ul>
+* A type constructor `Bool` of kind `Type`
+* A data constructor `True` of type `Bool`
+* A data constructor `False` of type `Bool`
 
-However, when `-XDataKinds` is enabled, our definition of `Bool` also
-introduces the following into scope:
+However, when `-XDataKinds` is enabled, our definition of `Bool` also introduces
+the following into scope:
 
-<ul>
-  * A new kind: `Bool`
-  * A promoted data constructor `'True` of kind `Bool`
-  * A promoted data constructor `'False` of kind `Bool`
-</ul>
+* A new kind: `Bool`
+* A promoted data constructor `'True` of kind `Bool`
+* A promoted data constructor `'False` of kind `Bool`
 
-The apostrophes on `'True` and `'False` are known as ticks,
-and are used to distinguish promoted data constructors from everyday type
-constructors.  Because promoted data constructors exist in the same namespace as
-type constructors, these ticks aid in differentiating the two. Strictly
-speaking, the ticks aren't always necessary, but consider the common case of a
-type with a single data constructor:
+The apostrophes on `'True` and `'False` are known as ticks, and are used to
+distinguish promoted data constructors from everyday type constructors.  Because
+promoted data constructors exist in the same namespace as type constructors,
+these ticks aid in differentiating the two. Strictly speaking, the ticks aren't
+always necessary, but consider the common case of a type with a single data
+constructor:
 
 [code/Kinds.hs:Unit](Snip)
 
 In this example, it's very important to differentiate between the *type
-constructor* `Unit` (of kind `Type`), and the *promoted data
-constructor* `'Unit` (of kind `Unit`.) This is a subtle point, and can
-often lead to inscrutable compiler errors; while it's fine to ask for values of
-type `Maybe Unit`, it's a *kind error* to ask for `Maybe
-'Unit`---because `'Unit` is the wrong kind!
+constructor* `Unit` (of kind `Type`), and the *promoted data constructor*
+`'Unit` (of kind `Unit`.) This is a subtle point, and can often lead to
+inscrutable compiler errors; while it's fine to ask for values of type `Maybe
+Unit`, it's a *kind error* to ask for `Maybe 'Unit`---because `'Unit` is the
+wrong kind!
 
 Let's return to the question of the importance of data kinds. Type-level
 programming in Haskell without them is equivalent to programming in a
@@ -213,8 +203,8 @@ administrator functionality. Because it would be particularly bad if we
 accidentally leaked admin functionality to non-admins, we decide to turn a
 business logic error into a type error and ask the type system for help.
 
-We can provide a `UserType` type, whose only purpose is to give us access to
-its promoted data constructors.
+We can provide a `UserType` type, whose only purpose is to give us access to its
+promoted data constructors.
 
 [code/Kinds.hs:UserType](Snip)
 
@@ -228,20 +218,20 @@ administration token.
 
 [code/Kinds.hs:doSensitiveThings](Snip)
 
-This minor change will cause a type error whenever `doSensitiveThings`{.haskell} is
-called without an administration token. Such an approach makes it much harder to
-accidentally call `doSensitiveThings`{.haskell}. More refined techniques (such as the
-ST trick, discussed @Sec:ST trick) can be used to prevent
-programmers from simply conjuring up an admin token whenever they might
-like---requiring `doSensitiveThings`{.haskell} to be called on behalf of an
-actual administrator `User`.
+This minor change will cause a type error whenever `doSensitiveThings` is called
+without an administration token. Such an approach makes it much harder to
+accidentally call `doSensitiveThings`. More refined techniques (such as the ST
+trick, discussed @Sec:ST trick) can be used to prevent programmers from simply
+conjuring up an admin token whenever they might like---requiring
+`doSensitiveThings` to be called on behalf of an actual administrator `User`.
 
 
 ### Promotion of Built-In Types
 
-```necessary-Imports
-[code/Kinds.hs:typelits](Snip)
-```
+Necessary
+
+:   [code/Kinds.hs:typelits](Snip)
+
 
 With `-XDataKinds` enabled, almost all types automatically promote to kinds,
 including the built-in ones. Since built-in types (strings, numbers, lists and
@@ -249,16 +239,16 @@ tuples) are special at the term-level---at least in terms of syntax---we should
 expect them to behave oddly at the type-level as well.
 
 When playing with promoted built-in types, it's necessary to first import the
-`GHC.TypeLits` module. `GHC.TypeLits` defines the kinds themselves, as
-well as all of the useful type families for manipulating them. We'll cover this
-idea in more detail soon.
+`GHC.TypeLits` module. `GHC.TypeLits` defines the kinds themselves, as well as
+all of the useful type families for manipulating them. We'll cover this idea in
+more detail soon.
 
 
 #### Symbols
 
-The promoted version of a `String` is called a `Symbol`. `Symbol`s
-are not lists of characters. Symbol type literals can be written by just using a
-string literal in a place where a type is expected. For example:
+The promoted version of a `String` is called a `Symbol`. `Symbol`s are not lists
+of characters. Symbol type literals can be written by just using a string
+literal in a place where a type is expected. For example:
 
 ```{ghci=code/Kinds.hs}
 :set -XDataKinds
@@ -267,9 +257,8 @@ string literal in a place where a type is expected. For example:
 
 It's somewhat frustrating that `Symbol`s are not merely lists of promoted
 characters; it means that `Symbol`s are no longer inductive types. It's
-impossible to deconstruct a `Symbol`, although we are capable of
-concatenating them via a magic `AppendSymbol` primitive provided in
-`GHC.TypeLits`.
+impossible to deconstruct a `Symbol`, although we are capable of concatenating
+them via a magic `AppendSymbol` primitive provided in `GHC.TypeLits`.
 
 ```{ghci=code/Kinds.hs}
 :set -XDataKinds
@@ -288,8 +277,8 @@ primitive.
 ```
 
 Notice that `CmpSymbol` is of kind `Symbol -> Symbol -> Ordering`. This
-`Ordering` is just the `-XDataKinds` promoted version of the standard
-`Ordering` type from `Prelude`.
+`Ordering` is just the `-XDataKinds` promoted version of the standard `Ordering`
+type from `Prelude`.
 
 
 #### Natural Numbers
@@ -303,9 +292,9 @@ kind `Nat`.
 :kind 5085072209
 ```
 
-`GHC.TypeLits` defines primitives for performing arithmetic on `Nat`s,
-with exactly the same symbolic identifiers you'd expect them to have. Using them
-will require enabling `-XTypeOperators`.
+`GHC.TypeLits` defines primitives for performing arithmetic on `Nat`s, with
+exactly the same symbolic identifiers you'd expect them to have. Using them will
+require enabling `-XTypeOperators`.
 
 ```{ghci=code/Kinds.hs}
 :set -XTypeOperators
@@ -325,20 +314,18 @@ And in fact, this is exactly what the promoted data constructors of lists look
 like. When `-XDataKinds` is enabled, we get the following promoted data
 constructors in scope:
 
-<ul>
-  * `'[]` of kind `[a]`
-  * `'(:)` of kind `a -> [a] -> [a]`; used infix as `x ': xs`
-</ul>
+* `'[]` of kind `[a]`
+* `'(:)` of kind `a -> [a] -> [a]`; used infix as `x ': xs`
 
 Note that although we haven't yet talked about kind-level polymorphism (things
-of kind `a`), it is meaningful and corresponds exactly to your intuition
-about how polymorphism should behave.
+of kind `a`), it is meaningful and corresponds exactly to your intuition about
+how polymorphism should behave.
 
-When compared against the data constructors of lists, `[] :: [a]`{.haskell} and `(:)
-:: a -> [a] -> [a]`{.haskell}, with a little concentration, the promoted data constructors
+When compared against the data constructors of lists, `[] :: [a]` and `(:) :: a
+-> [a] -> [a]`, with a little concentration, the promoted data constructors
 should make sense.  Because lists' data constructors have symbolic names, they
-also require `-XTypeOperators` enabled to be used. Don't worry though, GHC
-will helpfully remind you if you forget.
+also require `-XTypeOperators` enabled to be used. Don't worry though, GHC will
+helpfully remind you if you forget.
 
 There is another subtle point to be noted when dealing with list-kinds. While
 `[Bool]` is of kind `Type` and describes a term-level list of booleans,
@@ -351,8 +338,8 @@ with one element (namely, the type `Bool`.) Compare:
 ```
 
 Further care should be taken when constructing a promoted list; due to the way
-GHC's lexer parses character literals (`'a'`{.haskell}), make sure you add a space
-after starting a promoted list. While `'[ 'True ]` is fine, `'['True]` is
+GHC's lexer parses character literals (`'a'`), make sure you add a space after
+starting a promoted list. While `'[ 'True ]` is fine, `'['True]` is
 unfortunately a parse error.
 
 ```{ghci=code/Kinds.hs}
@@ -379,8 +366,6 @@ applies here as well, so be careful.
 
 ### Type-Level Functions
 
-
-
 Where `-XDataKinds` really begins to shine, however, is through the
 introduction of closed type families. You can think
 of closed type families as *functions at the type-level.* In fact, we've
@@ -390,30 +375,30 @@ families.
 
 The ability to write closed type families isn't merely one bestowed upon GHC
 developers, however. We are capable of writing our own too! But first, compare
-the regular, term-level function `or`{.haskell}, which computes the boolean OR of two
+the regular, term-level function `or`, which computes the boolean OR of two
 `Bool`s:
 
 [code/Kinds.hs:or](Snip)
 
 Unlike data constructors, we're unfortunately unable to automatically promote
 term-level functions into type-level ones. However, after enabling
-`-XTypeFamilies`, we can instead "promote" `or`{.haskell} by explicitly duplicating
+`-XTypeFamilies`, we can instead "promote" `or` by explicitly duplicating
 this logic and writing a completely separate, closed type family.
 
 [code/Kinds.hs:TFOr](Snip)
 
-Line for line, `or`{.haskell} and `Or` are analogous. The closed type family `Or`
+Line for line, `or` and `Or` are analogous. The closed type family `Or`
 requires a capital letter for the beginning of its name, because it exists at
 the type-level, and besides having a more verbose kind signature, the two
 definitions proceed almost exactly in lockstep.
 
-```exercise
-Write a closed type family to compute `Not`.
-```
+Exercise
 
-```solution
-  [code/Kinds.hs:Not](Snip)
-```
+:   Write a closed type family to compute `Not`.
+
+Solution
+
+:   [code/Kinds.hs:Not](Snip)
 
 
 While the metaphor between type families and functions is enticing, it isn't
@@ -422,11 +407,11 @@ important one is that *type families must be saturated.* Another way of
 saying this is that all of a type family's parameters must be specified
 simultaneously; there is no currying available.
 
-Recall the `map`{.haskell} function:
+Recall the `map` function:
 
 [code/Kinds.hs:map](Snip)
 
-We're capable of promoting `map`{.haskell} to the type-level:
+We're capable of promoting `map` to the type-level:
 
 [code/Kinds.hs:Map](Snip)
 

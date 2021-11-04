@@ -14,17 +14,18 @@ instances?
 
 [code/PosNeg.hs:T5](Snip)
 
-```exercise
-Which of these types are `Functor`s? Give instances for the ones that are.
-```
 
-```solution
-  Only `T1` and `T5` are `Functor`s.
+Exercise
 
-[code/PosNeg.hs:FunctorT1](Snip)
+:   Which of these types are `Functor`s? Give instances for the ones that are.
 
-[code/PosNeg.hs:FunctorT5](Snip)
-```
+Solution
+
+:   Only `T1` and `T5` are `Functor`s.
+
+    [code/PosNeg.hs:FunctorT1](Snip)
+
+    [code/PosNeg.hs:FunctorT5](Snip)
 
 
 Despite all of their similarities, only `T1` and `T5` are `Functor`s.
@@ -36,14 +37,12 @@ As it happens, we can sometimes do this, but it has a great deal to do with what
 `T` looks like. Depending on the shape of `T` (of kind `Type ->
 Type`) there are three possibilities for `T`'s variance:
 
-<ol>
-  * Covariant: Any function `a -> b` can be lifted into
-    a function `T a -> T b`.
-  * Contravariant: Any function `a -> b` can be
-    lifted into a function `T b -> T a`.
-  * Invariant: In general, functions `a -> b` cannot
-    be lifted into a function over `T a`.
-</ol>
+1. *Covariant:* Any function `a -> b` can be lifted into a function
+    `T a -> T b`.
+2. *Contravariant:* Any function `a -> b` can be lifted into a function
+    `T b -> T a`.
+3. *Invariant:* In general, functions `a -> b` cannot be lifted into a function
+    over `T a`.
 
 Covariance is the sort we're most familiar with---it corresponds directly to
 `Functor`s. And in fact, the type of `fmap`{.haskell} is exactly witness to this
