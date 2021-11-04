@@ -26,10 +26,10 @@ the following two programs:
 
 [code/Constraints.hs:five_](Snip)
 
-Both `five` and `five\_` are identical as far as Haskell is concerned.
-While `five` has type `Int`, `five\_` has type `a`, along with a
+Both `five` and `five_` are identical as far as Haskell is concerned.
+While `five` has type `Int`, `five_` has type `a`, along with a
 constraint saying that `a` equals `Int`. Of course, nobody would actually
-write `five\_`, but it's a neat feature of the type system regardless.
+write `five_`, but it's a neat feature of the type system regardless.
 
 Type equalities form an equivalence relation, meaning that they have the
 following properties:
@@ -114,7 +114,7 @@ Haskell datatype as follows:
 [code/GADTs.hs:Expr_](Snip)
 
 When viewed like this, it's a little easier to see what's happening behind the
-scenes. Each data constructor of `Expr\_` carries along with it a
+scenes. Each data constructor of `Expr_` carries along with it a
 type equality constraint. Like any constraint inside a data constructor, Haskell
 will require the constraint to be proven when the data constructor is called.
 
