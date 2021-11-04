@@ -1,1 +1,1 @@
-CodeBlock ("",["haskell","ghci"],[]) "> :t HNil\nHNil :: HList '[]\n\n> :t True :# HNil\nTrue :# HNil :: HList '[Bool]\n\n> let hlist = Just \"hello\" :# True :# HNil\n\n\n> :t hlist\nhlist :: HList '[Maybe [Char], Bool]\n\n> hLength hlist\n2\n\n"
+CodeBlock ("",["haskell","ghci"],[]) "> :t HNil\nHNil :: HList '[]\n\n> :t True :# HNil\nTrue :# HNil :: HList '[Bool]\n\n> let hlist = Just \"hello\" :# True :# HNil\n\n> :t hlist\nhlist :: HList '[Maybe [Char], Bool]\n\n> hLength hlist\n2\n\n"

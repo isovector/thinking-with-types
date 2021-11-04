@@ -1,1 +1,1 @@
-CodeBlock ("",["haskell","ghci"],[]) "> :t do { undefined; undefined }\ndo { undefined; undefined } :: Monad m => m b\n\n> :set -XRebindableSyntax\n\n\n> :t do { undefined; undefined }\ndo { undefined; undefined } :: IxMonad m => m i k2 b\n\n"
+CodeBlock ("",["haskell","ghci"],[]) "> :t do { undefined; undefined }\ndo { undefined; undefined } :: Monad m => m b\n\n> :set -XRebindableSyntax\n\n> :t do { undefined; undefined }\ndo { undefined; undefined } :: IxMonad m => m i k2 b\n\n"

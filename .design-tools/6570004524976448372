@@ -1,1 +1,1 @@
-CodeBlock ("",["haskell","ghci"],[]) "> :set -XTypeApplications\n\n\n> typeName @Bool\n\"Bool\"\n\n> typeName @String\n\"[Char]\"\n\n> typeName @(Maybe [Int])\n\"Maybe [Int]\"\n\n"
+CodeBlock ("",["haskell","ghci"],[]) "> :set -XTypeApplications\n\n> typeName @Bool\n\"Bool\"\n\n> typeName @String\n\"[Char]\"\n\n> typeName @(Maybe [Int])\n\"Maybe [Int]\"\n\n"

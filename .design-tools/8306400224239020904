@@ -1,1 +1,1 @@
-CodeBlock ("",["haskell","ghci"],[]) "> :set -XPolyKinds\n\n\n> type Snd2 = Snd <=< Snd\n\n\n> :kind! Eval (Snd2 '(1, '(2, 3)))\nEval (Snd2 '(1, '(2, 3))) :: Nat\n= 3\n\n"
+CodeBlock ("",["haskell","ghci"],[]) "> :set -XPolyKinds\n\n> type Snd2 = Snd <=< Snd\n\n> :kind! Eval (Snd2 '(1, '(2, 3)))\nEval (Snd2 '(1, '(2, 3))) :: Nat\n= 3\n\n"

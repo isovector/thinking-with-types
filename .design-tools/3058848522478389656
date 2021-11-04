@@ -1,1 +1,1 @@
-CodeBlock ("",["haskell","ghci"],[]) "> let foo = inj (Identity True) :: OpenSum Identity '[Bool, String]\n\n\n> friendlyPrj foo :: Maybe (Identity Int)\nLeaving GHCi.\n\n"
+CodeBlock ("",["haskell","ghci"],[]) "> let foo = inj (Identity True) :: OpenSum Identity '[Bool, String]\n\n> friendlyPrj foo :: Maybe (Identity Int)\nLeaving GHCi.\n\n"

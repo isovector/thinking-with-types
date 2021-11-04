@@ -1,1 +1,1 @@
-CodeBlock ("",["haskell","ghci"],[]) "> :set -XTypeApplications\n\n\n> :t fmap\nfmap :: Functor f => (a -> b) -> f a -> f b\n\n> :t fmap @Maybe\nfmap @Maybe :: (a -> b) -> Maybe a -> Maybe b\n\n"
+CodeBlock ("",["haskell","ghci"],[]) "> :set -XTypeApplications\n\n> :t fmap\nfmap :: Functor f => (a -> b) -> f a -> f b\n\n> :t fmap @Maybe\nfmap @Maybe :: (a -> b) -> Maybe a -> Maybe b\n\n"
