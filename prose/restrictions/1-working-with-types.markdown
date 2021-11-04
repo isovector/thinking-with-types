@@ -1,4 +1,3 @@
-
 ## Working with Types
 
 ### Type Scoping
@@ -8,7 +7,7 @@ Hindley--Milner's greatest contributions is its ability to infer the types of
 programs---without needing any explicit annotations. The result is that
 term-level Haskell programmers rarely need to pay much attention to types. It's
 often enough to just annotate the top-level declarations. And even then, this is
-done more for our benefit than the compiler's.
+done more for our benefit than for the compiler's.
 
 This state of affairs is ubiquitous and the message it sends is loud and clear:
 "types are something we need not think much about". Unfortunately, such an
@@ -82,6 +81,8 @@ the language.
 expressions. By prefixing a type with an `@`, we can explicitly fill in type
 variables. This can be demonstrated in GHCi:
 
+> TODO(sandy): do we need a section on visibility? probably!
+
 ```{ghci=code/TypeApps.hs}
 :set -XTypeApplications
 :t fmap
@@ -119,7 +120,7 @@ of type variables can break downstream code, so be careful when performing
 refactors of this nature.
 
 Pay attention to type order whenever you write a function that might be type
-applied. As a guiding principle, the hardest types to infer must come first.
+applied. As a guiding principle, the hardest types to infer should come first.
 This will often require using `-XScopedTypeVariables` and an explicitly scoped
 `forall`.
 
@@ -128,6 +129,8 @@ extensions in a type-programmer's toolbox. They go together hand in hand.
 
 
 ### Ambiguous Types
+
+> TODO(sandy): and skolems!
 
 Returning again to the example of `Data.Typeable`'s `typeRep` function, we can
 use it to implement a function that will give us the name of a type. And we can
@@ -144,8 +147,8 @@ aren't reserved for functions, they can be used anywhere types are present.
 At [1](Ann) we see that the type `a` doesn't actually appear to the right of the
 fat context arrow (`=>`). Because Hindley--Milner's type inference only works to
 the right of the context arrow, it means the type parameter `a` in `typeName`
-can never be correctly inferred. Haskell refers to such a type as being
-ambiguous.
+can never be correctly inferred. Haskell refers to such an unspecified type as
+being ambiguous.
 
 By default, Haskell will refuse to compile any programs with ambiguous types. We
 can bypass this behavior by enabling the aptly-named `-XAllowAmbiguousTypes`
@@ -173,7 +176,7 @@ program that will dump a schema of a type. Such a function is almost always
 going to be ambiguously typed, as we'll see soon.
 
 However, ambiguous types aren't always this obvious to spot. To compare, let's
-look at a surprising example. Consider the following type family:
+look at a surprising example. Consider the following closed type family:
 
 [code/PrintfTypes.hs:AlwaysUnit](Snip)
 
@@ -190,8 +193,9 @@ in `Show a => AlwaysUnit a -> String`, we're unable to access it---`AlwaysUnit
 a` is equal to `()` for all `a`s!
 
 More specifically, the issue is that `AlwaysUnit` doesn't have an inverse;
-there's no `Inverse` type family such that `Inverse (AlwaysUnit a)` equals `a`.
-In mathematics, this lack of an inverse is known as non-injectivity.
+there's no closed type family `Inverse` such that `Inverse (AlwaysUnit a)`
+equals `a`.  In mathematical lingo, this lack of an inverse is known as
+*non-injectivity.*
 
 Because `AlwaysUnit` is non-injective, we're unable to learn what `a` is, given
 `AlwaysUnit a`.
@@ -199,7 +203,7 @@ Because `AlwaysUnit` is non-injective, we're unable to learn what `a` is, given
 Consider an analogous example from cryptography; just because you know the hash
 of someone's password is `1234567890abcdef` doesn't mean you know what the
 password is; any good hashing function, like `AlwaysUnit`, is *one way*.  Just
-because we can go forwards doesn't mean we can also come back again.
+because we can get there doesn't mean we can also come back again!
 
 The solution to non-injectivity is to give GHC some other way of determining the
 otherwise ambiguous type. This can be done like in our examples by adding a
