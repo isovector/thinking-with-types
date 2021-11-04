@@ -1,4 +1,3 @@
-
 ## The Algebra Behind Types
 
 ### Isomorphisms and Cardinalities
@@ -25,22 +24,19 @@ type definitions:
 `Void` has zero inhabitants, and so it is assigned cardinality 0. The unit
 type `()` has one inhabitant---thus its cardinality is 1. Not to belabor
 the point, but `Bool` has cardinality 2, corresponding to its constructors
-`True`{.haskell} and `False`{.haskell}.
+`True` and `False`.
 
 We can write these statements about cardinality more formally:
 
 ```align
-  `cardinality:Void` &= 0
-
-  `cardinality:()` &= 1
-
-  `cardinality:Bool` &= 2
-
+`cardinality:Void` &= 0
+`cardinality:()` &= 1
+`cardinality:Bool` &= 2
 ```
 
 Any two finite types that have the same cardinality will always be isomorphic to
 one another. An isomorphism between types `s` and `t` is defined as
-a pair of functions `to`{.haskell} and `from`{.haskell}:
+a pair of functions `to` and `from`:
 
 [code/Algebra.hs:to](Snip)
 
@@ -48,16 +44,15 @@ such that composing either after the other gets you back where you started. In
 other words, such that:
 
 ```align
-  `to .\spaceJob{}from = id`{.haskell}
+`to .\spaceJob{}from = id`
 
-  `from .\spaceJob{}to = id`{.haskell}
-
+`from .\spaceJob{}to = id`
 ```
 
 We sometimes write an isomorphism between types `s` and `t` as `s` &cong; `t`.
 
 If two types have the same cardinality, any one-to-one mapping between their
-elements is exactly these `to`{.haskell} and `from`{.haskell} functions. But where does such a
+elements is exactly these `to` and `from` functions. But where does such a
 mapping come from? Anywhere---it doesn't really matter! Just pick an arbitrary
 ordering on each type---not necessarily corresponding to an `Ord`
 instance---and then map the first element under one ordering to the first
@@ -127,7 +122,7 @@ We can analyze `Deal`'s cardinality;
 
 We can also look at the cardinality of `Maybe a`. Because nullary data
 constructors are uninteresting to construct---there is only one
-`Nothing`{.haskell}---the cardinality of `Maybe a` can be expressed as follows;
+`Nothing`---the cardinality of `Maybe a` can be expressed as follows;
 
 $$
 `cardinality:Maybe a` = 1 + `cardinality:a`
@@ -175,15 +170,15 @@ between `Either a Void` and `a`.
 
 [code/Algebra.hs:sumUnitFrom](Snip)
 
-The function `absurd`{.haskell} at [1](Ann) has the type `Void -> a`. It's a sort of
+The function `absurd` at [1](Ann) has the type `Void -> a`. It's a sort of
 bluff saying "if you give me a `Void` I can give you anything you want."
 This is a promise that can never be fulfilled, but because there are no
 `Void`s to be had in the first place, we can't disprove such a claim.
 
 Function types also have an encoding as statements about cardinality---they
 correspond to exponentialization. To give an example, there are exactly four
-($2^2$) inhabitants of the type `Bool -> Bool`. These functions are `id`{.haskell},
-`not`{.haskell}, `const True`{.haskell} and `const False`{.haskell}. Try as hard as you can, but you
+($2^2$) inhabitants of the type `Bool -> Bool`. These functions are `id`,
+`not`, `const True` and `const False`. Try as hard as you can, but you
 won't find any other pure functions between `Bool`s!
 
 More generally, the type `a -> b` has cardinality $`cardinality:b`^{`cardinality:a`}$.
@@ -197,32 +192,25 @@ $$
 `cardinality:b`}_{`cardinality:a` \text{times}} = `cardinality:b`^{`cardinality:a`}
 $$
 
-```exercise
-Determine the cardinality of `Either Bool (Bool, Maybe Bool) -> Bool`.
-```
 
-```solution
-```align
-  &  `cardinality:Either Bool (Bool, Maybe Bool) -> Bool`
+Exercise
 
-  &= `cardinality:Bool`^{`cardinality:Either Bool (Bool, Maybe Bool)`}
+:   Determine the cardinality of `Either Bool (Bool, Maybe Bool) -> Bool`.
 
-  &= `cardinality:Bool`^{`cardinality:Bool`+`cardinality:Bool`\times`cardinality:Maybe Bool`}
 
-  &= `cardinality:Bool`^{`cardinality:Bool`+`cardinality:Bool`\times(`cardinality:Bool`+1)}
+Solution
 
-  &= 2^{2+2\times(2+1)}
-
-  &= 2^{2+2\times 3}
-
-  &= 2^{2+6}
-
-  &= 2^{8}
-
-  &= 256
-```
-```
-
+:   ```align
+      &  `cardinality:Either Bool (Bool, Maybe Bool) -> Bool`
+      &= `cardinality:Bool`^{`cardinality:Either Bool (Bool, Maybe Bool)`}
+      &= `cardinality:Bool`^{`cardinality:Bool`+`cardinality:Bool`\times`cardinality:Maybe Bool`}
+      &= `cardinality:Bool`^{`cardinality:Bool`+`cardinality:Bool`\times(`cardinality:Bool`+1)}
+      &= 2^{2+2\times(2+1)}
+      &= 2^{2+2\times 3}
+      &= 2^{2+6}
+      &= 2^{8}
+      &= 256
+    ```
 
 The inquisitive reader might wonder whether subtraction, division and other
 mathematical operations have meaning when applied to types. Indeed they do, but
@@ -237,7 +225,7 @@ encouraged to refer to Conor McBride's paper "The Derivative of a Regular Type
 is its Type of One-Hole Contexts."@cite:one-hole.
 
 
-### Example: Tic-Tac-Toe
+### Example: Tic-Tac-Toe {.rev2}
 
 I said earlier that being able to manipulate the algebra behind types is a
 mighty superpower. Let's prove it.
@@ -245,48 +233,81 @@ mighty superpower. Let's prove it.
 Imagine we wanted to write a game of tic-tac-toe. The standard tic-tac-toe board
 has nine spaces, which we could naively implement like this:
 
-[code/Algebra.hs:TicTacToe](Snip)
+[code/TicTacToe.hs:Board1](Snip)
 
 While such a thing works, it's rather unwieldy to program against. If we wanted
 to construct an empty board for example, there's quite a lot to fill in.
 
-[code/Algebra.hs:emptyBoard](Snip)
+[code/TicTacToe.hs:empty1](Snip)
 
-Writing functions like `checkWinner`{.haskell} turn out to be even more involved.
+Given a type `Three`, which we will reuse for rows and columns, we can index
+into a board thusly:
+
+[code/TicTacToe.hs:Three](Snip)
+
+[code/TicTacToe.hs:getAt1](Snip)
+
+And of course, we will need the ability to write to a board cell:
+
+[code/TicTacToe.hs:setAt1](Snip)
+
+This is all quite a lot of work, and writing functions like
+`checkWinner` turn out to be even more involved.
 
 Rather than going through all of this trouble, we can use our knowledge of the
 algebra of types to help. The first step is to perform a cardinality analysis on
-`TicTacToe`;
+`Board1`;
 
 ```align
-  `cardinality:TicTacToe a` &= \underbrace{`cardinality:a` \times `cardinality:a` \times \cdots
-  \times `cardinality:a`}_{9 \text{ times}}
-
-    &= `cardinality:a`^{9}
-
-    &= `cardinality:a`^{3\times 3}
+`cardinality:Board1 a` &= \underbrace{`cardinality:a` \times `cardinality:a` \times \cdots
+\times `cardinality:a`}_{9 \text{ times}}
+  &= `cardinality:a`^{9}
+  &= `cardinality:a`^{3\times 3}
 ```
 
-When written like this, we see that `TicTacToe` is isomorphic to a function
-`(Three, Three) -> a`, or in its curried form: `Three -> Three -> a`. Of
-course, `Three` is any type with three inhabitants; perhaps it looks like
-this:
+When written like this, we see that `Board1 a` is isomorphic to a function
+`(Three, Three) -> a`, or in its curried form: `Three -> Three -> a`. Due to
+this isomorphism, we can instead represent `Board1` in this form:
 
-[code/Algebra.hs:Three](Snip)
+[code/TicTacToe.hs:Board3](Snip)
 
-Due to this isomorphism, we can instead represent `TicTacToe` in this form:
+And thus simplify our implementations of `empty1`:
 
-[code/Algebra.hs:TicTacToe2](Snip)
+[code/TicTacToe.hs:empty3](Snip)
 
-And thus simplify our implementation of `emptyBoard`{.haskell}:
+It's certainly much less effort. Getting the contents of a `Board3` is just a
+matter of applying the function:
 
-[code/Algebra.hs:emptyBoard2](Snip)
+[code/TicTacToe.hs:getAt3](Snip)
 
-Such a transformation doesn't let us do anything we couldn't have done
-otherwise, but it does drastically improve the ergonomics. By making this
-change, we are rewarded with the entire toolbox of combinators for working with
-functions; we gain better compositionality and have to pay less of a cognitive
-burden.
+However, setting a `Board3` is a little trickier. The trick is to create a new
+function which checks if the requested position is the one we're trying to set.
+If so, we give back the new value, otherwise delegating to looking up in the
+older board's function.
+
+[code/TicTacToe.hs:setAt3](Snip)
+
+In spirit, `Board3` represents state by chaining a bunch of if-else expressions
+together.
+
+You might notice that the asymptotics are different here. The `empty` function
+went from $O(n)$ to $O(1)$ in our new representation, but `getAt3` goes from
+$O(1)$ to $O(n)$. Trade-offs like these are common when looking at different
+representations of types. If you are in a performance-critical
+domain[^not-very-often], it makes sense to optimize your representation for best
+performance in the common case. But this example is merely a tic-tac-toe board,
+so we will not burden ourselves with further thoughts about performance.
+
+[^not-very-often]: Which is significantly less common than most programmers
+  believe.
+
+The new representation of our type doesn't let us do anything we couldn't have
+done otherwise. In fact, it probably feels silly and needlessly slow to you. But
+you must admit that dramatically improves the ergonomics of `getAt1` and
+`setAt1` --- as well as the other functions you'd need to implement for a
+working tic-tac-toe game. By making this change, we are rewarded with the entire
+toolbox of combinators for working with functions; we gain better
+compositionality and have to pay less of a cognitive burden.
 
 Let us not forget that programming is primarily a human endeavor, and ergonomics
 are indeed a worthwhile pursuit. Your colleagues and collaborators will thank
@@ -298,25 +319,14 @@ you later!
 Our previous discussion of the algebraic relationships between types and their
 cardinalities can be summarized in the following table.
 
-
-<table border="1">
-
-  <tr><td>**Algebra##</td> <td>**Logic##</td> <td>**Types##</td></tr>
-
-  <tr><td>$a + b$</td> <td>$a \vee b$</td> <td>`Either a b`</td></tr>
-
-  <tr><td>$a \times b$</td> <td>$a \wedge b$</td> <td>`(a, b)`</td></tr>
-
-  <tr><td>$b^a$</td> <td>$a \implies b$</td> <td>`a -> b`</td></tr>
-
-  <tr><td>$a=b$</td> <td>$a \iff b$</td> <td>*isomorphism*</td></tr>
-
-  <tr><td>0</td> <td>$\bot$</td> <td>`Void`</td></tr>
-
-  <tr><td>1</td> <td>$\top$</td> <td>`()`</td></tr>
-
-</table>
-
+|  **Algebra** |    **Logic**   |   **Types**   |
+|:------------:|:--------------:|:-------------:|
+|    $a + b$   |   $a \vee b$   |  `Either a b` |
+| $a \times b$ |  $a \wedge b$  |    `(a, b)`   |
+|     $b^a$    | $a \implies b$ |    `a -> b`   |
+|    $a = b$   |   $a \iff b$   | *isomorphism* |
+|       0      |     $\bot$     |     `Void`    |
+|       1      |     $\top$     |      `()`     |
 
 This table itself forms a more-general isomorphism between mathematics and
 types. It's known as the Curry--Howard isomorphism---loosely stating
@@ -335,46 +345,46 @@ between having a value and having a (pure) program that computes that value.
 This insight is the core principle behind why writing Haskell is such a joy
 compared with other programming languages.
 
-```exercise
-  Use Curry--Howard to prove that $(a^b)^c = a^{b\times c}$. That is, provide a
-  function of type `(b -> c -> a) -> (b, c) -> a`, and one of `((b, c) ->
-  a) -> b -> c -> a`. Make sure they satisfy the equalities `to . from = id`{.haskell}
-  and `from . to = id`{.haskell}. Do these functions remind you of anything from
-  `Prelude`?
-```
+Exercise
 
-```solution
-[code/Algebra.hs:curry](Snip)
+:   Use Curry--Howard to prove that $(a^b)^c = a^{b\times c}$. That is, provide a
+    function of type `(b -> c -> a) -> (b, c) -> a`, and one of `((b, c) ->
+    a) -> b -> c -> a`. Make sure they satisfy the equalities `to . from = id`
+    and `from . to = id`. Do these functions remind you of anything from
+    `Prelude`?
 
-[code/Algebra.hs:uncurry](Snip)
+Solution
 
-  Both of these functions already exist in `Prelude`.
-```
+:   [code/Algebra.hs:curry](Snip)
 
+    [code/Algebra.hs:uncurry](Snip)
 
-```exercise
-Give a proof of the exponent law that $a^b \times a^c = a^{b+c}$.
-```
-
-```solution
-[code/Algebra.hs:productRule1To](Snip)
-
-[code/Algebra.hs:productRule1From](Snip)
-
-  Notice that `productRule1To`{.haskell} is the familiar `either`{.haskell} function from `Prelude`.
-```
+    Both of these functions already exist in `Prelude`.
 
 
-```exercise
-Prove $(a\times b)^c = a^c \times b^c$.
-```
+Exercise
 
-```solution
-[code/Algebra.hs:productRule2To](Snip)
+:   Give a proof of the exponent law that $a^b \times a^c = a^{b+c}$.
 
-[code/Algebra.hs:productRule2From](Snip)
-```
+Solution
 
+:   [code/Algebra.hs:productRule1To](Snip)
+
+    [code/Algebra.hs:productRule1From](Snip)
+
+    Notice that `productRule1To` is the familiar `either` function from
+    `Prelude`.
+
+
+Exercise
+
+:   Prove $(a\times b)^c = a^c \times b^c$.
+
+Solution
+
+:   [code/Algebra.hs:productRule2To](Snip)
+
+    [code/Algebra.hs:productRule2From](Snip)
 
 
 ### Canonical Representations
@@ -404,28 +414,22 @@ complicated than it really is.
 All of this is to say that each of following types is in its canonical
 representation:
 
-<ul>
-  * `()`
-  * `Either a b`
-  * `Either (a, b) (c, d)`
-  * `Either a (Either b (c, d))`
-  * `a -> b`
-  * `(a, b)`
-  * `(a, Int)`---we make an exception to the rule for numeric
-    types, as it would be too much work to express them as sums.
-</ul>
+* `()`
+* `Either a b`
+* `Either (a, b) (c, d)`
+* `Either a (Either b (c, d))`
+* `a -> b`
+* `(a, b)`
+* `(a, Int)`---we make an exception to the rule for numeric types, as it would
+    be too much work to express them as sums.
 
 But neither of the following types are in their canonical representation;
 
-<ul>
-  * `(a, Bool)`
-  * `(a, Either b c)`
-</ul>
+* `(a, Bool)`
+* `(a, Either b c)`
 
 As an example, the canonical representation of `Maybe a` is `Either a ()`.
 To reiterate, this doesn't mean you should prefer using `Either a ()` over
 `Maybe a`. For now it's enough to know that the two types are equivalent. We
 shall return to canonical forms in chapter 13.
-
-
 
