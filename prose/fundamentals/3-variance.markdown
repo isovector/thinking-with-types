@@ -45,7 +45,7 @@ Type`) there are three possibilities for `T`'s variance:
     over `T a`.
 
 Covariance is the sort we're most familiar with---it corresponds directly to
-`Functor`s. And in fact, the type of `fmap`{.haskell} is exactly witness to this
+`Functor`s. And in fact, the type of `fmap` is exactly witness to this
 "lifting" motion `(a -> b) -> T a -> T b`. A type `T` is a `Functor`
 if and only if it is covariant.
 
@@ -104,7 +104,7 @@ negative position is to put them on the left-side of an arrow. This should
 correspond to your intuition that the type of a function goes "backwards" when
 pre-composed with another function.
 
-In the following example, pre-composing with `show :: Bool -> String`{.haskell}
+In the following example, pre-composing with `show :: Bool -> String`
 transforms a type `String -> [String]` into `Bool -> [String]`.
 
 ```{ghci=code/PosNeg.hs}

@@ -9,37 +9,35 @@ promoted data kinds. They are a fundamentally different thing altogether, and
 thus worth studying.
 
 The `Constraint` kind is reserved for things that can appear on the left
-side of the fat context arrow (`=>`{.haskell}). This includes fully-saturated
+side of the fat context arrow (`=>`). This includes fully-saturated
 typeclasses (like `Show a`), tuples of other `Constraint`s, and type
 equalities (`Int ~ a`.) We will discuss type equalities in a moment.
 
 Typeclass constraints are certainly the most familiar. We use them all the time,
 even when we are not writing type-level Haskell. Consider the equality function
-`(==) :: Eq a => a -> a -> Bool`{.haskell}. Tuples of `Constraint`s are similarly
+`(==) :: Eq a => a -> a -> Bool`. Tuples of `Constraint`s are similarly
 well-known: `sequenceA :: (Applicative f, Traversable t) => t (f a) -> f (t
-a)`{.haskell}.
+a)`.
 
 Type equalities are more interesting, and are enabled via `-XGADTs`. Compare
 the following two programs:
 
 [code/Constraints.hs:five](Snip)
+
 [code/Constraints.hs:five_](Snip)
 
-Both `five`{.haskell} and `five\_`{.haskell} are identical as far as Haskell is concerned.
-While `five`{.haskell} has type `Int`, `five\_`{.haskell} has type `a`, along with a
+Both `five` and `five\_` are identical as far as Haskell is concerned.
+While `five` has type `Int`, `five\_` has type `a`, along with a
 constraint saying that `a` equals `Int`. Of course, nobody would actually
 write `five\_`, but it's a neat feature of the type system regardless.
 
 Type equalities form an equivalence relation, meaning that they have the
 following properties:
 
-<ul>
-  * reflexivity---a type is always equal to itself: `a ~ a`
-  * symmetry---`a ~ b` holds if and only if `b
-    ~ a`
-  * transitivity---if we know both `a ~ b` and `b
-    ~ c`, we (and GHC) can infer that `a ~ c`.
-</ul>
+* reflexivity---a type is always equal to itself: `a ~ a`
+* symmetry---`a ~ b` holds if and only if `b ~ a`
+* transitivity---if we know both `a ~ b` and `b ~ c`, we (and GHC) can infer
+  that `a ~ c`.
 
 
 ### GADTs
@@ -56,13 +54,13 @@ and if statements.
 
 [code/GADTs.hs:Expr](Snip)
 
-The `where`{.haskell} at [1](Ann) is what turns on GADT syntax for the rest of the
-declaration. Each of `LitInt`{.haskell}, `LitBool`{.haskell}, `Add`{.haskell}, etc. corresponds to a
+The `where` at [1](Ann) is what turns on GADT syntax for the rest of the
+declaration. Each of `LitInt`, `LitBool`, `Add`, etc. corresponds to a
 data constructor of `Expr`. These constructors all take some number of
 arguments before resulting in an `Expr`.
 
-For example, `LitInt`{.haskell} at [2](Ann) takes an `Int` before returning a
-`Expr Int`. On the other hand, the data constructor `If`{.haskell} at [3](Ann) takes
+For example, `LitInt` at [2](Ann) takes an `Int` before returning a
+`Expr Int`. On the other hand, the data constructor `If` at [3](Ann) takes
 three arguments (one `Expr Bool` and two `Expr a`s) and returns an
 `Expr a`.
 
@@ -100,9 +98,9 @@ evalExpr . If (LitBool False) (LitInt 1) . Add (LitInt 5) $ LitInt 13
 evalExpr . Not $ LitBool True
 ```
 
-Pay careful attention here! At [1](Ann), `evalExpr`{.haskell} returns an `Int`, but
+Pay careful attention here! At [1](Ann), `evalExpr` returns an `Int`, but
 at [2](Ann) it returns a `Bool`! This is possible because Haskell can
-*reason* about GADTs. In the `LitInt`{.haskell} case, the only way such a pattern
+*reason* about GADTs. In the `LitInt` case, the only way such a pattern
 could have matched is if `a ~ Int`, in which case it's certainly okay to
 return a `Int`. The reasoning for the other patterns is similar; Haskell can
 use information from inside a pattern match to drive type inference.
@@ -123,7 +121,7 @@ will require the constraint to be proven when the data constructor is called.
 As such, when we pattern match on a data constructor which contains a
 constraint, this satisfied constraint *comes back into scope.* That is, a
 function of type `Expr a -> a` can return an `Int` when pattern matching
-on `LitInt`{.haskell}, but return a `Bool` when matching on `LitBool`{.haskell}. The type
+on `LitInt`, but return a `Bool` when matching on `LitBool`. The type
 equality constraining `a` only comes back into scope after pattern matching
 on the data constructor that contains it.
 
@@ -136,8 +134,6 @@ readable.
 
 
 ### Heterogeneous Lists
-
-
 
 One of the primary motivations of GADTs is building inductive type-level
 structures out of term-level data. As a working example for this section, we can use GADTs
@@ -154,8 +150,12 @@ let hlist = Just "hello" :# True :# HNil
 hLength hlist
 ```
 
-The `HNil`{.haskell} constructor here is analogous to the regular list constructor
-`[]`{.haskell}. `(:\#)`{.haskell} likewise corresponds to `(:)`{.haskell}. They're defined as a GADT:
+> TODO(sandy): There is a bug in ghci mode here. Let bound things produce
+> output!
+
+
+The `HNil` constructor here is analogous to the regular list constructor
+`[]`. `(:\#)` likewise corresponds to `(:)`. They're defined as a GADT:
 
 [code/GADTs.hs:HList](Snip)
 
@@ -167,13 +167,13 @@ future self will appreciate you having written it. A good rule of thumb is to
 annotate *every* kind if *any* of them isn't `Type`.
 
 `HList` is analogous to the familiar `[]` type, and so it needs to define
-an empty list at [2](Ann) called `HNil`{.haskell}, and a cons operator at [3](Ann)
-called `(:\#)`{.haskell}. These constructors have carefully chosen types.
+an empty list at [2](Ann) called `HNil`, and a cons operator at [3](Ann)
+called `(:\#)`. These constructors have carefully chosen types.
 
-`HNil`{.haskell} represents an empty `HList`. We can see this by the fact that it
+`HNil` represents an empty `HList`. We can see this by the fact that it
 takes nothing and gives back `ts ~ '[]`---an empty list of types.
 
-The other data constructor, `(:\#)`{.haskell}, takes two parameters. Its first is of
+The other data constructor, `(:\#)`, takes two parameters. Its first is of
 type `t`, and the second is a `HList ts`. In response, it returns a
 `HList (t ': ts)`---the result is this new type has been consed onto the
 other `HList`.
@@ -185,7 +185,7 @@ lists. For example, we can implement a length function:
 
 But, having this explicit list of types to work with, allows us to implement
 much more interesting things. To illustrate, we can write a *total*
-`head`{.haskell} function---something impossible to do with traditional lists.
+`head` function---something impossible to do with traditional lists.
 
 [code/GADTs.hs:hHead](Snip)
 
@@ -197,7 +197,7 @@ this is an acceptable (if strange) thing to do.
 
 Unfortunately, GHC's stock deriving machinery doesn't play nicely with
 GADTs---it will refuse to write `Eq`, `Show` or other instances. But we
-can write our own by providing a base case (for `HNil`{.haskell}), and an inductive
+can write our own by providing a base case (for `HNil`), and an inductive
 case.
 
 The base case is that two empty `HList`s are always equal.
@@ -209,24 +209,27 @@ tails are equal.
 
 [code/GADTs.hs:eqHCons](Snip)
 
-```exercise
-Implement `Ord` for `HList`.
-```
+Exercise
 
-```solution
-[code/GADTs.hs:ordHNil](Snip)
-[code/GADTs.hs:ordHCons](Snip)
-```
+:   Implement `Ord` for `HList`.
 
 
-```exercise
-Implement `Show` for `HList`.
-```
+Solution
 
-```solution
-[code/GADTs.hs:showHNil](Snip)
-[code/GADTs.hs:showHCons](Snip)
-```
+:   [code/GADTs.hs:ordHNil](Snip)
+
+    [code/GADTs.hs:ordHCons](Snip)
+
+
+Exercise
+
+:   Implement `Show` for `HList`.
+
+Solution
+
+:   [code/GADTs.hs:showHNil](Snip)
+
+    [code/GADTs.hs:showHCons](Snip)
 
 
 The reason we had to write two instances for `Eq` was to assert that every
@@ -244,7 +247,7 @@ If it is empty---line [1](Ann)---we simply return the unit `Constraint`.
 Note that because of the kind signature on `AllEq`, Haskell interprets this
 as `Constraint` rather than the unit `Type`.
 
-However, if `ts`{.haskell} is a promoted list cons, we instead construct a
+However, if `ts` is a promoted list cons, we instead construct a
 `Constraint`-tuple at [2](Ann). You'll notice that `AllEq` is defined
 inductively, so it will eventually find an empty list and terminate. By using
 the `:kind!` command in GHCi, we can see what this type family expands
@@ -265,14 +268,13 @@ With `All`, we can now write our `Eq` instance more directly.
 
 [code/GADTs.hs:eqHList](Snip)
 
-```exercise
-Rewrite the `Ord` and `Show` instances in terms of `All`.
-```
+Exercise
 
-```solution
-[code/GADTs.hs:ordHList](Snip)
-[code/GADTs.hs:showHList](Snip)
-```
+:   Rewrite the `Ord` and `Show` instances in terms of `All`.
 
+Solution
 
+:   [code/GADTs.hs:ordHList](Snip)
+
+    [code/GADTs.hs:showHList](Snip)
 
