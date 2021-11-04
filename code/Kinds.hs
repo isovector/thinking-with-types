@@ -1,4 +1,5 @@
 -- # pragmas
+{-# LANGUAGE StandaloneKindSignatures #-}
 {-# LANGUAGE DataKinds     #-}
 {-# LANGUAGE PolyKinds     #-}
 {-# LANGUAGE TypeFamilies  #-}
@@ -22,15 +23,18 @@ or True  _ = True
 or False y = y
 
 -- # TFOr
-type family Or (x :: Bool) (y :: Bool) :: Bool where
+type Or :: Bool -> Bool -> Bool
+type family Or x y where
   Or 'True  y = 'True
   Or 'False y = y
 
-type family And (x :: Bool) (y :: Bool) :: Bool where
+type And :: Bool -> Bool -> Bool
+type family And x y where
   And 'True  y = y
   And 'False y = 'False
 
-type family Not (x :: Bool) :: Bool where
+type Not :: Bool -> Bool
+type family Not x where
   Not 'True  = 'False
   Not 'False = 'True
 
@@ -39,11 +43,13 @@ map _ []       = []
 map f (a : as) = f a : map f as
 
 -- # TFMap
-type family Map (x :: a -> b) (i :: [a]) :: [b] where
+type Map :: (a -> b) -> [a] -> [b]
+type family Map f xs where
   Map f '[]       = '[]
   Map f (x ': xs) = f x ': Map f xs
 
-type family Foo (x :: Bool) (y :: Bool) :: Bool
+type Foo :: Bool -> Bool -> Bool
+type family Foo x y
 
 type family Bar x y :: Bool -> Bool -> Bool
 

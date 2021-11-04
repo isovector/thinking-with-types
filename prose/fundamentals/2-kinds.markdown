@@ -30,46 +30,46 @@ Before continuing our discussion, we must sidestep a potential point of
 confusion. Rather perplexingly, there are several, related meanings that fall
 under the word "type." We will need to differentiate between two of them.
 
-The word "type" can be used to describe anything that exists at the type
-level, which is to say, anything that is neither a term nor a kind.
+The word "type" can be used to describe anything that exists at the type level,
+which is to say, anything that is neither a term nor a kind.
 
-However, we can also refer to `Type`s, which is the *kind* of types
-that have inhabitants. Historically `Type` has been written as $\star$, but
-this older notation is slated for deprecation in the latest versions of GHC.
-`Type` is the kind of things like `Int` and `Maybe Bool`---it
-classifies the sorts of things that exist at runtime. Some things which
-*aren't* of kind `Type` are `Maybe` (without a type parameter), and
-`Show`.
+However, we can also refer to `kind:Type`s, which is the *kind* of types that
+have inhabitants. Historically `kind:Type` has been written as $\star$, but this
+older notation is deprecated. `kind:Type` is the kind of things like `Int` and
+`Maybe Bool`---it classifies the sorts of things that exist at runtime. Some
+things which *aren't* of kind `kind:Type` are `Maybe` (without a type
+parameter), and `Show`.
 
-Sometimes we call the sorts of things which have kind `Type` value
-types.
+Sometimes we call the sorts of things which have kind `kind:Type` value types.
 
-In this book, we will typeset kinds in `SmallCaps` in order to
-differentiate them from regular types. Note that this is merely a convention of
-the printing process---the kind `Type` should be still written as `Type`
-in a Haskell source file.
+In this book, we will typeset kinds in `kind:Script` in order to differentiate
+them from regular types. Note that this is merely a convention of the printing
+process---the kind `kind:Type` should be still written as `Type` in a Haskell
+source file.
 
 
 #### Arrow Kinds
 
 This book assumes you already have a working knowledge of the standard Haskell
-kinds, `Type` and `(->)`. As such, we will not dally here any more
+kinds, `kind:Type` and `kind:(->)`. As such, we will not dally here any more
 than is strictly necessary.
 
-Higher-kinded types (HKTs) are those which have type
-variables. Fully saturated HKTs in everyday Haskell always have kind
-`Type`, which means that their type constructors *do not.*
+> TODO(sandy): no, this is why i'm here. TEACH THIS
 
-Let's consider `Maybe`. Because it takes a single `Type` parameter, we
-say that `Maybe` has kind `Type -> Type`---it takes a `Type` and
-gives you back one. `Either` takes two parameters, and so its kind is
-`Type -> Type -> Type`.
+Higher-kinded types (HKTs) are those which have type variables. Fully saturated
+HKTs in everyday Haskell always have kind `kind:Type`, which means that their type
+constructors *do not.*
+
+Let's consider `Maybe`. Because it takes a single `kind:Type` parameter, we say
+that `Maybe` has kind `kind:Type -> Type`---it takes a `kind:Type` and gives you
+back one.  `Either` takes two parameters, and so its kind is `kind:Type -> Type
+-> Type`.
 
 But more interesting higher-kinded types are possible too. What about the monad
-transformer `MaybeT`? It also takes two parameters, but unlike `Either`,
-one of those parameters must be a `Monad`. Because monads are always of kind
-`Type -> Type`, we are left with the inescapable conclusion that
-`MaybeT` must have kind `(Type -> Type) -> Type -> Type`.
+transformer `MaybeT`? It also takes two parameters, but unlike `Either`, one of
+those parameters must be a `Monad`. Because monads are always of kind `kind:Type
+-> Type`, we are left with the inescapable conclusion that `MaybeT` must have
+kind `kind:(Type -> Type) -> Type -> Type`. Yeah---it's a bit of a mouthful.
 
 If you're not already familiar with this stuff, it will soon come to you just as
 naturally as the type checking rules do.
@@ -77,21 +77,21 @@ naturally as the type checking rules do.
 
 #### Constraint Kinds
 
-However, kinds apply to everything at the type-level, not just the things we
+However, kinds apply to everything at the type level, not just the things we
 traditionally think of as "types." For example, the type of `show` is
 `Show a => a -> String`. This `Show` thing exists as part of the type
 signature, even though it's clearly not a `Type`. Does `Show a` also
 have a kind?
 
-Yes! Its kind is `Constraint`. More generally, `Constraint` is the
+Yes! Its kind is `kind:Constraint`. More generally, `kind:Constraint` is the
 kind of any fully-saturated typeclass.
 
 Exercise
 
-:   If `Show Int` has kind `Constraint`, what's the kind of `Show`?
+:   If `Show Int` has kind `kind:Constraint`, what's the kind of `Show`?
 
 Solution
-:   `Type -> Constraint`
+:   `kind:Type -> Constraint`
 
 
 Exercise
@@ -100,7 +100,7 @@ Exercise
 
 Solution
 
-:   `(Type -> Type) -> Constraint`
+:   `kind:(Type -> Type) -> Constraint`
 
 
 Exercise
@@ -109,19 +109,24 @@ Exercise
 
 Solution
 
-:   `(Type -> Type) -> Constraint`
+:   `kind:(Type -> Type) -> Constraint`
 
 
 Exercise
 
-:   What is the kind of `MonadTrans`?
+:   What is the kind of `MonadTrans` in the following?
+
+    ```haskell
+    class MonadTrans t where
+      lift :: Monad m => m a -> t m a
+    ```
 
 Solution
 
-:   `((Type -> Type) -> Type -> Type) -> Constraint`
+:   `kind:((Type -> Type) -> Type -> Type) -> Constraint`
 
 
-We will discuss the `Constraint` kind in much further detail later
+We will discuss the `kind:Constraint` kind in much further detail later
 @Sec:constraints.
 
 Without further language extensions, this is the extent of the expressiveness of
@@ -137,9 +142,9 @@ extensions.
 ### Data Kinds
 
 By enabling the `-XDataKinds` extension, we gain the ability to talk about kinds
-other than `Type`, `Constraint`, and their arrow derivatives. In particular,
-`-XDataKinds` lifts data constructors into *type constructors* and types into
-*kinds.*
+other than `kind:Type`, `kind:Constraint`, and their arrow compositions. In
+particular, `-XDataKinds` lifts data constructors into *type constructors* and
+types into *kinds.*
 
 What does that mean? As an example, let's look at a familiar type definition:
 
@@ -152,20 +157,20 @@ Haskell syntax:
 [code/Kinds.hs:kind](Snip)
 
 In other words, via `-XDataKinds` we have now declared the types `'True` and
-`'False`---both of kind `Bool`. We call `'True` and `'False` promoted data
-constructors. To be clear the `data Bool` definition above introduces the
+`'False`---both of kind `kind:Bool`. We call `'True` and `'False` promoted data
+constructors. To be clear, the `data Bool` definition above introduces the
 following things into scope (as usual):
 
-* A type constructor `Bool` of kind `Type`
+* A type constructor `Bool` of kind `kind:Type`
 * A data constructor `True` of type `Bool`
 * A data constructor `False` of type `Bool`
 
 However, when `-XDataKinds` is enabled, our definition of `Bool` also introduces
 the following into scope:
 
-* A new kind: `Bool`
-* A promoted data constructor `'True` of kind `Bool`
-* A promoted data constructor `'False` of kind `Bool`
+* A new kind: `kind:Bool`
+* A promoted data constructor `'True` of kind `kind:Bool`
+* A promoted data constructor `'False` of kind `kind:Bool`
 
 The apostrophes on `'True` and `'False` are known as ticks, and are used to
 distinguish promoted data constructors from everyday type constructors.  Because
@@ -177,11 +182,11 @@ constructor:
 [code/Kinds.hs:Unit](Snip)
 
 In this example, it's very important to differentiate between the *type
-constructor* `Unit` (of kind `Type`), and the *promoted data constructor*
-`'Unit` (of kind `Unit`.) This is a subtle point, and can often lead to
+constructor* `Unit` (of kind `kind:Type`), and the *promoted data constructor*
+`'Unit` (of kind `kind:Unit`.) This is a subtle point, and can often lead to
 inscrutable compiler errors; while it's fine to ask for values of type `Maybe
-Unit`, it's a *kind error* to ask for `Maybe 'Unit`---because `'Unit` is the
-wrong kind!
+Unit`, it's a *kind error* to ask for `Maybe 'Unit`---because `'Unit` isn't of
+kind `kind:Type`!
 
 Let's return to the question of the importance of data kinds. Type-level
 programming in Haskell without them is equivalent to programming in a
@@ -194,14 +199,16 @@ write more and more interesting type-level programs, we'll use kind signatures
 to restrict the sorts of types we can be dealing with.
 
 Promoted data constructors are of the wrong kind to ever exist at runtime, which
-raises the question "what good are they?" It's a little too soon to answer
-this in full glory, but without any other fancy type-level machinery, we can use
-them as phantom parameters.
+raises the question "what good are they?" It's a little too soon to answer this
+in full glory, but without any other fancy type-level machinery, we can use them
+as phantom parameters.
 
 Imagine an application for managing sensitive data, which has built-in
 administrator functionality. Because it would be particularly bad if we
 accidentally leaked admin functionality to non-admins, we decide to turn a
 business logic error into a type error and ask the type system for help.
+
+> TODO(sandy): terrible example
 
 We can provide a `UserType` type, whose only purpose is to give us access to its
 promoted data constructors.
@@ -233,10 +240,12 @@ Necessary
 :   [code/Kinds.hs:typelits](Snip)
 
 
-With `-XDataKinds` enabled, almost all types automatically promote to kinds,
-including the built-in ones. Since built-in types (strings, numbers, lists and
-tuples) are special at the term-level---at least in terms of syntax---we should
-expect them to behave oddly at the type-level as well.
+With `-XDataKinds` enabled, almost[^dont-promote] all types automatically
+promote to kinds, including the built-in ones. Since built-in types (strings,
+numbers, lists and tuples) are special at the term-level---at least in terms of
+syntax---we should expect them to behave oddly at the type level as well.
+
+[^dont-promote]: GADTs and other "tricky" data constructors fail to promote.
 
 When playing with promoted built-in types, it's necessary to first import the
 `GHC.TypeLits` module. `GHC.TypeLits` defines the kinds themselves, as well as
@@ -246,19 +255,22 @@ more detail soon.
 
 #### Symbols
 
-The promoted version of a `String` is called a `Symbol`. `Symbol`s are not lists
-of characters. Symbol type literals can be written by just using a string
-literal in a place where a type is expected. For example:
+The promoted version of a `String` is called a `kind:Symbol`. `kind:Symbol`s are
+not lists of characters. Symbol type literals can be written by just using a
+string literal in a place where a type is expected. For example:
 
 ```{ghci=code/Kinds.hs}
 :set -XDataKinds
 :kind "hello"
 ```
 
-It's somewhat frustrating that `Symbol`s are not merely lists of promoted
-characters; it means that `Symbol`s are no longer inductive types. It's
-impossible to deconstruct a `Symbol`, although we are capable of concatenating
-them via a magic `AppendSymbol` primitive provided in `GHC.TypeLits`.
+It's somewhat frustrating that `kind:Symbol`s are not merely lists of promoted
+characters; it means that `kind:Symbol`s are no longer inductive types. It's
+impossible to deconstruct a `kind:Symbol`, although we are capable of
+concatenating them via a magic `AppendSymbol` primitive provided in
+`GHC.TypeLits`.
+
+> TODO(sandy): it is NOT impossible to deconstruct a symbol!
 
 ```{ghci=code/Kinds.hs}
 :set -XDataKinds
@@ -266,7 +278,7 @@ them via a magic `AppendSymbol` primitive provided in `GHC.TypeLits`.
 :kind! AppendSymbol "thinking" " with types"
 ```
 
-Additionally, we are capable of comparing `Symbol`s via the `CmpSymbol`
+Additionally, we are capable of comparing `kind:Symbol`s via the `CmpSymbol`
 primitive.
 
 ```{ghci=code/Kinds.hs}
@@ -276,8 +288,8 @@ primitive.
 :kind! CmpSymbol "sandy" "batman"
 ```
 
-Notice that `CmpSymbol` is of kind `Symbol -> Symbol -> Ordering`. This
-`Ordering` is just the `-XDataKinds` promoted version of the standard `Ordering`
+Notice that `CmpSymbol` is of kind `kind:Symbol -> Symbol -> Ordering`. This
+`kind:Ordering` is just the `-XDataKinds` promoted version of the standard `Ordering`
 type from `Prelude`.
 
 
@@ -292,7 +304,7 @@ kind `Nat`.
 :kind 5085072209
 ```
 
-`GHC.TypeLits` defines primitives for performing arithmetic on `Nat`s, with
+`GHC.TypeLits` defines primitives for performing arithmetic on `kind:Nat`s, with
 exactly the same symbolic identifiers you'd expect them to have. Using them will
 require enabling `-XTypeOperators`.
 
@@ -314,8 +326,8 @@ And in fact, this is exactly what the promoted data constructors of lists look
 like. When `-XDataKinds` is enabled, we get the following promoted data
 constructors in scope:
 
-* `'[]` of kind `[a]`
-* `'(:)` of kind `a -> [a] -> [a]`; used infix as `x ': xs`
+* `'[]` of kind `kind:[a]`
+* `'(:)` of kind `kind:a -> [a] -> [a]`; used infix as `x ': xs`
 
 Note that although we haven't yet talked about kind-level polymorphism (things
 of kind `a`), it is meaningful and corresponds exactly to your intuition about
@@ -354,7 +366,9 @@ error when dealing with type-level literals, it's likely caused by this.
 #### Tuples
 
 Tuples also promote in a straightforward way, via the `'(,)`
-constructor.
+constructor.[^tuple-ctors]
+
+[^tuple-ctors]: And all the related promoted tuples, `'(,,)`, `'(,,,,)` and etc.
 
 ```{ghci=code/Kinds.hs}
 :kind '(2, "tuple")
@@ -364,14 +378,13 @@ Tuples are promoted with a leading tick. The aforementioned parsing gotcha
 applies here as well, so be careful.
 
 
-### Type-Level Functions
+### Type-Level Functions {.rev2}
 
-Where `-XDataKinds` really begins to shine, however, is through the
-introduction of closed type families. You can think
-of closed type families as *functions at the type-level.* In fact, we've
-looked at quite a few in this chapter already. Each of those "primitives" I
-mentioned earlier---`CmpSymbol`, `Div`, and etc.---are all closed type
-families.
+Where `-XDataKinds` really begins to shine, however, is through the introduction
+of closed type families. You can think of closed type families as *functions at
+the type level.* In fact, we've looked at quite a few in this chapter already.
+Each of those "primitives" I mentioned earlier---`CmpSymbol`, `Div`, and
+etc.---are all closed type families.
 
 The ability to write closed type families isn't merely one bestowed upon GHC
 developers, however. We are capable of writing our own too! But first, compare
@@ -382,19 +395,19 @@ the regular, term-level function `or`, which computes the boolean OR of two
 
 Unlike data constructors, we're unfortunately unable to automatically promote
 term-level functions into type-level ones. However, after enabling
-`-XTypeFamilies`, we can instead "promote" `or` by explicitly duplicating
-this logic and writing a completely separate, closed type family.
+`-XTypeFamilies`, we can instead "promote" `or` by explicitly duplicating this
+logic and writing a completely separate, closed type family.
 
 [code/Kinds.hs:TFOr](Snip)
 
-Line for line, `or` and `Or` are analogous. The closed type family `Or`
-requires a capital letter for the beginning of its name, because it exists at
-the type-level, and besides having a more verbose kind signature, the two
+Line for line, `or` and `Or` are analogous. The closed type family `Or` requires
+a capital letter for the beginning of its name, because it exists at the
+type level, and besides having a more verbose kind signature, the two
 definitions proceed almost exactly in lockstep.
 
 Exercise
 
-:   Write a closed type family to compute `Not`.
+:   Write a closed type family to compute `Not :: Bool -> Bool`.
 
 Solution
 
@@ -403,20 +416,20 @@ Solution
 
 While the metaphor between type families and functions is enticing, it isn't
 entirely *correct.* The analogues break down in several ways, but the most
-important one is that *type families must be saturated.* Another way of
-saying this is that all of a type family's parameters must be specified
-simultaneously; there is no currying available.
+important one is that *type families must be saturated.* Another way of saying
+this is that all of a type family's parameters must be specified simultaneously;
+there is no currying available.
 
 Recall the `map` function:
 
 [code/Kinds.hs:map](Snip)
 
-We're capable of promoting `map` to the type-level:
+We're capable of promoting `map` to the type level:
 
 [code/Kinds.hs:Map](Snip)
 
-But because we're unable to partially apply closed type families, `Map`
-doesn't turn out to be particularly useful.
+But because we're unable to partially apply closed type families, `Map` doesn't
+turn out to be particularly useful.
 
 ```{ghci=code/Kinds.hs}
 @import Data.Proxy
@@ -429,26 +442,27 @@ it requires, and so unfortunately GHC refuses to compile this program.
 
 There is nothing preventing us from writing `Map`, but its usefulness in this
 form is severely limited. We are simply unable to curry closed type families,
-and so we can't use `Map` to perform any interesting type-level computations
-for us. We will later explore some techniques for working around this
-unfortunate limitation when we discuss *first class families* in chapter 10.
+and so we can't use `Map` to perform any interesting type-level computations for
+us. We will later explore some techniques for working around this unfortunate
+limitation when we discuss *first class families* in chapter 10.
 
+> TODO(sandy): CUSKS and SAKS
 
+Before leaving this topic, let's look again at our definition of `Or`. Pay close
+attention to its kind signature. We write it as `Or (x :: Bool) (y :: Bool)
+:: Bool`, rather than `Or x y :: Bool -> Bool -> Bool`. The kinds of type
+families are tricky beasts; the kind you write after the `::` is the kind of the
+type *returned* by the type family, *not* the kind of the type family itself.
 
-Before leaving this topic, let's look again at our definition of `Or`. Pay
-close attention to its kind signature. We write it as `Or (x ::
-`Bool`) (y :: `Bool`) :: `Bool``, rather than `Or x y ::
-`Bool -> Bool -> Bool``. The kinds of type families are tricky beasts;
-the kind you write after the `::` is the kind of the type *returned*
-by the type family, *not* the kind of the type family itself.
+> TODO(sandy): NO LONGER
 
 [code/Kinds.hs:Foo](Snip)
 
 [code/Kinds.hs:Bar](Snip)
 
-Take a moment to think about the kinds of `Foo` and `Bar`. While `Foo`
-has kind `Bool -> Bool -> Bool`, `Bar` has kind `Type -> Type -> Bool
--> Bool -> Bool`. GHCi agrees with our assessment:
+Take a moment to think about the kinds of `Foo` and `Bar`. While `Foo` has kind
+`Bool -> Bool -> Bool`, `Bar` has kind `Type -> Type -> Bool -> Bool -> Bool`.
+GHCi agrees with our assessment:
 
 ```{ghci=code/Kinds.hs}
 :kind Foo
@@ -457,5 +471,4 @@ has kind `Bool -> Bool -> Bool`, `Bar` has kind `Type -> Type -> Bool
 
 We will discuss type families in more generality in a later chapter; for now
 it's sufficient to think of closed type families as type-level functions.
-
 

@@ -3,17 +3,17 @@
 ### Isomorphisms and Cardinalities
 
 One of functional programming's killer features is pattern matching, as made
-possible by algebraic data types. But this term
-isn't just a catchy title for things that we can pattern match on. As their name
-suggests, there is in fact an *algebra* behind algebraic data types.
+possible by algebraic data types. But this term isn't just a catchy title for
+things that we can pattern match on. As their name suggests, there is in fact an
+*algebra* behind algebraic data types.
 
 Being comfortable understanding and manipulating this algebra is a mighty
 superpower---it allows us to analyze types, find more convenient forms for them,
 and determine which operations (eg. typeclasses) are possible to implement.
 
-To start, we can associate each finite type with its cardinality---the
-number of inhabitants it has, ignoring bottoms. Consider the following simple
-type definitions:
+To start, we can associate each finite type with its cardinality---the number of
+inhabitants (values) it has, ignoring bottoms. Consider the following simple type
+definitions:
 
 [code/Algebra.hs:Void](Snip)
 
@@ -21,10 +21,9 @@ type definitions:
 
 [code/Algebra.hs:Bool](Snip)
 
-`Void` has zero inhabitants, and so it is assigned cardinality 0. The unit
-type `()` has one inhabitant---thus its cardinality is 1. Not to belabor
-the point, but `Bool` has cardinality 2, corresponding to its constructors
-`True` and `False`.
+`Void` has zero inhabitants, and so it is assigned cardinality 0. The unit type
+`()` has one inhabitant---thus its cardinality is 1. `Bool` has cardinality 2,
+while `Word8` has 256.
 
 We can write these statements about cardinality more formally:
 
@@ -32,11 +31,12 @@ We can write these statements about cardinality more formally:
 `cardinality:Void` &= 0
 `cardinality:()` &= 1
 `cardinality:Bool` &= 2
+`cardinality:Word8` &= 256
 ```
 
 Any two finite types that have the same cardinality will always be isomorphic to
-one another. An isomorphism between types `s` and `t` is defined as
-a pair of functions `to` and `from`:
+one another. An isomorphism between types `s` and `t` is defined as a pair of
+functions `to` and `from`:
 
 [code/Algebra.hs:to](Snip)
 
@@ -44,9 +44,9 @@ such that composing either after the other gets you back where you started. In
 other words, such that:
 
 ```align
-`to .\spaceJob{}from = id`
+`to . from = id`
 
-`from .\spaceJob{}to = id`
+`from . to = id`
 ```
 
 We sometimes write an isomorphism between types `s` and `t` as `s` &cong; `t`.
@@ -54,9 +54,9 @@ We sometimes write an isomorphism between types `s` and `t` as `s` &cong; `t`.
 If two types have the same cardinality, any one-to-one mapping between their
 elements is exactly these `to` and `from` functions. But where does such a
 mapping come from? Anywhere---it doesn't really matter! Just pick an arbitrary
-ordering on each type---not necessarily corresponding to an `Ord`
-instance---and then map the first element under one ordering to the first
-element under the other. Rinse and repeat.
+ordering on each type---not necessarily corresponding to an `Ord` instance---and
+then map the first element under one ordering to the first element under the
+other. Rinse and repeat.
 
 For example, we can define a new type that also has cardinality 2.
 
@@ -69,8 +69,7 @@ Indeed it is:
 
 [code/Algebra.hs:spinToBool1](Snip)
 
-However, note that there is another isomorphism between `Spin` and
-`Bool`:
+However, note that there is another isomorphism between `Spin` and `Bool`:
 
 [code/Algebra.hs:boolToSpin2](Snip)
 
@@ -78,60 +77,58 @@ However, note that there is another isomorphism between `Spin` and
 
 Which of the two isomorphisms should we prefer? Does it matter?
 
-In general, for any two types with cardinality $n$, there
-are $n!$ unique isomorphisms between them. As far as the math goes, any of these
-is just as good as any other---and for most purposes, knowing that an
-isomorphism *exists* is enough.
+In general, for any two types with cardinality $n$, there are $n!$ unique
+isomorphisms between them. As far as the math goes, any of these is just as good
+as any other---and for most purposes, knowing that an isomorphism *exists* is
+enough.
 
-An isomorphism between types `s` and `t` is a proof that *for all
-intents and purposes,* `s` and `t` *are the same thing.* They might
-have different instances available, but this is more a statement about Haskell's
-typeclass machinery than it is about the equivalence of `s` and `t`.
+An isomorphism between types `s` and `t` is a proof that *for all intents and
+purposes,* `s` and `t` *are the same thing.* They might have different instances
+available, but this is more a statement about Haskell's typeclass machinery than
+it is about the equivalence of `s` and `t`.
 
 Isomorphisms are a particularly powerful concept in the algebra of types.
 Throughout this book we shall reason via isomorphism, so it's best to get
 comfortable with the idea now.
 
+> TODO(sandy): is this claim true?
+
 
 ### Sum, Product and Exponential Types
 
-In the language of cardinalities, sum types correspond to
-addition. The canonical example of these is `Either a b`, which is
-*either* an `a` or a `b`. As a result, the cardinality (remember, the
-number of inhabitants) of `Either a b` is the cardinality of `a` plus the
-cardinality of `b`.
+In the language of cardinalities, sum types correspond to addition. The
+canonical example of these is `Either a b`, which is *either* an `a` or a `b`.
+As a result, the cardinality (remember, the number of inhabitants) of `Either a
+b` is the cardinality of `a` plus the cardinality of `b`.
 
 $$
 `cardinality:Either a b` = `cardinality:a` + `cardinality:b`
 $$
 
-As you might expect, this is why such things are called *sum* types. The
-intuition behind adding generalizes to any datatype with multiple
-constructors---the cardinality of a type is always the sum of the cardinalities
-of its constructors.
+This property is why such things are called *sum* types. The intuition behind
+adding generalizes to any datatype with multiple constructors---the cardinality
+of a type is always the sum of the cardinalities of its constructors.
 
 [code/Algebra.hs:Deal](Snip)
 
 We can analyze `Deal`'s cardinality;
 
 ```align
-  `cardinality:Deal a b` &= `cardinality:a` + `cardinality:b` + `cardinality:Bool`
-
-  &= `cardinality:a` + `cardinality:b` + 2
+`cardinality:Deal a b` &= `cardinality:a` + `cardinality:b` + `cardinality:Bool`
+&= `cardinality:a` + `cardinality:b` + 2
 ```
 
 We can also look at the cardinality of `Maybe a`. Because nullary data
-constructors are uninteresting to construct---there is only one
-`Nothing`---the cardinality of `Maybe a` can be expressed as follows;
+constructors are uninteresting to construct---there is only one `Nothing`---the
+cardinality of `Maybe a` can be expressed as follows;
 
 $$
 `cardinality:Maybe a` = 1 + `cardinality:a`
 $$
 
-Dual to sum types are the so-called product types. Again,
-we will look at the canonical example first---the pair type `(a, b)`.
-Analogously, the cardinality of a product type is the *product* of their
-cardinalities.
+Dual to sum types are the *product* types. Again, we can look at the
+canonical example---the pair type `(a, b)`.  Analogously, the cardinality
+of a product type is the *product* of their cardinalities.
 
 $$
 `cardinality:(a, b)` = `cardinality:a` \times `cardinality:b`
@@ -149,43 +146,47 @@ $$
 \times `cardinality:a` \times `cardinality:a`
 $$
 
-An interesting consequence of all of this cardinality stuff is that we find
-ourselves able to express *mathematical truths in terms of types*. For
-example, we can prove that $a \times 1 = a$ by showing an isomorphism between
-`(a, ())` and `a`.
+An interesting consequence of all this cardinality stuff is that we find
+ourselves able to express *mathematical truths in terms of types*. For example,
+we can prove that $a \times 1 = a$ by showing an isomorphism between `(a, ())`
+and `a`.
 
 [code/Algebra.hs:prodUnitTo](Snip)
 
 [code/Algebra.hs:prodUnitFrom](Snip)
 
+> TODO(sandy): define monoidal in the next sentence
+
 Here, we can think of the unit type as being a monoidal identity for product
 types---in the sense that "sticking it in doesn't change anything." Because $a
 \times 1 = a$, we can pair with as many unit types as we want.
 
-Likewise, `Void` acts as a monoidal unit for sum types. To convince ourselves
-of this, the trivial statement $a+0 = a$ can be witnessed as an isomorphism
-between `Either a Void` and `a`.
+Likewise, `Void` acts as a monoidal unit for sum types. To convince ourselves of
+this, the trivial statement $a+0 = a$ can be witnessed as an isomorphism between
+`Either a Void` and `a`.
 
 [code/Algebra.hs:sumUnitTo](Snip)
 
 [code/Algebra.hs:sumUnitFrom](Snip)
 
-The function `absurd` at [1](Ann) has the type `Void -> a`. It's a sort of
-bluff saying "if you give me a `Void` I can give you anything you want."
-This is a promise that can never be fulfilled, but because there are no
-`Void`s to be had in the first place, we can't disprove such a claim.
+> TODO(sandy): who CARES? how do you USE THIS
+
+The function `absurd` at [1](Ann) has the type `Void -> a`. It's a sort of bluff
+saying "if you give me a `Void` I can give you anything you want." This is a
+promise that can never be fulfilled, but because there are no `Void`s to be had
+in the first place, we can't disprove such a claim.
 
 Function types also have an encoding as statements about cardinality---they
 correspond to exponentialization. To give an example, there are exactly four
-($2^2$) inhabitants of the type `Bool -> Bool`. These functions are `id`,
-`not`, `const True` and `const False`. Try as hard as you can, but you
-won't find any other pure functions between `Bool`s!
+($2^2$) inhabitants of the type `Bool -> Bool`. These functions are `id`, `not`,
+`const True` and `const False`. Try as hard as you can, but you won't find any
+other pure functions between `Bool`s!
 
-More generally, the type `a -> b` has cardinality $`cardinality:b`^{`cardinality:a`}$.
-While this might be surprising at first---it always seems backwards to me---the
-argument is straightforward. For every value of `a` in the domain, we need to
-give back a `b`. But we can choose any value of `b` for every value of
-`a`---resulting in the following equality.
+More generally, the type `a -> b` has cardinality
+$`cardinality:b`^{`cardinality:a`}$.  While this might be surprising at
+first---it always seems backwards to me---the argument is straightforward. For
+every value of `a` in the domain, we need to give back a `b`. But we can choose
+any value of `b` for every value of `a`---resulting in the following equality.
 
 $$
 `cardinality:a -> b` = \underbrace{`cardinality:b` \times `cardinality:b` \times \cdots \times
@@ -224,6 +225,8 @@ domain of types. Though we will not discuss it further, the interested reader is
 encouraged to refer to Conor McBride's paper "The Derivative of a Regular Type
 is its Type of One-Hole Contexts."@cite:one-hole.
 
+> TODO(sandy): use bibtex
+
 
 ### Example: Tic-Tac-Toe {.rev2}
 
@@ -251,8 +254,8 @@ And of course, we will need the ability to write to a board cell:
 
 [code/TicTacToe.hs:setAt1](Snip)
 
-This is all quite a lot of work, and writing functions like
-`checkWinner` turn out to be even more involved.
+This is all quite a lot of work, and writing functions like `checkWinner` turn
+out to be even more involved.
 
 Rather than going through all of this trouble, we can use our knowledge of the
 algebra of types to help. The first step is to perform a cardinality analysis on
@@ -329,21 +332,23 @@ cardinalities can be summarized in the following table.
 |       1      |     $\top$     |      `()`     |
 
 This table itself forms a more-general isomorphism between mathematics and
-types. It's known as the Curry--Howard isomorphism---loosely stating
-that every statement in logic is equivalent to some computer program, and vice
-versa.
+types. It's known as the Curry--Howard isomorphism---loosely stating that every
+statement in logic is equivalent to some computer program, and vice versa.
 
 The Curry--Howard isomorphism is a profound insight about our universe. It
 allows us to analyze mathematical theorems through the lens of functional
-programming. What's better is that often even "boring" mathematical theorems
-are interesting when expressed as types.
+programming. What's better is that often even "boring" mathematical theorems are
+interesting when expressed as types.
 
 To illustrate, consider the theorem $a^1 = a$. When viewed through
-Curry--Howard, it describes an isomorphism between `() -> a` and `a`.
-Said another way, this theorem shows that there is no essential distinction
-between having a value and having a (pure) program that computes that value.
-This insight is the core principle behind why writing Haskell is such a joy
-compared with other programming languages.
+Curry--Howard, it describes an isomorphism between `() -> a` and `a`. Said
+another way, this theorem shows that there is no essential distinction between
+having a value and having a (pure) program that computes that value. This
+insight is the core principle behind why writing Haskell is such a joy compared
+with other programming languages.
+
+
+> TODO(sandy): Prove commutativity of pairs
 
 Exercise
 
@@ -395,21 +400,20 @@ shouldn't necessarily let it change the way you model types, it's good to keep
 in mind that you have a choice.
 
 Due to the isomorphism, all of these representations of a type are "just as
-good" as any other. However, as we'll see @Sec:ghc.generics, it's
-often useful to have a conventional form when working with types generically.
-This canonical representation is known as a sum of products, and
-refers to any type `t` of the form,
+good" as any other. However, as we'll see @Sec:ghc.generics, it's often useful
+to have a conventional form when working with types generically.  This canonical
+representation is known as a sum of products, and refers to any type `t` of the
+form,
 
 $$
-{t = \sum_{m}^{}{\prod_{n}^{}{t_{m,n}}}}
+t = \sum_{m}^{}{\prod_{n}^{}{t_{m,n}}}
 $$
 
-The big $\Sigma$ means addition, and
-the $\Pi$ means multiplication---so we can read this as "addition on the
-outside and multiplication on the inside." We also make the stipulation that
-all additions must be represented via `Either`, and that multiplications via
-`(,)`. Don't worry, writing out the rules like this makes it seem much more
-complicated than it really is.
+The big $\Sigma$ means addition, and the $\Pi$ means multiplication---so we can
+read this as "addition on the outside and multiplication on the inside." We also
+make the stipulation that all additions must be represented via `Either`, and
+that multiplications via `(,)`. Don't worry, writing out the rules like this
+makes it seem much more complicated than it really is.
 
 All of this is to say that each of following types is in its canonical
 representation:
@@ -428,8 +432,14 @@ But neither of the following types are in their canonical representation;
 * `(a, Bool)`
 * `(a, Either b c)`
 
-As an example, the canonical representation of `Maybe a` is `Either a ()`.
-To reiterate, this doesn't mean you should prefer using `Either a ()` over
-`Maybe a`. For now it's enough to know that the two types are equivalent. We
-shall return to canonical forms in chapter 13.
+As an example, the canonical representation of `Maybe a` is `Either a ()`.  To
+reiterate, this doesn't mean you should prefer using `Either a ()` over `Maybe
+a`. For now it's enough to know that the two types are equivalent. We shall
+return to canonical forms in chapter 13.
+
+> TODO(sandy): cite ref this chapter 13
+
+> TODO(sandy): this chapter should talk about FUNCTORALITY
+
+> TODO(sandy): the canonical stuff doesn't need to be here
 

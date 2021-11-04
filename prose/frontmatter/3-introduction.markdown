@@ -14,7 +14,7 @@ under which a program compiles. If you're a beginner Haskell programmer who
 feels like GHC argues with you too often, who often finds type errors
 inscrutable, then this book is probably not for you. Not yet.
 
-So whom is this book for? The target audience I've been trying to write for are
+So whom *is* this book for? The target audience is people who are
 intermediate-to-proficient with the language. They're capable of solving real
 problems in Haskell, and doing it without too much hassle. They need not have
 strong opinions on `ExceptT` vs throwing exceptions in `IO`, nor do they need to
@@ -68,16 +68,15 @@ As Haskellers, we certainly have strong opinions about the value of types. They
 *are* useful, and they *do* carry their weight in gold when coding, debugging
 and refactoring. While we can dismiss our colleague's complaints with a wave of
 the hand and the justification that they've never seen a "real" type system
-before, we are doing them and ourselves a disservice both. Such a flippant
+before, we are doing them and ourselves both a disservice. Such a flippant
 response is to ignore the spirit of their unhappiness---types *often do* get in
 the way.  We've just learned to blind ourselves to these shortcomings, rather
 than to bite the bullet and entertain that maybe types aren't always the
 solution to every problem.
 
-Simon Peyton Jones, one of the primary authors of Haskell, is quick to
-acknowledge the fact that there are plenty of error-free programs ruled out by a
-type system. Consider, for example, the following program which has a
-type-error, but never actually evaluates it:
+But there are plenty of error-free programs that are ruled out by a type system.
+Consider, for example, the following program which has a type-error, but never
+actually evaluates it:
 
 ```haskell
 fst ("no problems", True <> 17)
@@ -90,22 +89,21 @@ of such an example is admittedly low, but the point stands; types often do get
 in the way of perfectly reasonable programs.
 
 Sometimes such an obstruction comes under the guise of "it's not clear what type
-this thing should have." One particularly poignant case of this is C's
-`printf` function:
+this thing should have." One particularly poignant case of this is C's `printf`
+function:
 
 ```c
 int printf (const char *format, ...)
 ```
 
-
-If you've never before had the pleasure of using `printf`, it works like
-this: it parses the `format` parameter, and uses its structure to pop
-additional arguments off of the call-stack. You see, it's the shape of
-`format` that decides what parameters should fill in the `...` above.
+If you've never before had the pleasure of using `printf`, it works like this:
+it parses the `format` parameter, and uses its structure to pop additional
+arguments off of the call-stack. You see, it's the shape of `format` that
+decides what parameters should fill in the `...` above.
 
 For example, the format string `"hello %s"` takes an additional string and
-interpolates it in place of the `%s`. Likewise, the specifier `%d`
-describes interpolation of a signed decimal integer.
+interpolates it in place of the `%s`. Likewise, the specifier `%d` describes
+interpolation of a signed decimal integer.
 
 The following calls to `printf` are all valid:
 
@@ -116,7 +114,7 @@ The following calls to `printf` are all valid:
 Notice that, as written, it seems impossible to assign a Haskell-esque type
 signature to `printf`. The additional parameters denoted by its ellipsis are
 given types by the value of its first parameter---a string. Such a pattern is
-common in dynamically typed languages, and in the case of `printf`, it's
+common in dynamically-typed languages, and in the case of `printf`, it's
 inarguably useful.
 
 The documentation for `printf` is quick to mention that the format string must
@@ -151,7 +149,7 @@ other languages can.
 
 But all is not lost. Indeed, Haskell *is* capable of expressing things as
 oddly-typed as `printf`, for those of us willing to put in the effort to learn
-how. This book aims to be *the* comprehensive manual for getting you from here
-to there, from a competent Haskell programmer to one who convinces the compiler
-to do their work for them.
+how. This book is *the* comprehensive manual for getting you from here to there:
+from a competent Haskell programmer to one who convinces the compiler to do
+their work for them.
 
