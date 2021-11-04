@@ -1,1 +1,1 @@
-CodeBlock ("",["haskell","ghci"],[]) "> :t runCodensity\nrunCodensity :: Codensity m a -> (a -> m b) -> m b\n\n\n> :t (>>=)\n(>>=) :: Monad m => m a -> (a -> m b) -> m b\n\n\n"
+CodeBlock ("",["haskell","ghci"],[]) "> :t runCodensity\nrunCodensity :: Codensity m a -> (a -> m b) -> m b\n\n> :t (>>=)\n(>>=) :: Monad m => m a -> (a -> m b) -> m b\n\n"

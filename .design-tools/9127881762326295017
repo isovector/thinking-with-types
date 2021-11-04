@@ -1,1 +1,1 @@
-CodeBlock ("",["haskell","ghci"],[]) "> :t runCurried @(Yoneda _) @(Yoneda _)\nrunCurried @(Yoneda _) @(Yoneda _)\n  :: Curried (Yoneda _1) (Yoneda _2) a\n     -> Yoneda _1 (a -> r) -> Yoneda _2 r\n\n\n> :t flip (<*>)\nflip (<*>) :: Applicative f => f a -> f (a -> b) -> f b\n\n\n"
+CodeBlock ("",["haskell","ghci"],[]) "> :t runCurried @(Yoneda _) @(Yoneda _)\nrunCurried @(Yoneda _) @(Yoneda _)\n  :: Curried (Yoneda _1) (Yoneda _2) a\n     -> Yoneda _1 (a -> r) -> Yoneda _2 r\n\n> :t flip (<*>)\nflip (<*>) :: Applicative f => f a -> f (a -> b) -> f b\n\n"

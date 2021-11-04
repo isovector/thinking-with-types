@@ -1,1 +1,1 @@
-CodeBlock ("",["haskell","ghci"],[]) "> :t LitInt\nLitInt :: Int -> Expr Int\n\n\n> :t If\nIf :: Expr Bool -> Expr a -> Expr a -> Expr a\n\n\n"
+CodeBlock ("",["haskell","ghci"],[]) "> :t LitInt\nLitInt :: Int -> Expr Int\n\n> :t If\nIf :: Expr Bool -> Expr a -> Expr a -> Expr a\n\n"

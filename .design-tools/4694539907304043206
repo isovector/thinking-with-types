@@ -1,1 +1,1 @@
-CodeBlock ("",["haskell","ghci"],[]) "> :kind! AllEq '[Int, Bool]\nAllEq '[Int, Bool] :: Constraint\n= (Eq Int, (Eq Bool, () :: Constraint))\n\n\n"
+CodeBlock ("",["haskell","ghci"],[]) "> :kind! AllEq '[Int, Bool]\nAllEq '[Int, Bool] :: Constraint\n= (Eq Int, (Eq Bool, () :: Constraint))\n\n"

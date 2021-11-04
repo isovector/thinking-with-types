@@ -1,1 +1,1 @@
-CodeBlock ("",["haskell","ghci"],[]) "> :set -XTypeOperators\n(1 + 17) * 3 :: Nat\n= 54\n\n\n> :kind! (1 + 17) * 3\n(128 `Div` 8) ^ 2 :: Nat\n= 256\n\n\n> :kind! (128 `Div` 8) ^ 2\nLeaving GHCi.\n\n\n"
+CodeBlock ("",["haskell","ghci"],[]) "> :set -XTypeOperators\n\n\n> :kind! (1 + 17) * 3\n(1 + 17) * 3 :: Nat\n= 54\n\n> :kind! (128 `Div` 8) ^ 2\n(128 `Div` 8) ^ 2 :: Nat\n= 256\n\n"

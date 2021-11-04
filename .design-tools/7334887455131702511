@@ -1,1 +1,1 @@
-CodeBlock ("",["haskell","ghci"],[]) "> evalExpr . If (LitBool False) (LitInt 1) . Add (LitInt 5) $ LitInt 13\n18\n\n\n> evalExpr . Not $ LitBool True\nFalse\n\n\n"
+CodeBlock ("",["haskell","ghci"],[]) "> evalExpr . If (LitBool False) (LitInt 1) . Add (LitInt 5) $ LitInt 13\n18\n\n> evalExpr . Not $ LitBool True\nFalse\n\n"

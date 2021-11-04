@@ -1,1 +1,1 @@
-CodeBlock ("",["haskell","ghci"],[]) "> @import Data.Proxy\nLeaving GHCi.\n\n\n"
+CodeBlock ("",["haskell","ghci"],[]) "> :t undefined :: Proxy (Map (Or 'True) '[ 'True, 'False, 'False ])\nLeaving GHCi.\n\n"

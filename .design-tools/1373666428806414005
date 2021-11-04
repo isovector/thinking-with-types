@@ -1,1 +1,1 @@
-CodeBlock ("",["haskell","ghci"],[]) "> :t symbolVal\nsymbolVal :: KnownSymbol n => proxy n -> String\n\n\n> symbolVal (Proxy @\"i am a symbol\")\n\"i am a symbol\"\n\n\n"
+CodeBlock ("",["haskell","ghci"],[]) "> :t symbolVal\nsymbolVal :: KnownSymbol n => proxy n -> String\n\n> symbolVal (Proxy @\"i am a symbol\")\n\"i am a symbol\"\n\n"

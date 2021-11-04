@@ -1,1 +1,1 @@
-CodeBlock ("",["haskell","ghci"],[]) "> runST (newSTRef True)\nLeaving GHCi.\n\n\n"
+CodeBlock ("",["haskell","ghci"],[]) "> runST (newSTRef True)\nLeaving GHCi.\n\n"

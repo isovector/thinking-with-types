@@ -1,1 +1,1 @@
-CodeBlock ("",["haskell","ghci"],[]) "> printf (Proxy @(String :<< \" world!\")) \"hello\"\n\"hello world!\"\n\n\n"
+CodeBlock ("",["haskell","ghci"],[]) "> printf (Proxy @(String :<< \" world!\")) \"hello\"\n\"hello world!\"\n\n"

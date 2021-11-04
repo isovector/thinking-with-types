@@ -1,1 +1,1 @@
-CodeBlock ("",["haskell","ghci"],[]) "> eval (MapList Fst [(\"hello\", 1), (\"world\", 2)])\n[\"hello\",\"world\"]\n\n\n"
+CodeBlock ("",["haskell","ghci"],[]) "> eval (MapList Fst [(\"hello\", 1), (\"world\", 2)])\n[\"hello\",\"world\"]\n\n"

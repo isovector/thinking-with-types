@@ -1,1 +1,1 @@
-CodeBlock ("",["haskell","ghci"],[]) ""
+CodeBlock ("",["haskell","ghci"],[]) "> /oldInsert/insert/:t oldInsert (Key @\"key\") (Just True) result\nLeaving GHCi.\n\n"

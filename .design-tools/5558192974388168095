@@ -1,1 +1,1 @@
-CodeBlock ("",["haskell","ghci"],[]) "> withSomeSing (toSing True) fromSing\nTrue\n\n\n> withSomeSing (toSing False) fromSing\nFalse\n\n\n"
+CodeBlock ("",["haskell","ghci"],[]) "> withSomeSing (toSing True) fromSing\nTrue\n\n> withSomeSing (toSing False) fromSing\nFalse\n\n"

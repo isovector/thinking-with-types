@@ -1,1 +1,1 @@
-CodeBlock ("",["haskell","ghci"],[]) "> applyToFive id\n5\n\n\n"
+CodeBlock ("",["haskell","ghci"],[]) "> applyToFive id\n5\n\n"

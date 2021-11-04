@@ -1,1 +1,1 @@
-CodeBlock ("",["haskell","ghci"],[]) "> :kind! Printf (Int :<< \":\" :<< Bool :<< \"!\")\nPrintf (Int :<< \":\" :<< Bool :<< \"!\") :: Type\n= Int -> Bool -> String\n\n\n"
+CodeBlock ("",["haskell","ghci"],[]) "> :kind! Printf (Int :<< \":\" :<< Bool :<< \"!\")\nPrintf (Int :<< \":\" :<< Bool :<< \"!\") :: Type\n= Int -> Bool -> String\n\n"

@@ -1,1 +1,1 @@
-CodeBlock ("",["haskell","ghci"],[]) "> let etcPasswd = openFile \"/etc/passwd\" ReadMode\nrunLinear (etcPasswd >>= closeFile) :: IO ()\n\n\n> :t runLinear (etcPasswd >>= closeFile)\nLeaving GHCi.\n\n\n"
+CodeBlock ("",["haskell","ghci"],[]) "> let etcPasswd = openFile \"/etc/passwd\" ReadMode\n\n\n> :t runLinear (etcPasswd >>= closeFile)\nrunLinear (etcPasswd >>= closeFile) :: IO ()\n\n"

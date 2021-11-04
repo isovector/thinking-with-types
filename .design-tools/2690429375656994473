@@ -1,1 +1,1 @@
-CodeBlock ("",["haskell","ghci"],[]) ""
+CodeBlock ("",["haskell","ghci"],[]) "> import Data.Foldable\n\n\n> traverse_ putStrLn (showLogs logs)\nText \"hello\"\nJson (Object (fromList [(\"world\",Number 5.0)]))\nText \"structured logging is cool\"\n\n"
