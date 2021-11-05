@@ -1,27 +1,30 @@
 -- # pragmas
-{-# LANGUAGE DataKinds            #-}
-{-# LANGUAGE FlexibleInstances    #-}
-{-# LANGUAGE KindSignatures       #-}
-{-# LANGUAGE PolyKinds            #-}
-{-# LANGUAGE ScopedTypeVariables  #-}
-{-# LANGUAGE TypeApplications     #-}
-{-# LANGUAGE TypeFamilies         #-}
-{-# LANGUAGE TypeOperators        #-}
-{-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE DataKinds                #-}
+{-# LANGUAGE FlexibleInstances        #-}
+{-# LANGUAGE KindSignatures           #-}
+{-# LANGUAGE PolyKinds                #-}
+{-# LANGUAGE ScopedTypeVariables      #-}
+{-# LANGUAGE StandaloneKindSignatures #-}
+{-# LANGUAGE TypeApplications         #-}
+{-# LANGUAGE TypeFamilies             #-}
+{-# LANGUAGE TypeOperators            #-}
+{-# LANGUAGE UndecidableInstances     #-}
 
 module Printf where
 
 -- # imports
-import Data.Kind   (Type)
+import Data.Kind   (Type, Constraint)
 import Data.Monoid ((<>))
 import Data.Proxy  (Proxy (..))
 import GHC.TypeLits
 
 -- # typeList
-data (a :: k1) :<< (b :: k2)
+type (:<<) :: k1 -> k2 -> Type
+data a :<< b
 infixr 5 :<<
 
 
+type HasPrintf :: k -> Constraint
 class HasPrintf a where
   type Printf a :: Type
   format :: String    -- ! 1
@@ -34,11 +37,13 @@ instance KnownSymbol text => HasPrintf (text :: Symbol) where
   format s _ = s <> symbolVal (Proxy @text)
 
 -- # textInstance
-instance (HasPrintf a, KnownSymbol text)
-    => HasPrintf ((text :: Symbol) :<< a) where
-  type Printf (text :<< a) = Printf a
-  format s _ = format (s <> symbolVal (Proxy @text))
-                      (Proxy @a)
+instance
+     (HasPrintf a, KnownSymbol text)
+  => HasPrintf ((text :: Symbol) :<< a)
+  where
+    type Printf (text :<< a) = Printf a
+    format s _ = format (s <> symbolVal (Proxy @text))
+                        (Proxy @a)
 
 -- # paramInstance
 instance (HasPrintf a, Show param)
@@ -58,5 +63,6 @@ instance {-# OVERLAPPING #-} HasPrintf a
 wrongPrintf :: a -> String -> String
 wrongPrintf _ str = show str ++ " world!"
 
-data Pad (n :: Nat) a
+type Pad :: Nat -> k -> Type
+data Pad n a
 

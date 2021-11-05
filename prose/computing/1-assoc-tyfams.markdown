@@ -235,6 +235,8 @@ printf (Proxy @(Int :<< "+" :<< Int :<< "=3")) 1 2
 /wrongPrintf/printf/wrongPrintf (Proxy @(String :<< " world!")) "hello"
 ```
 
+> TODO(sandy): why am i cheating here
+
 It works pretty well for our first attempt, all things considered. One
 noticeable flaw is that `String`s gain an extra set of quotes due to being
 `show`n. We can fix this infelicity by providing a special instance of
@@ -244,7 +246,7 @@ noticeable flaw is that `String`s gain an extra set of quotes due to being
 
 Writing this instance will require the `-XFlexibleInstances` extension,
 since the instance head is no longer just a single type constructor and type
-variables. We mark the instance with the `{-\# OVERLAPPING \#-}` pragma
+variables. We mark the instance with the `{-# OVERLAPPING #-}` pragma
 because we'd like to select this instance instead of case 3 when the parameter
 is a `String`.
 
