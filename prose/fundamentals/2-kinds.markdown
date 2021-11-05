@@ -208,8 +208,8 @@ as phantom parameters.
 
 A fantastic way to develop an understanding about how to apply type-level
 techniques is to study real life examples. Rather than waiting until an
-appropriate opportunity arises, and hoping that we remember, we can instead look
-at other people's use-cases.
+appropriate opportunity arises, and hoping that we have a flicker of
+recognition, we can instead look at other people's use-cases.
 
 Throughout this book, I've included many "war stories" from my near-decade of
 experience writing Haskell. In my personal projects, paid work, and open-source
