@@ -1,4 +1,3 @@
-
 ## Existential Types
 
 ### Existential Types and Eliminators
@@ -223,7 +222,7 @@ elimHas isMempty foo
 ```
 
 
-### Scoping Information with Existentials
+### Scoping Information with Existentials {#st-trick}
 
 Existential types can be used to prevent information from leaking outside of a
 desired scope. For example, it means we can ensure that allocated resources

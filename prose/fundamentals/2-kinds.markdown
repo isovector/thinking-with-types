@@ -203,34 +203,162 @@ raises the question "what good are they?" It's a little too soon to answer this
 in full glory, but without any other fancy type-level machinery, we can use them
 as phantom parameters.
 
-Imagine an application for managing sensitive data, which has built-in
-administrator functionality. Because it would be particularly bad if we
-accidentally leaked admin functionality to non-admins, we decide to turn a
-business logic error into a type error and ask the type system for help.
 
-> TODO(sandy): terrible example
+### About the War Stories {.rev2}
 
-We can provide a `UserType` type, whose only purpose is to give us access to its
-promoted data constructors.
+A fantastic way to develop an understanding about how to apply type-level
+techniques is to study real life examples. Rather than waiting until an
+appropriate opportunity arises, and hoping that we remember, we can instead look
+at other people's use-cases.
 
-[code/Kinds.hs:UserType](Snip)
+Throughout this book, I've included many "war stories" from my near-decade of
+experience writing Haskell. In my personal projects, paid work, and open-source
+contributions, my first attempts at code are usually smelly. While the core
+ideas are (usually) correct, too often would it be easy to accidentally get one
+of the small details wrong. Instead of waiting for the inevitable bug, it's
+usually worth heading them off at the pass, and finding minor changes that will
+help me enlist the type-system.
 
-Then, we can change our `User` type so that each user potentially has an
-administration token:
+Every war story in this book is true. Undoubtedly my memories of them are
+embellished, but I've made an honest attempt to capture the situations,
+problems, and---most importantly---thought processes that I used to reason
+through to a better solution.
 
-[code/Kinds.hs:User](Snip)
 
-And finally, we make the sensitive operations require a copy of this
-administration token.
+### War Story: Tracking Data's Age {.rev2}
 
-[code/Kinds.hs:doSensitiveThings](Snip)
+I spent a year contributing a large feature to the Haskell Language Server (HLS)
+project. HLS is a tool that provides smart, language-dependent support to text
+editors---for example, it can intelligently add imports, warn you about smelly
+code, and automatically synthesize functions.
 
-This minor change will cause a type error whenever `doSensitiveThings` is called
-without an administration token. Such an approach makes it much harder to
-accidentally call `doSensitiveThings`. More refined techniques (such as the ST
-trick, discussed @Sec:ST trick) can be used to prevent programmers from simply
-conjuring up an admin token whenever they might like---requiring
-`doSensitiveThings` to be called on behalf of an actual administrator `User`.
+By virtue of being interactive, HLS needs to respond quickly to user actions,
+and thus it makes significant use of concurrency and caching. For example, when
+the user changes their source code, HLS notices this and reruns the type checker
+over the active module. But suppose the user then wants to complete some code,
+which requires type information. If the type checker hasn't finished, HLS will
+give back *stale* type information, corresponding to whatever data it last had.
+
+HLS communicates with text editors via the Language Server Protocol, which
+mandates that code be described by its source position---that is, the line and
+column numbers in source code that correspond to the thing in question. Thus,
+any time HLS has an interaction with the user, it's in terms of lines and
+columns.
+
+This works well, except that there's a problem. *The source positions of stale
+data might not align with the source positions of the current file!* Thankfully,
+HLS handles this for us: whenever you retrieve stale data, it will helpfully
+also return a `PositionMapping`, which comes with two functions:
+
+[code/War/Age.hs:fromCurrentRange](Snip)
+
+Client code can use the `PositionMapping` to map a source location from the past
+into the current version, or vice versa.
+
+As you can imagine, wrangling `PositionMapping`s by hand is quite the Herculean
+effort! It takes significant mental effort to keep track of when any particular
+`Range` is valid. To make matters worse, my feature needed to coalesce data from
+multiple sources---any piece of which might be *differently* stale! Struggling
+through the implementation, I finally finished, relatively confident that I had
+successfully wrestled all of the `Range`s.
+
+Unfortunately, I started getting bug reports that my feature wouldn't activate
+if the user had been typing around the place it should trigger immediately
+before. Uh oh! The panic flashed before my eyes---I'd screwed up a `Range`
+somewhere, and it was going to be a nightmare to track down!
+
+Well, it would have been, if I'd decided to do it by hand. Instead I thought
+this was a job best left to the computer. The type checker is good at
+fastidious, tedious jobs like this---all I had to do was to teach it how. My
+thought was that I could associate an "age" with every particular piece of data,
+modifying `fromCurrentRange` to correctly transform the age.
+
+The first step was to define an `Age` type:
+
+[code/War/Age.hs:BadAge](Snip)
+
+which I could use to tag my data. By using `-XDataKinds`, I could use its
+promoted data constructors as arguments to `Tracked`:
+
+[code/War/Age.hs:Tracked](Snip)
+
+Of course, the `age` parameter doesn't *actually do* anything, but that's OK.
+All I needed it for was to ensure that `Tracked 'Stale Range` was a different
+type than `Tracked 'Current Range`. I couldn't accidentally use one in place of
+the other, because the type system would holler.
+
+The next step was to use the same trick on `PositionMapping`, to track what
+`Age` was on either side of the mapping:
+
+[code/War/Age.hs:PositionMap](Snip)
+
+Many of the structures I needed to track were much bigger than `Range`s. For
+example, my type-checked data came in the form of an entire type-checked AST of
+the current module---something that could conceivably contain many thousands of
+`Range`s. Rather than manually lifting all of the time-traveling machinery
+across each data type, it seemed wiser to build a single abstraction that could
+push a `PositionMap` through a type:
+
+[code/War/Age.hs:MapAge](Snip)
+
+And of course, there's an instance for `MapAge Range`:
+
+[code/War/Age.hs:MapAgeRange](Snip)
+
+This trick of using `coerce` is a great side-effect of implementing `Tracked` as
+a `newtype` rather than as a `data`---rather than have a big wrapping/unwrapping
+ceremony, we can just `coerce` the desired function. This technique is discussed
+at more depth in @sec:roles.
+
+I added instances of `MapAge` for every type I was interested in, and finally
+changed the function that could return stale data to instead return a
+`(PositionMap 'Stale 'Current, Tracked 'Stale a)`. Now I could be sure that every
+piece of data's age was being tracked correctly. All that was left was to make
+sure my coalescing function was correct. What used to be:
+
+```haskell
+buildStructure
+    :: ParsedSource
+    -> TypecheckedSource
+    -> Judgement
+    -> TacticResult
+```
+
+instead was lifted to be polymorphic over its age:
+
+```haskell
+buildStructure
+    :: Tracked age ParsedSource
+    -> Tracked age TypecheckedSource
+    -> Tracked age Judgement
+    -> Tracked age TacticResult
+```
+
+With this change, I could now be certain that I could only call `buildStructure`
+on data that was all the same age---and thus that all of the `Range`s inside of
+these pieces of data aligned.
+
+Feeling very proud of myself, I did some perfunctory testing, but found a bug
+almost immediately! How could this be? The type checker was now enforcing that I
+was correctly tracking the age of all data!
+
+After a few moments of deep thought, I realized my mistake. While all `Current`
+data is the same age, not all `Stale` data is equally stale! Different data
+caches are updated at different rates, so there was no guarantee that a stale
+`ParsedSource` would be the same age as a stale `TypecheckedSource`!
+
+The solution was minor. I employed the `ST` trick (described in @sec:st-trick),
+using an existential variable to differentiate `Stale` values:
+
+[code/War/Age.hs:Age](Snip)
+
+Immediately, my change must have worked, because my HLS feature no longer
+compiled. Indeed, I was using two pieces of data that I couldn't prove were
+equally stale. Instead I used `mapAgeTo` to fast-forward all my data to the
+present before calling `buildStructure` on it.
+
+Testing showed that the bug was fixed. I pushed the changes and sat back,
+satisfied in the knowledge of a job well done.
 
 
 ### Promotion of Built-In Types
