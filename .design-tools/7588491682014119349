@@ -1,1 +1,0 @@
-CodeBlock ("",["haskell","ghci"],[]) "> :t runLinear etcPasswd\nLeaving GHCi.\n\n"

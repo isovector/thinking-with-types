@@ -37,7 +37,7 @@ library
   --                , Data.Ecstasy.Internal
   --                , Data.Ecstasy.Internal.Deriving
   -- other-extensions:
-  build-depends:       base >=4.9 && <5, containers, mtl, transformers, kan-extensions, aeson, vector, text, bytestring, aeson-pretty, aeson-lens, lens, indexed, constraints, do-notation, first-class-families, inspection-testing, singletons, generic-lens
+  build-depends:       base >=4.9 && <5, containers, mtl, transformers, kan-extensions, aeson, vector, text, bytestring, aeson-pretty, aeson-lens, lens, indexed, constraints, first-class-families, inspection-testing, singletons, generic-lens
   hs-source-dirs:      code
   default-language:    Haskell2010
   ghc-options: -fno-warn-unused-imports

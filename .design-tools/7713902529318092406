@@ -1,1 +1,0 @@
-CodeBlock ("",["haskell","ghci"],[]) "> :t runLinear (etcPasswd >>= \\f -> closeFile f >> closeFile f)\nLeaving GHCi.\n\n"
