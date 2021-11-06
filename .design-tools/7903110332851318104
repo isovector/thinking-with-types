@@ -1,1 +1,1 @@
-CodeBlock ("",["haskell","ghci"],[]) "> instance Coercible a b\nLeaving GHCi.\n\n"
+CodeBlock ("",["haskell","ghci"],[]) "> instance Coercible a b\nghci> ghci> ghci> Leaving GHCi.\n\n"

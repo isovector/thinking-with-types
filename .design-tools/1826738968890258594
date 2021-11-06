@@ -1,1 +1,1 @@
-CodeBlock ("",["haskell","ghci"],[]) "> :kind! Eval (FromMaybe \"nothing\" ('Just \"just\"))\nEval (FromMaybe \"nothing\" ('Just \"just\")) :: Symbol\n= \"just\"\n\n> :kind! Eval (FromMaybe \"nothing\" 'Nothing)\nEval (FromMaybe \"nothing\" 'Nothing) :: Symbol\n= \"nothing\"\n\n"
+CodeBlock ("",["haskell","ghci"],[]) "> :kind! Eval (FromMaybe \"nothing\" ('Just \"just\"))\nghci> Eval (FromMaybe \"nothing\" ('Just \"just\")) :: Symbol\n= \"just\"\nghci> Eval (FromMaybe \"nothing\" 'Nothing) :: Symbol\n= \"nothing\"\nghci> ghci> Leaving GHCi.\n\n"

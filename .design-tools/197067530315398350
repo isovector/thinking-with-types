@@ -1,1 +1,1 @@
-CodeBlock ("",["haskell","ghci"],[]) "> coerce (M.singleton 'S' True) :: M.Map Char (Reverse Bool)\nfromList [('S',Reverse {getReverse = True})]\n\n> coerce (M.singleton 'S' True) :: M.Map (Reverse Char) Bool\nLeaving GHCi.\n\n"
+CodeBlock ("",["haskell","ghci"],[]) "> coerce (M.singleton 'S' True) :: M.Map Char (Reverse Bool)\nghci> fromList [('S',Reverse {getReverse = True})]\nghci> ghci> ghci> Leaving GHCi.\n\n"

@@ -1,1 +1,1 @@
-CodeBlock ("",["haskell","ghci"],[]) "> :kind (:<<)\n(:<<) :: k1 -> k2 -> Type\n\n"
+CodeBlock ("",["haskell","ghci"],[]) "> :kind (:<<)\nghci> (:<<) :: k1 -> k2 -> Type\nghci> ghci> Leaving GHCi.\n\n"

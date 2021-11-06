@@ -1,1 +1,1 @@
-CodeBlock ("",["haskell","ghci"],[]) "> :t [ Any 5, Any True, Any \"hello\" ]\n[ Any 5, Any True, Any \"hello\" ] :: [Any]\n\n"
+CodeBlock ("",["haskell","ghci"],[]) "> :t [ Any 5, Any True, Any \"hello\" ]\nghci> [ Any 5, Any True, Any \"hello\" ] :: [Any]\nghci> ghci> Leaving GHCi.\n\n"

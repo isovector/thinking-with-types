@@ -1,1 +1,1 @@
-CodeBlock ("",["haskell","ghci"],[]) "> show jsonLogs\n\"[Json (Object (fromList [(\\\"world\\\",Number 5.0)]))]\"\n\n"
+CodeBlock ("",["haskell","ghci"],[]) "> show jsonLogs\nghci> \"[Json (Object (fromList [(\\\"world\\\",Number 5.0)]))]\"\nghci> ghci> Leaving GHCi.\n\n"

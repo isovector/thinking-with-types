@@ -1,1 +1,1 @@
-CodeBlock ("",["haskell","ghci"],[]) "> :kind 5085072209\n5085072209 :: Nat\n\n"
+CodeBlock ("",["haskell","ghci"],[]) "> :kind 5085072209\nghci> 5085072209 :: Nat\nghci> ghci> Leaving GHCi.\n\n"

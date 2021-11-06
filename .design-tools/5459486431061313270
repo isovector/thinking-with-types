@@ -1,1 +1,1 @@
-CodeBlock ("",["haskell","ghci"],[]) "> :kind '(2, \"tuple\")\n'(2, \"tuple\") :: (Nat, Symbol)\n\n"
+CodeBlock ("",["haskell","ghci"],[]) "> :kind '(2, \"tuple\")\nghci> '(2, \"tuple\") :: (Nat, Symbol)\nghci> ghci> Leaving GHCi.\n\n"

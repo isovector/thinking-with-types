@@ -5,15 +5,29 @@
 
 packages:
 - completed:
-    hackage: aeson-lens-0.5.0.0@sha256:7b557d74d1f35ce47905d5ab65d9c87bb59843e24177341995d2bb1ceeb177fb,994
+    hackage: generic-lens-2.2.0.0@sha256:4008a39f464e377130346e46062e2ac1211f9d2e256bbb1857216e889c7196be,3867
     pantry-tree:
-      size: 261
-      sha256: 603ccba7d86c40cf2e02139d3d843a07c6782edc94b0368947a13f2757fe39da
+      size: 2470
+      sha256: 93d7aae1de4cbbb2e3320b357cd744618cb17356989bd417d374aa73331e7370
   original:
-    hackage: aeson-lens-0.5.0.0
+    hackage: generic-lens-2.2.0.0@sha256:4008a39f464e377130346e46062e2ac1211f9d2e256bbb1857216e889c7196be,3867
+- completed:
+    hackage: generic-lens-core-2.2.0.0@sha256:b6b69e992f15fa80001de737f41f2123059011a1163d6c8941ce2e3ab44f8c03,2913
+    pantry-tree:
+      size: 2202
+      sha256: 6918fb47f34ecf4246778b229911693b6e20fc2ce94ae8c89d69a89db4e72269
+  original:
+    hackage: generic-lens-core-2.2.0.0@sha256:b6b69e992f15fa80001de737f41f2123059011a1163d6c8941ce2e3ab44f8c03,2913
+- completed:
+    hackage: higgledy-0.4.1.1@sha256:103701c8080ec345a21edd3ef149b4d3b8ec66a12a82d3d0b5c5e4a0d7d6ac26,2238
+    pantry-tree:
+      size: 836
+      sha256: f5ee3462fe051163b085fa3fc85f01469e3fbfd40ccbbbcc517b79bafbd8122d
+  original:
+    hackage: higgledy-0.4.1.1
 snapshots:
 - completed:
-    size: 586069
-    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/18/14.yaml
-    sha256: 87842ecbaa8ca9cee59a7e6be52369dbed82ed075cb4e0d152614a627e8fd488
-  original: lts-18.14
+    size: 594195
+    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/nightly/2021/10/29.yaml
+    sha256: 6eca2192c85fa4df1f93ac039285d960db6ccad2a786729ef10df4f0537ae929
+  original: nightly-2021-10-29

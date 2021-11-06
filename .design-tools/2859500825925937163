@@ -1,1 +1,1 @@
-CodeBlock ("",["haskell","ghci"],[]) "> :kind [Bool]\n[Bool] :: Type\n\n> :kind '[Bool]\n'[Bool] :: [Type]\n\n"
+CodeBlock ("",["haskell","ghci"],[]) "> :kind [Bool]\nghci> [Bool] :: Type\nghci> '[Bool] :: [Type]\nghci> ghci> Leaving GHCi.\n\n"

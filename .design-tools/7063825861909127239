@@ -1,1 +1,1 @@
-CodeBlock ("",["haskell","ghci"],[]) "> eval (Fst (\"hello\", True))\n\"hello\"\n\n"
+CodeBlock ("",["haskell","ghci"],[]) "> eval (Fst (\"hello\", True))\nghci> \"hello\"\nghci> ghci> Leaving GHCi.\n\n"

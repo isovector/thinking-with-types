@@ -1,1 +1,1 @@
-CodeBlock ("",["haskell","ghci"],[]) "> :kind! Eval (All Eq '[Int, Bool])\nEval (All Eq '[Int, Bool]) :: Constraint\n= (Eq Int, (Eq Bool, () :: Constraint))\n\n"
+CodeBlock ("",["haskell","ghci"],[]) "> :kind! Eval (All Eq '[Int, Bool])\nghci> Eval (All Eq '[Int, Bool]) :: Constraint\n= (Eq Int, (Eq Bool, () :: Constraint))\nghci> ghci> Leaving GHCi.\n\n"

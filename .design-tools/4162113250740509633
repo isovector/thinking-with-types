@@ -1,1 +1,1 @@
-CodeBlock ("",["haskell","ghci"],[]) "> 1 True\nLeaving GHCi.\n\n"
+CodeBlock ("",["haskell","ghci"],[]) "> 1 True\nghci> ghci> ghci> Leaving GHCi.\n\n"

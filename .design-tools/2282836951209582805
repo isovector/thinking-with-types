@@ -1,1 +1,1 @@
-CodeBlock ("",["haskell","ghci"],[]) "> :t undefined :: Proxy (Map (Or 'True) '[ 'True, 'False, 'False ])\nLeaving GHCi.\n\n"
+CodeBlock ("",["haskell","ghci"],[]) "> :t undefined :: Proxy (Map (Or 'True) '[ 'True, 'False, 'False ])\nghci> ghci> ghci> ghci> Leaving GHCi.\n\n"

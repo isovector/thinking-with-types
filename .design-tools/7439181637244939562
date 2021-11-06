@@ -1,1 +1,1 @@
-CodeBlock ("",["haskell","ghci"],[]) "> :kind '[ 'True ]\n'[ 'True ] :: [Bool]\n\n> :kind '['True]\nLeaving GHCi.\n\n"
+CodeBlock ("",["haskell","ghci"],[]) "> :kind '[ 'True ]\nghci> '[ 'True ] :: [Bool]\nghci> ghci> ghci> Leaving GHCi.\n\n"

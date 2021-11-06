@@ -1,1 +1,1 @@
-CodeBlock ("",["haskell","ghci"],[]) "> :kind! Rep Bool\nRep Bool :: Type -> Type\n= D1\n    ('MetaData \"Bool\" \"GHC.Types\" \"ghc-prim\" 'False)\n    (C1 ('MetaCons \"False\" 'PrefixI 'False) U1\n     :+: C1 ('MetaCons \"True\" 'PrefixI 'False) U1)\n\n"
+CodeBlock ("",["haskell","ghci"],[]) "> :kind! Rep Bool\nghci> Rep Bool :: Type -> Type\n= D1\n    ('MetaData \"Bool\" \"GHC.Types\" \"ghc-prim\" 'False)\n    (C1 ('MetaCons \"False\" 'PrefixI 'False) U1\n     :+: C1 ('MetaCons \"True\" 'PrefixI 'False) U1)\nghci> ghci> Leaving GHCi.\n\n"

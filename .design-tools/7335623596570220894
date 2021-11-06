@@ -1,1 +1,1 @@
-CodeBlock ("",["haskell","ghci"],[]) "> applyToFive id\n5\n\n"
+CodeBlock ("",["haskell","ghci"],[]) "> applyToFive id\nghci> 5\nghci> ghci> Leaving GHCi.\n\n"

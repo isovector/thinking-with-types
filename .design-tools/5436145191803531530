@@ -1,1 +1,1 @@
-CodeBlock ("",["haskell","ghci"],[]) "> :set -XDataKinds\n\n> :kind AppendSymbol\nAppendSymbol :: Symbol -> Symbol -> Symbol\n\n> :kind! AppendSymbol \"thinking\" \" with types\"\nAppendSymbol \"thinking\" \" with types\" :: Symbol\n= \"thinking with types\"\n\n"
+CodeBlock ("",["haskell","ghci"],[]) "> :set -XDataKinds\n\n> :kind AppendSymbol\nghci> ghci> AppendSymbol :: Symbol -> Symbol -> Symbol\nghci> AppendSymbol \"thinking\" \" with types\" :: Symbol\n= \"thinking with types\"\nghci> ghci> Leaving GHCi.\n\n"
