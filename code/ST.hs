@@ -48,7 +48,7 @@ modifySTRef ref f = do
 runST
     :: (forall s. ST s a)  -- ! 1
     -> a
-runST = unsafeRunST
+runST x = unsafeRunST x
 
 {-
 

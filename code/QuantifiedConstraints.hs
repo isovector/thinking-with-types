@@ -82,7 +82,7 @@ yo :: Eq a => Foo Identity a -> Foo Identity a -> Bool
 yo = (==)
 
 with :: (c => t) -> (c => t)
-with = id
+with x = x
 
 
 

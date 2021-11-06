@@ -1,0 +1,45 @@
+name:                thinking-with-types
+version:             0.1.0.0
+github:              "isovector/thinking-with-types"
+license:             BSD3
+author:              "Sandy Maguire"
+maintainer:          "sandy@sandymaguire.me"
+copyright:           "2021 Sandy Maguire"
+
+extra-source-files:
+- README.md
+
+# Metadata used when publishing your package
+# synopsis:            Short description of your package
+# category:            Web
+
+# To avoid duplicated efforts in documentation and dealing with the
+# complications of embedding Haddock markup inside cabal files, it is
+# common to point users to the README.md file.
+description:         Please see the README on GitHub at <https://github.com/isovector/design-tools#readme>
+
+dependencies:
+- base >= 4.7 && < 5
+- containers
+- mtl
+- transformers
+- lens
+- kan-extensions
+- aeson
+- vector
+- text
+- bytestring
+- aeson-pretty
+- constraints
+- first-class-families
+- inspection-testing
+- singletons
+- singletons-th
+- singletons-base
+- witherable
+- generic-lens
+- barbies
+- higgledy
+
+library:
+  source-dirs: code

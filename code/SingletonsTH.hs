@@ -6,6 +6,7 @@
 {-# LANGUAGE KindSignatures           #-}
 {-# LANGUAGE PolyKinds                #-}
 {-# LANGUAGE ScopedTypeVariables      #-}
+{-# LANGUAGE StandaloneDeriving       #-}
 {-# LANGUAGE StandaloneKindSignatures #-}
 {-# LANGUAGE TemplateHaskell          #-}
 {-# LANGUAGE TypeApplications         #-}
@@ -15,8 +16,9 @@
 module SingletonsTH where
 
 -- # imports
-import Data.Singletons.Prelude
+import Data.Ord.Singletons
 import Data.Singletons.TH
+import Prelude.Singletons
 
 -- # TimeOfDay
 singletons [d|

@@ -1,0 +1,84 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.34.4.
+--
+-- see: https://github.com/sol/hpack
+
+name:           thinking-with-types
+version:        0.1.0.0
+description:    Please see the README on GitHub at <https://github.com/isovector/design-tools#readme>
+homepage:       https://github.com/isovector/thinking-with-types#readme
+bug-reports:    https://github.com/isovector/thinking-with-types/issues
+author:         Sandy Maguire
+maintainer:     sandy@sandymaguire.me
+copyright:      2021 Sandy Maguire
+license:        BSD3
+license-file:   LICENSE
+build-type:     Simple
+extra-source-files:
+    README.md
+
+source-repository head
+  type: git
+  location: https://github.com/isovector/thinking-with-types
+
+library
+  exposed-modules:
+      AdHocSingletons
+      Algebra
+      Commander
+      Constraints
+      Database
+      Defunc
+      DeriveAnyClass
+      FCTF
+      GADTs
+      HKD
+      InspectionTesting
+      JSONSchema
+      Kan
+      Kinds
+      Misc
+      OpenProduct
+      OpenSum
+      PosNeg
+      Printf
+      PrintfTypes
+      QuantifiedConstraints
+      RankN
+      Roles
+      Sigma
+      Singletons
+      SingletonsTH
+      ST
+      TicTacToe
+      TypeApps
+      War.Age
+      War.Ecstasy
+  other-modules:
+      Paths_thinking_with_types
+  hs-source-dirs:
+      code
+  build-depends:
+      aeson
+    , aeson-pretty
+    , barbies
+    , base >=4.7 && <5
+    , bytestring
+    , constraints
+    , containers
+    , first-class-families
+    , generic-lens
+    , higgledy
+    , inspection-testing
+    , kan-extensions
+    , lens
+    , mtl
+    , singletons
+    , singletons-base
+    , singletons-th
+    , text
+    , transformers
+    , vector
+    , witherable
+  default-language: Haskell2010

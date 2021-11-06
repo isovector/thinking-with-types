@@ -5,6 +5,7 @@
 {-# LANGUAGE GADTs                    #-}
 {-# LANGUAGE InstanceSigs             #-}
 {-# LANGUAGE MultiParamTypeClasses    #-}
+{-# LANGUAGE OverloadedStrings        #-}
 {-# LANGUAGE RankNTypes               #-}
 {-# LANGUAGE ScopedTypeVariables      #-}
 {-# LANGUAGE StandaloneDeriving       #-}
@@ -15,8 +16,6 @@
 {-# LANGUAGE TypeInType               #-}
 {-# LANGUAGE UndecidableInstances     #-}
 
-{-# LANGUAGE OverloadedStrings  #-}
-
 module Sigma where
 
 -- # imports
@@ -24,8 +23,10 @@ import Data.Aeson
 import Data.Constraint
 import Data.Kind (Type)
 import Data.Maybe (mapMaybe)
-import Data.Singletons.Prelude
+import Data.Ord.Singletons
 import Data.Singletons.TH
+import Data.String.Singletons
+import Prelude.Singletons
 
 
 data Sigma (f :: k -> Type) where
