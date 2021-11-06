@@ -122,13 +122,12 @@ This relationship can be expressed with a simple table---but again, note that
 the mnemonic suggested by the name of positive and negative positions should be
 enough to commit this table to memory.
 
-<table border="1">
-  <tr><td>`a`</td> <td>`b`</td> <td>$`a` \circ `b`$</td></tr>
-  <tr><td>$+$</td> <td>$+$</td> <td>$+$</td></tr>
-  <tr><td>$+$</td> <td>$-$</td> <td>$-$</td></tr>
-  <tr><td>$-$</td> <td>$+$</td> <td>$-$</td></tr>
-  <tr><td>$-$</td> <td>$-$</td> <td>$+$</td></tr>
-</table>
+| `a` | `b` | `a` $\cdot$ `b` |
+|:---:|:---:|:---------------:|
+| $+$ | $+$ |       $+$       |
+| $+$ | $-$ |       $-$       |
+| $-$ | $+$ |       $-$       |
+| $-$ | $-$ |       $+$       |
 
 We can use this knowledge to convince ourselves why `Functor` instances exist
 only for the `T1` and `T5` types defined above.

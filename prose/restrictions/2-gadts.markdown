@@ -133,6 +133,127 @@ defining complicated types. This is purely a matter of style as I find it more
 readable.
 
 
+### War Story: Efficient Queries {.rev2}
+
+During a much-needed vacation from writing advertising software, I decided to
+program a video game instead. The idea was to shamelessly reimplement a favorite
+game from my childhood, which was a nice middle-ground between having something
+fun to write, without needing to think deeply about the non-programming
+concerns. Before making the transition to Haskell, I'd made games both as an
+amateur and in a professional capacity, so the lay of the land was already quite
+familiar.
+
+In fact, this wasn't even my first foray into game programming in Haskell. A few
+years earlier I'd built many of the tools I'd need for a game engine---rendering
+machinery, and an implementation of an entity-component system (ECS). My plan
+was to reuse these pieces, and just write the game on top.
+
+In essence, an ECS is a specialized database for video games. The idea is that
+you can implement game objects (the entities) as (possibly empty) "bags" of
+components. Rather than programming entity behavior directly, instead you write
+transformations over their components. For example, you might have a `position
+:: R2` and a `velocity :: R2` component. Entities may or may not have the
+`position` component, but those that do will appear on the screen. Now, if we
+wanted to implement movement, we could write a transformation over the
+`position` and `velocity` components:
+
+```haskell
+emap $ do
+  p <- get position
+  v <- get velocity
+  pure defEnt'
+    { position = Set $ p + v
+    }
+```
+
+Every time this transformation runs, any entity that has both the `position` and
+`velocity` components set will see its `velocity` added to its `position`. Any
+entities that are missing either component will be left alone, unchanged.
+
+The end result of building a game as an ECS is that you get a nice, composable
+system. All that's necessary is to define meaningful transformations over
+components, and the resulting world is full of consistent, repeatable
+interactions.
+
+Back to the story. After a few days of hacking, I had quite a nice little
+prototype of my game. I had a few little people who would move around and
+interact with one another. Everything looked good in my limited tests. But the
+game was supposed to be a war simulator, with hundreds of soldiers and thousands
+of bullets flying around---each one an entity. When I cranked up the number of
+objects I was creating, everything ground to a halt. My implementation was too
+slow!
+
+After some profiling, I found that the root cause was that my old ECS library
+was dead slow, due to many bad assumptions. A common implementation of an ECS is
+to implement entities as as *map from components to entities*, rather than the
+more usual map from records to components. In a system with many interactions,
+most entities will have a sparse collection of components, and so keeping them
+denormalized helps cut down on memory usage. Furthermore, this representation
+allows for extremely efficient evaluation of queries: if we want to run the
+*position/velocity* rule above, we don't need to look at every entity---only
+those in the intersection of the `position` and `velocity` maps.
+
+So what was going wrong? The problem was that `Query` was a monad, which meant
+it was impossible to do static analysis of the components it required. Knowing
+that this was going to be a performance bottleneck, my library cheated and asked
+you for an `IdTarget` every time you ran a `Query`. The idea was that the
+`IdTarget` describes which entities the system needs to look at.
+
+[code/War/Ecstasy.hs:allIds](Snip)
+
+The result was an awful mess. If you wanted to be performant, you needed to
+duplicate the majority of your query logic in the `IdTarget`. And if they ever
+got out of sync, the game would start exhibiting bugs! Fearing that, I had
+simply used the `allIds` target for every transformation, meaning that every
+interaction needed to traverse every entity in the game---a sure-fire recipe for
+$O(\text{awful})$ performance.
+
+My first (unwise) attempt at a solution was to try to "plumb" my way through the
+`Query`, and generate an optimistic `IdTarget` based on how far I got before the
+thing inevitably forked. It was complicated and unreliable, and thus destined to
+failure.
+
+Upon deep thought, I realized the issue was that `Query` was a monad (it wasn't
+as obvious as I've presented here!) What I really wanted was a data structure
+that I could inspect when running queries to find an optimally small set of
+`Id`s necessary to traverse. The challenge was the different ways of building
+queries result in different types being queried!
+
+Aha! But what about using GADTs? Then I could build a inspectable data
+structure, and use the type index to describe the result of the `Query`! After
+carefully mapping out all of the different ways I wanted to be able to query,
+and their respective types, I wrote the following definition:
+
+[code/War/Ecstasy.hs:Query](Snip)
+
+Having reified `Query` as a data structure instead of a program, it was now
+possible to write different "interpretations" of it. One those those
+interpretations was to synthesize the `IdTarget`:
+
+[code/War/Ecstasy.hs:findRelevant](Snip)
+
+This was already a significant improvement! But I realized I could also
+interpret the `Query` to determine if I needed to run it at all! Perhaps the
+thing always resulted in a constant value, in which case I could save a lot of
+work by computing it once and pushing the result everywhere necessary:
+
+[code/War/Ecstasy.hs:constantValue](Snip)
+
+Here you can see the GADT doing work---each branch of `constantValue` returns a
+different type, depending on which constructor we've pattern matched over.
+
+To put everything together, I added `Functor` and `Applicative` instances for
+`Query`:
+
+[code/War/Ecstasy.hs:QueryFunctor](Snip)
+
+[code/War/Ecstasy.hs:QueryApplicative](Snip)
+
+After turning on `-XApplicativeDo`, all of my old transformations continued to
+work as written---except that now everything ran asymptotically faster, thanks
+to the optimization power possible by expecting the `Query` GADT.
+
+
 ### Heterogeneous Lists
 
 One of the primary motivations of GADTs is building inductive type-level

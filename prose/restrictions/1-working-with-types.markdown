@@ -22,7 +22,7 @@ The problem with `broken` is that, despite all appearances, the type `b` in
 here, and introduces a new type variable for `apply`. The result of this is
 effectively as though we had instead written the following:
 
-!snipRename{Misc}{brokenWhy}
+[code/Misc.hs:brokenWhy](Snip)
 
 Hindley--Milner seems to take the view that types should be "neither seen nor
 heard," and an egregious consequence of this is that type variables have no
