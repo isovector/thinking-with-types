@@ -1,6 +1,5 @@
 {-# LANGUAGE TemplateHaskell  #-}
 {-# LANGUAGE TypeApplications #-}
-{-# OPTIONS_GHC -O -fplugin Test.Inspection.Plugin #-}
 
 module InspectionTesting where
 

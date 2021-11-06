@@ -34,7 +34,6 @@ library
       FCTF
       GADTs
       HKD
-      InspectionTesting
       JSONSchema
       Kan
       Kinds
@@ -56,7 +55,7 @@ library
       War.Age
       War.Ecstasy
   other-modules:
-      Paths_thinking_with_types
+      InspectionTesting
   hs-source-dirs:
       code
   build-depends:

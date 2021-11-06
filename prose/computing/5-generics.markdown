@@ -585,7 +585,7 @@ For example, if we wanted to show that the `schema` function successfully
 optimized away all of its generics, we could add a little test to our project
 like this:
 
-[code/InspectionTesting.hs](Snip)
+[noncode/InspectionTesting.hs](Snip)
 
 Easy as that. Now in the course of compiling your module, if your generic code
 has any runtime overhead, GHC will refuse to continue. Unfortunately for us,
