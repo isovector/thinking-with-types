@@ -1,1 +1,1 @@
-CodeBlock ("",["haskell","ghci"],[]) "> :t runYoneda\nghci> runYoneda :: Yoneda f a -> forall b. (a -> b) -> f b\nghci> flip fmap :: Functor f => f a -> (a -> b) -> f b\nghci> ghci> Leaving GHCi.\n\n"
+CodeBlock ("",["haskell","ghci"],[]) "> :t runYoneda\nrunYoneda :: Yoneda f a -> forall b. (a -> b) -> f b\n\n> :t flip fmap\nflip fmap :: Functor f => f a -> (a -> b) -> f b\n\n"

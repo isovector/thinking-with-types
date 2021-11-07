@@ -1,1 +1,1 @@
-CodeBlock ("",["haskell","ghci"],[]) "> runST safeExample\nghci> \"hello world\"\nghci> ghci> Leaving GHCi.\n\n"
+CodeBlock ("",["haskell","ghci"],[]) "> runST safeExample\n\"hello world\"\n\n"

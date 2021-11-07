@@ -1,1 +1,1 @@
-CodeBlock ("",["haskell","ghci"],[]) "> :t words\nghci> words :: String -> [String]\nghci> show :: Bool -> String :: Bool -> String\nghci> words . (show :: Bool -> String) :: Bool -> [String]\nghci> ghci> Leaving GHCi.\n\n"
+CodeBlock ("",["haskell","ghci"],[]) "> :t words\nwords :: String -> [String]\n\n> :t show :: Bool -> String\nshow :: Bool -> String :: Bool -> String\n\n> :t words . (show :: Bool -> String)\nwords . (show :: Bool -> String) :: Bool -> [String]\n\n"

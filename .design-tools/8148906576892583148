@@ -1,1 +1,1 @@
-CodeBlock ("",["haskell","ghci"],[]) "> :t sing @'True\nghci> ghci> ghci> Leaving GHCi.\n\n"
+CodeBlock ("",["haskell","ghci"],[]) "> :t sing @'True\nLeaving GHCi.\n\n"

@@ -1,1 +1,1 @@
-CodeBlock ("",["haskell","ghci"],[]) "> :t fmap\nghci> fmap :: Functor f => (a -> b) -> f a -> f b\nghci> fmap @_ @Int @Bool :: Functor w => (Int -> Bool) -> w Int -> w Bool\nghci> ghci> Leaving GHCi.\n\n"
+CodeBlock ("",["haskell","ghci"],[]) "> :t fmap\nfmap :: Functor f => (a -> b) -> f a -> f b\n\n> :t fmap @_ @Int @Bool\nfmap @_ @Int @Bool :: Functor w => (Int -> Bool) -> w Int -> w Bool\n\n"

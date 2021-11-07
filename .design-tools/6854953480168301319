@@ -1,1 +1,1 @@
-CodeBlock ("",["haskell","ghci"],[]) "> printf (Proxy @\"test\")\nghci> \"test\"\nghci> \"1+2=3\"\nghci> ghci> ghci> Leaving GHCi.\n\n"
+CodeBlock ("",["haskell","ghci"],[]) "> printf (Proxy @\"test\")\n\"test\"\n\n> printf (Proxy @(Int :<< \"+\" :<< Int :<< \"=3\")) 1 2\n\"1+2=3\"\n\n> /wrongPrintf/printf/wrongPrintf (Proxy @(String :<< \" world!\")) \"hello\"\nLeaving GHCi.\n\n"

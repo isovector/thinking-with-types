@@ -1,1 +1,1 @@
-CodeBlock ("",["haskell","ghci"],[]) "> coerce (1867 :: Sum Int) :: Product Int\nghci> Product {getProduct = 1867}\nghci> ghci> Leaving GHCi.\n\n"
+CodeBlock ("",["haskell","ghci"],[]) "> coerce (1867 :: Sum Int) :: Product Int\nProduct {getProduct = 1867}\n\n"

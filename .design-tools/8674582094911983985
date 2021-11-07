@@ -1,1 +1,1 @@
-CodeBlock ("",["haskell","ghci"],[]) "> :kind! Eval (Snd <=< FromMaybe '(0, 0) =<< Pure (Just '(1, 2)))\nghci> Eval (Snd <=< FromMaybe '(0, 0) =<< Pure (Just '(1, 2))) :: Nat\n= 2\nghci> ghci> Leaving GHCi.\n\n"
+CodeBlock ("",["haskell","ghci"],[]) "> :kind! Eval (Snd <=< FromMaybe '(0, 0) =<< Pure (Just '(1, 2)))\nEval (Snd <=< FromMaybe '(0, 0) =<< Pure (Just '(1, 2))) :: Nat\n= 2\n\n"

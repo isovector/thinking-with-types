@@ -1,1 +1,1 @@
-CodeBlock ("",["haskell","ghci"],[]) "> makeTypeObj @Int\nghci> Object (fromList [(\"type\",String \"integer\")])\nghci> ghci> Leaving GHCi.\n\n"
+CodeBlock ("",["haskell","ghci"],[]) "> makeTypeObj @Int\nObject (fromList [(\"type\",String \"integer\")])\n\n"

@@ -1,1 +1,1 @@
-CodeBlock ("",["haskell","ghci"],[]) "> default (Int)\n\n> fromDynamic @Int (pyPlus (Dynamic 1) (Dynamic 2))\nghci> ghci> Just 3\nghci> Just \"hello world\"\nghci> Just \"4 minute\"\nghci> ghci> Leaving GHCi.\n\n"
+CodeBlock ("",["haskell","ghci"],[]) "> default (Int)\n\n> fromDynamic @Int (pyPlus (Dynamic 1) (Dynamic 2))\nJust 3\n\n> fromDynamic @String (pyPlus (Dynamic \"hello\") (Dynamic \" world\"))\nJust \"hello world\"\n\n> fromDynamic @String (pyPlus (Dynamic 4) (Dynamic \" minute\"))\nJust \"4 minute\"\n\n"

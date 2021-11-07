@@ -1,1 +1,1 @@
-CodeBlock ("",["haskell","ghci"],[]) "> :t eq\nghci> eq :: MyEq a => a -> a -> Bool\nghci> True\nghci> True\nghci> False\nghci> False\nghci> ghci> Leaving GHCi.\n\n"
+CodeBlock ("",["haskell","ghci"],[]) "> :t eq\neq :: MyEq a => a -> a -> Bool\n\n> eq F0 F0\nTrue\n\n> eq (F1 \"foo\") (F1 \"foo\")\nTrue\n\n> eq F0 (F1 \"hello\")\nFalse\n\n> eq (F1 \"foo\") (F1 \"bar\")\nFalse\n\n"

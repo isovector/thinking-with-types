@@ -1,1 +1,1 @@
-CodeBlock ("",["haskell","ghci"],[]) "> :kind CmpSymbol\nghci> ghci> CmpSymbol :: Symbol -> Symbol -> Ordering\nghci> CmpSymbol \"sandy\" \"sandy\" :: Ordering\n= 'EQ\nghci> CmpSymbol \"sandy\" \"batman\" :: Ordering\n= 'GT\nghci> ghci> Leaving GHCi.\n\n"
+CodeBlock ("",["haskell","ghci"],[]) "> :kind CmpSymbol\nCmpSymbol :: Symbol -> Symbol -> Ordering\n\n> :kind! CmpSymbol \"sandy\" \"sandy\"\nCmpSymbol \"sandy\" \"sandy\" :: Ordering\n= 'EQ\n\n> :kind! CmpSymbol \"sandy\" \"batman\"\nCmpSymbol \"sandy\" \"batman\" :: Ordering\n= 'GT\n\n"

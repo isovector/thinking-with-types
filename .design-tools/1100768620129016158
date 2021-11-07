@@ -1,1 +1,1 @@
-CodeBlock ("",["haskell","ghci"],[]) "> /badInsert/insert/let result = badInsert (Key @\"key\") (Just \"hello\") nil\nghci> ghci> ghci> ghci> ghci> Leaving GHCi.\n\n"
+CodeBlock ("",["haskell","ghci"],[]) "> /badInsert/insert/let result = badInsert (Key @\"key\") (Just \"hello\") nil\nLeaving GHCi.\n\n"

@@ -1,1 +1,1 @@
-CodeBlock ("",["haskell","ghci"],[]) "> schema @Bool\nghci> ghci> ghci> Leaving GHCi.\n\n"
+CodeBlock ("",["haskell","ghci"],[]) "> schema @Bool\nLeaving GHCi.\n\n"

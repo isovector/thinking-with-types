@@ -1,1 +1,1 @@
-CodeBlock ("",["haskell","ghci"],[]) "> :kind! Eval (Snd '(1, \"hello\"))\nghci> Eval (Snd '(1, \"hello\")) :: Symbol\n= \"hello\"\nghci> ghci> Leaving GHCi.\n\n"
+CodeBlock ("",["haskell","ghci"],[]) "> :kind! Eval (Snd '(1, \"hello\"))\nEval (Snd '(1, \"hello\")) :: Symbol\n= \"hello\"\n\n"

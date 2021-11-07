@@ -1,1 +1,1 @@
-CodeBlock ("",["haskell","ghci"],[]) "> withSomeSBool (toSBool True)  fromSBool\nghci> True\nghci> False\nghci> ghci> Leaving GHCi.\n\n"
+CodeBlock ("",["haskell","ghci"],[]) "> withSomeSBool (toSBool True)  fromSBool\nTrue\n\n> withSomeSBool (toSBool False) fromSBool\nFalse\n\n"

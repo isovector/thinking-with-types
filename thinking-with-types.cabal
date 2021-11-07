@@ -55,7 +55,7 @@ library
       War.Age
       War.Ecstasy
   other-modules:
-      InspectionTesting
+      Paths_thinking_with_types
   hs-source-dirs:
       code
   build-depends:

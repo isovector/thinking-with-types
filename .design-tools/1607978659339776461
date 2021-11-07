@@ -1,1 +1,1 @@
-CodeBlock ("",["haskell","ghci"],[]) "> :kind! \"hello \" :<< String :<< \"!\"\nghci> \"hello \" :<< String :<< \"!\" :: Type\n= \"hello \" :<< (String :<< \"!\")\nghci> ghci> Leaving GHCi.\n\n"
+CodeBlock ("",["haskell","ghci"],[]) "> :kind! \"hello \" :<< String :<< \"!\"\n\"hello \" :<< String :<< \"!\" :: Type\n= \"hello \" :<< (String :<< \"!\")\n\n"
