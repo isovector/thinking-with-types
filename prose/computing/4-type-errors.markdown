@@ -78,7 +78,7 @@ friendlyPrj foo :: Maybe (Identity Int)
 Let's return to the example of `insert` for `OpenProduct`. Recall the `UniqueKey
 key ts ~ 'True` constraint we added to prevent duplicate keys.
 
-[code/OpenProduct.hs|oldInsert=insert](Snip)
+[code/OpenProduct.hs](Snip){oldInsert=insert}
 
 This is another good place to add a custom type error; it's likely to happen,
 and the default one GHC will emit is unhelpful at best and horrendous at worst.
@@ -91,7 +91,7 @@ error.
 `RequireUniqueKey` is intended to be called as `RequireUniqueKey (UniqueKey key
 ts) key t ts`. The `Bool` at [1](Ann) is the result of calling `UniqueKey`, and
 it is pattern matched on. At [2](Ann), if it's `'True`, `RequireUniqueKey` emits
-the unit constraint `()`.[^requires-contraintskinds] As a `kind:Constraint`,
+the unit constraint `()`.[^requires-constraintkinds] As a `kind:Constraint`,
 `()` is trivially satisfied.
 
 [^requires-constraintkinds]: This requires `-XConstraintKinds`.
@@ -111,9 +111,9 @@ Solution
 
 :   [code/OpenProduct.hs:FriendlyFindElem](Snip)
 
-    [code/OpenProduct.hs|friendlyUpdate=update](Snip)
+    [code/OpenProduct.hs](Snip){friendlyUpdate=update}
 
-    [code/OpenProduct.hs|friendlyDelete=delete](Snip)
+    [code/OpenProduct.hs](Snip){friendlyDelete=delete}
 
     These functions could be cleaned up a little by moving the
     `FriendlyFindElem` constraint to `findElem`, which would remove the need for
