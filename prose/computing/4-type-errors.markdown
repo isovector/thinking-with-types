@@ -15,20 +15,22 @@ nothing short of a failure in our library. A type-safe library is of no value if
 nobody knows how to use it.
 
 Fortunately, GHC provides the ability to construct custom type errors. The
-module `GHC.TypeLits` defines the type `TypeError` of kind `ErrorMessage -> k`.
-The semantics of `TypeError` is that if GHC is ever asked to solve one, it emits
-the given type error instead, and refuse to compile. Because `TypeError` is
-poly-kinded, we can put it anywhere we'd like at the type-level.
+module `GHC.TypeLits` defines the type `TypeError` of kind `kind:ErrorMessage ->
+k`.  The semantics of `TypeError` is that if GHC is ever asked to solve one, it
+emits the given type error instead, and refuse to compile. Because `TypeError`
+is poly-kinded, we can put it anywhere we'd like at the type-level.
 
-The following four means of constructing `ErrorMessage`s are available to us.
+The following four means of constructing `kind:ErrorMessage`s are available to
+us.
 
-* `'Text` (of kind `Symbol -> ErrorMessage`.) Emits the symbol verbatim. Note
-  that this is *not* `Data.Text.Text`.
-* `'ShowType` (of kind `k -> ErrorMessage`.) Prints the name of the given type.
-* `'(:<>:)` (of kind `ErrorMessage -> ErrorMessage -> ErrorMessage`.)
-  Concatenate two `ErrorMessage`s side-by-side.
-* `'(:\$\$:)` (of kind `ErrorMessage -> ErrorMessage -> ErrorMessage`.) Append
-  one `ErrorMessage` vertically atop another.
+* `'Text` (of kind `kind:Symbol -> ErrorMessage`.) Emits the symbol verbatim.
+  Note that this is *not* `Data.Text.Text`.
+* `'ShowType` (of kind `kind:k -> ErrorMessage`.) Prints the name of the given
+  type.
+* `'(:<>:)` (of kind `kind:ErrorMessage -> ErrorMessage -> ErrorMessage`.)
+  Concatenate two `kind:ErrorMessage`s side-by-side.
+* `'(:\$\$:)` (of kind `kind:ErrorMessage -> ErrorMessage -> ErrorMessage`.)
+  Append one `kind:ErrorMessage` vertically atop another.
 
 `TypeError` is usually used as a constraint in an instance context, or as the
 result of a type family. As an illustration, we can provide a more helpful error
@@ -76,7 +78,7 @@ friendlyPrj foo :: Maybe (Identity Int)
 Let's return to the example of `insert` for `OpenProduct`. Recall the `UniqueKey
 key ts ~ 'True` constraint we added to prevent duplicate keys.
 
-!snipRename{OpenProduct}{oldInsert}{insert}
+[code/OpenProduct.hs|oldInsert=insert](Snip)
 
 This is another good place to add a custom type error; it's likely to happen,
 and the default one GHC will emit is unhelpful at best and horrendous at worst.
@@ -89,7 +91,10 @@ error.
 `RequireUniqueKey` is intended to be called as `RequireUniqueKey (UniqueKey key
 ts) key t ts`. The `Bool` at [1](Ann) is the result of calling `UniqueKey`, and
 it is pattern matched on. At [2](Ann), if it's `'True`, `RequireUniqueKey` emits
-the unit constraint `()` . As a `Constraint`, `()` is trivially satisfied.
+the unit constraint `()`.[^requires-contraintskinds] As a `kind:Constraint`,
+`()` is trivially satisfied.
+
+[^requires-constraintkinds]: This requires `-XConstraintKinds`.
 
 Notice that at [3](Ann) we helpfully suggest a solution. This is good form in
 any libraries you write. Your users will thank you for it.
@@ -106,9 +111,9 @@ Solution
 
 :   [code/OpenProduct.hs:FriendlyFindElem](Snip)
 
-    !snipRename{OpenProduct}{friendlyUpdate}{update}
+    [code/OpenProduct.hs|friendlyUpdate=update](Snip)
 
-    !snipRename{OpenProduct}{friendlyDelete}{delete}
+    [code/OpenProduct.hs|friendlyDelete=delete](Snip)
 
     These functions could be cleaned up a little by moving the
     `FriendlyFindElem` constraint to `findElem`, which would remove the need for
@@ -117,8 +122,8 @@ Solution
 
 Exercise
 
-:   Write a closed type family of kind `[k] -> ErrorMessage` that pretty prints
-    a list. Use it to improve the error message from `FriendlyFindElem`.
+:   Write a closed type family of kind `kind:[k] -> ErrorMessage` that pretty
+    prints a list. Use it to improve the error message from `FriendlyFindElem`.
 
 Solution
 
@@ -137,8 +142,8 @@ Solution
 :   GHC will throw the error message immediately upon attempting to compile the
     module.
 
-    The reason why is because the compiler will attempt to discharge any extraneous
-    constraints (for example, `Show Int` is always in scope, and so it can
-    automatically be discharged.) This machinery causes the type error to be seen,
-    and thus thrown.
+    The reason why is because the compiler will attempt to discharge any
+    extraneous constraints (for example, `Show Int` is always in scope, and so
+    it can automatically be discharged.) This machinery causes the type error to
+    be seen, and thus thrown.
 

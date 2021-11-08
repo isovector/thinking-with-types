@@ -1,5 +1,7 @@
 ## First Class Families
 
+> TODO(sandy): intro
+
 ### Defunctionalization
 
 Until recently, it was believed that type families had no chance of being first
@@ -10,9 +12,8 @@ this repetitive boilerplate.
 
 The work of Li-yao Xia @cite:fcf has relaxed this limitation, not by providing
 unsaturated type families, but by giving us tools for working around them. It
-works via Defunctionalization---the process of
-replacing an instantiation of a polymorphic function with a specialized label
-instead.
+works via Defunctionalization---the process of replacing an instantiation of a
+polymorphic function with a specialized label instead.
 
 For example, rather than the function `fst`:
 
@@ -27,15 +28,14 @@ codified as a typeclass with a functional dependency to guide the return type.
 
 [code/Defunc.hs:Eval](Snip)
 
-The syntax `| l -> t` at [1](Ann) is known as a functional dependency,
-and states that the type `t` is fully determined by the type `l`. Here,
-`l` is the type of our defunctionalized label, and `t` is the return type
-of the evaluation.
+The syntax `| l -> t` at [1](Ann) is known as a functional dependency, and
+states that the type `t` is fully determined by the type `l`. Here, `l` is the
+type of our defunctionalized label, and `t` is the return type of the
+evaluation.
 
 [code/Defunc.hs:EvalFst](Snip)
 
-Despite being roundabout, this approach works just as well as `fst` itself
-does.
+Despite being roundabout, this approach works just as well as `fst` itself does.
 
 ```{ghci=code/Defunc.hs}
 eval (Fst ("hello", True))
@@ -56,9 +56,9 @@ Even higher-order functions can be defunctionalized:
 
 [code/Defunc.hs:Map](Snip)
 
-The `dfb` type at [1](Ann) could be labeled simply as `b`, but we will
-enforce it is a defunctionalized symbol---evaluation of `MapList` will depend on
-an `Eval dfb` instance. This name helps suggest that.
+The `dfb` type at [1](Ann) could be labeled simply as `b`, but we will enforce
+it is a defunctionalized symbol---evaluation of `MapList` will depend on an
+`Eval dfb` instance. This name helps suggest that.
 
 [code/Defunc.hs:EvalMap](Snip)
 
@@ -86,14 +86,14 @@ which, when evaluated, will produce a type of kind `a`.
 
 [code/FCTF.hs:Exp](Snip)
 
-This "evaluation" is performed via an open type family `Eval`. `Eval`
-matches on `Exp a`s, mapping them to an `a`.
+This "evaluation" is performed via an open type family `Eval`. `Eval` matches on
+`Exp a`s, mapping them to an `a`.
 
 [code/FCTF.hs:Eval](Snip)
 
 To write defunctionalized "labels", empty data-types can be used. As an
-illustration, if we wanted to lift `snd` to the type-level, we write a
-data-type whose kind mirrors the type of `snd`.
+illustration, if we wanted to lift `snd` to the type-level, we write a data-type
+whose kind mirrors the type of `snd`.
 
 [code/FCTF.hs:Snd](Snip)
 
@@ -102,9 +102,9 @@ data-type whose kind mirrors the type of `snd`.
 :kind Snd
 ```
 
-The type of `snd` and kind of `Snd` share a symmetry, if you ignore the
-trailing `-> Type` on `Snd`. An instance of `Eval` can be used to
-implement the evaluation of `Snd`.
+The type of `snd` and kind of `Snd` share a symmetry, if you ignore the trailing
+`kind:-> Type` on `Snd`. An instance of `Eval` can be used to implement the
+evaluation of `Snd`.
 
 [code/FCTF.hs:EvalSnd](Snip)
 
@@ -133,10 +133,9 @@ Solution
 :   [code/FCTF.hs:ListToMaybe](Snip)
 
 
-However, the real appeal of this approach is that it allows for
-*higher-order* functions. For example, `map` is lifted by taking a
-defunctionalization label of kind `a -> Exp b` and applying it to a
-`[a]` to get a `Exp [b]`.
+However, the real appeal of this approach is that it allows for *higher-order*
+functions. For example, `map` is lifted by taking a defunctionalization label of
+kind `a -> Exp b` and applying it to a `[a]` to get a `Exp [b]`.
 
 [code/FCTF.hs:MapList](Snip)
 
@@ -144,9 +143,9 @@ defunctionalization label of kind `a -> Exp b` and applying it to a
 
 [code/FCTF.hs:EvalNil](Snip)
 
-And `Eval` of cons proceeds in the only way that will type check, by
-evaluating the function symbol applied to the head, and evaluating the
-`MapList` of the tail.
+And `Eval` of cons proceeds in the only way that will type check, by evaluating
+the function symbol applied to the head, and evaluating the `MapList` of the
+tail.
 
 [code/FCTF.hs:EvalCons](Snip)
 
@@ -175,8 +174,8 @@ Interestingly, first-class families form a monad at the type-level.
 [code/FCTF.hs:bind](Snip)
 
 As such, we can compose them in terms of their Kleisli composition.
-Traditionally the fish operator (`<=<`) is used to represent this combinator
-in Haskell.  We are unable to use the more familiar period operator at the
+Traditionally the fish operator (`<=<`) is used to represent this combinator in
+Haskell.  We are unable to use the more familiar period operator at the
 type-level, as it conflicts with the syntax of the `forall` quantifier.
 
 [code/FCTF.hs:kleisli](Snip)
@@ -187,17 +186,17 @@ type Snd2 = Snd <=< Snd
 :kind! Eval (Snd2 '(1, '(2, 3)))
 ```
 
-While `(<=<)` at the type-level acts like regular function composition
-`(.)`, `(=<<)` behaves like function application `(\$)`.
+While `(<=<)` at the type-level acts like regular function composition `(.)`,
+`(=<<)` behaves like function application `($)`.
 
 ```{ghci=code/FCTF.hs}
 :kind! Eval (Snd <=< FromMaybe '(0, 0) =<< Pure (Just '(1, 2)))
 ```
 
-The `first-class-families`@cite:fcf package provides most of `Prelude`
-as FCFs, as well as some particularly useful functions for type-level
-programming. For example, we can determine if any two types are the
-same---remember, there is no `Eq` at the type-level.
+The `first-class-families`@cite:fcf package provides most of `Prelude` as FCFs,
+as well as some particularly useful functions for type-level programming. For
+example, we can determine if any two types are the same---remember, there is no
+`Eq` at the type-level.
 
 [code/FCTF.hs:TyEq](Snip)
 
@@ -272,7 +271,7 @@ the "type application" explicit. We give the kind signature of
 
 [code/FCTF.hs:Mempty](Snip)
 
-The understanding here is that given a type of any monoidal kind `k`,
+The understanding here is that given a type of any monoidal kind `kind:k`,
 `Mempty` will give back the monoidal identity for that kind. This can be done
 by matching on a rigid kind signature, as in the following instances.
 

@@ -38,7 +38,11 @@ equal.
 Structural polymorphism is mindless work to write, but needs to be done. In the
 case of some of the standard Haskell typeclasses, GHC is capable of writing
 these instances for you via the `deriving` machinery. Unfortunately, for custom
-typeclasses we're on our own, without any direct support from the compiler.
+typeclasses we're on our own, without any direct support from the
+compiler.[^deriving-via]
+
+[^deriving-via]: The `-XDerivingVia` language extension allows for first-class
+  deriving of typeclasses in terms of other types.
 
 As terrible as this situation appears, all hope is not lost. Using
 `GHC.Generics`, we're capable of writing our own machinery for helping GHC
@@ -75,8 +79,9 @@ extension, which will automatically derive an instance of `Generic` for you:
 [code/DeriveAnyClass.hs:Generic](Snip)
 
 The associated type `Rep a` at [1](Ann) corresponds to the canonical form of the
-type `a`. Notice however the kinds; while `a` has kind `Type`, `Rep a` is of
-kind `Type -> Type`. We will investigate why this is the case in a moment.
+type `a`. Notice however the kinds; while `a` has kind `kind:Type`, `Rep a` is
+of kind `kind:Type -> Type`. We will investigate why this is the case in a
+moment.
 
 The functions `from` and `to` at [2](Ann) and [3](Ann) form the isomorphism
 between `a` and `Rep a`. Somewhat confusingly, their implied directionality
@@ -152,11 +157,11 @@ derive `Eq` generically, call your carrier typeclass `GEq`.
 Our `GEq` class has a single method, `geq`, whose signature closely matches
 `(==) :: a -> a -> Bool`.
 
-Notice that the type parameter `a` to `GEq` has kind `Type -> Type`.  This is a
-quirk of `GHC.Generics`, and allows the same `Rep` machinery when dealing with
-higher-kinded classes. When writing carrier classes for types of kind `Type`, we
-will always saturate `a` with a dummy type `x` whose only purpose is to make the
-whole thing kind check.
+Notice that the type parameter `a` to `GEq` has kind `kind:Type -> Type`.  This
+is a quirk of `GHC.Generics`, and allows the same `Rep` machinery when dealing
+with higher-kinded classes. When writing carrier classes for types of kind
+`kind:Type`, we will always saturate `a` with a dummy type `x` whose only
+purpose is to make the whole thing kind check.
 
 With our carrier defined, the next step is to provide instances for the generic
 `Rep` constructors. A good approach when writing generic instances is to work
@@ -187,7 +192,7 @@ The one other case we need to consider is what should happen for concrete types
 inside of data constructors? Such things are denoted via `K1`, and in this case,
 we want to fall back on an `Eq` (*not* `GEq`!) instance to compare the two. The
 analogous non-generic behavior for this is how the `Eq` instance for `Maybe a`
-is `Eq a => Eq (Maybe a)`; most datatypes simply want to lift equality over
+is `Eq a => Eq (Maybe a)`; most data types simply want to lift equality over
 their constituent fields.
 
 [code/DeriveAnyClass.hs:geqK1](Snip)
@@ -236,6 +241,7 @@ instances in terms of it. Given our `Foo` datatype from earlier:
 We can give an `Eq` instance with very little effort.
 
 [code/DeriveAnyClass.hs:EqFoo](Snip)
+
 
 Exercise
 
@@ -382,7 +388,7 @@ the corresponding term-level string.
 runWriter (emitRequired @"required property")
 ```
 
-`symbolVal` is a function that converts a `Symbol` into a `String`.  It comes
+`symbolVal` is a function that converts a `kind:Symbol` into a `String`. It comes
 from `GHC.TypeLits`. For example:
 
 ```{ghci=code/Printf.hs}
@@ -391,7 +397,7 @@ symbolVal (Proxy @"i am a symbol")
 ```
 
 The `KnownSymbol` stuff in `symbolVal`'s type is simply a proof that GHC knows
-what `Symbol` we're talking about; it will automatically generate the
+what `kind:Symbol` we're talking about; it will automatically generate the
 `KnownSymbol` instance for us, so it's nothing we need to worry about.
 
 Anyway, in JSON Schema, the boolean type `Bool` is represented via `"boolean"`.
@@ -522,9 +528,9 @@ behavior for `a`. Programming with typeclass instances is not always the most
 elegant experience.
 
 And we're done. We've successfully used the metadata in `GHC.Generics` to
-automatically marshall a description of our Haskell datatypes into JSON Schema.
+automatically marshall a description of our Haskell data types into JSON Schema.
 We didn't need to resort to using code generation---which would have complicated
-our compilation pipeline---and we've written nothing but everday Haskell in
+our compilation pipeline---and we've written nothing but everyday Haskell in
 order to accomplish it.
 
 We can admire our handiwork:
@@ -550,27 +556,27 @@ With all of the fantastic things we're capable of doing with `GHC.Generics`,
 it's worth wondering whether or not we need to pay a runtime cost to perform
 these marvels. After all, converting to and from `Rep`s probably isn't free.
 
-If there is indeed a hefty cost for using `GHC.Generics`, the convenience to
-the programmer might not be worthwhile. After all, code gets executed much more
+If there is indeed a hefty cost for using `GHC.Generics`, the convenience to the
+programmer might not be worthwhile. After all, code gets executed much more
 often than it gets written. Writing boilerplate by hand is annoying and tedious,
 but at least it gives us some understanding of what's going on under the hood.
 With `GHC.Generics`, these things are certainly less clear.
 
-There is good and bad news here. The good news is that usually adding
-`INLINE` pragmas to each of your class' methods is enough to optimize away
-all usage of `GHC.Generics` at compile-time.
+There is good and bad news here. The good news is that usually adding `INLINE`
+pragmas to each of your class' methods is enough to optimize away all usage of
+`GHC.Generics` at compile-time.
 
-The bad news is that this is only *usually* enough to optimize them away.
-Since there is no separate compilation step when working with `GHC.Generics`,
-it's quite a lot of work to actually determine whether or not your generic code
-is being optimized away.
+The bad news is that this is only *usually* enough to optimize them away. Since
+there is no separate compilation step when working with `GHC.Generics`, it's
+quite a lot of work to actually determine whether or not your generic code is
+being optimized away.
 
 Thankfully, we have tools for convincing ourselves our performance isn't being
-compromised. Enter the `inspection-testing`@cite:inspection-testing
-library. `inspection-testing` provides a plugin to GHC which allows us to
-make assertions about our generated code. We can use it to ensure GHC optimizes
-away all of our usages of `GHC.Generics`, and generates the exact same code
-that we would have written by hand.
+compromised. Enter the `inspection-testing`@cite:inspection-testing library.
+`inspection-testing` provides a plugin to GHC which allows us to make assertions
+about our generated code. We can use it to ensure GHC optimizes away all of our
+usages of `GHC.Generics`, and generates the exact same code that we would have
+written by hand.
 
 We can use `inspection-testing` like so:
 
@@ -579,7 +585,9 @@ We can use `inspection-testing` like so:
 3. Import `Test.Inspection`.
 4. Write some code that exercises the generic code path. Call it `foo`, for
    example.
-5. Add `inspect \$ hasNoGenerics 'foo` to your top level module.
+5. Add `inspect $ hasNoGenerics 'foo` to your top level module.
+
+> TODO(sandy): don't need the plugin anymore
 
 For example, if we wanted to show that the `schema` function successfully
 optimized away all of its generics, we could add a little test to our project
@@ -619,7 +627,8 @@ challenging exercise. The secret is to rewrite our types in terms of kan
 extensions.
 
 * Rather than `forall f. Functor f => f a`, instead use `forall f. Yoneda f a`
-* Instead of `forall f. Applicative f => f a`, use `forall f. Curried (Yoneda f) (Yoneda f) a`
+* Instead of `forall f. Applicative f => f a`, use `forall f. Curried (Yoneda f)
+  (Yoneda f) a`
 * Instead of `forall f. Monad f => f a`, use `forall f. Codensity f a`
 
 These types `Yoneda`, `Curried` and `Codensity` all come from the
@@ -666,7 +675,7 @@ enlightening:
 
 Note the lack of a `Functor f` constraint on this instance! `Yoneda f` is a
 `Functor` *even when* `f` *isn't.* In essence, `Yoneda f` gives us a instance of
-`Functor` for free. Any type of kind `Type -> Type` is eligible. There's lots of
+`Functor` for free. Any type of kind `kind:Type -> Type` is eligible. There's lots of
 interesting category theory behind all of this, but it's not important to us.
 
 But how does `Yoneda` work? Keep in mind the functor law that `fmap f .  fmap g

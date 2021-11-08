@@ -26,22 +26,26 @@ concrete types those variables get. The signature `(a -> a) -> Int` promises
 that `applyToFive` will happily take any function which returns the same type
 it takes.
 
-We wanted `applyToFive` to only be able to take `id` as a parameter, but
-instead we've written a function which (if it compiled) would happily take any
-endomorphism. Because the choice of `a` is at the mercy of the caller, Haskell has no
-choice but to reject the above definition of `applyToFive`---it would be a
-type error to try to apply `5` to `not`, for example.
+We wanted `applyToFive` to only be able to take `id` as a parameter, but instead
+we've written a function which (if it compiled) would happily take any
+*endomorphism*.[^endo] Because the choice of `a` is at the mercy of the caller,
+Haskell has no choice but to reject the above definition of `applyToFive`---it
+would be a type error to try to apply `5` to `not`, for example.
+
+[^endo]: Functions which take and return the same type. For example, `not ::
+  Bool -> Bool`, `show @String :: String -> String` and `id :: a -> a` are all
+  endomorphisms, but `words :: String -> [String]` is not.
 
 And so we come to the inevitable conclusion that, as is so often the case, the
 compiler is right and we (or at least, our type) is wrong. The type of
-`applyToFive` simply doesn't have enough polymorphism. But why not, and what
-can we do about it?
+`applyToFive` simply doesn't have enough polymorphism. But why not, and what can
+we do about it?
 
 The discrepancy comes from a quirk of Haskell's syntax. By default, the language
 will automatically quantify our type variables, meaning that the type signature
 `a -> a` is really syntactic sugar for `forall a. a -> a`. By enabling
-`-XRankNTypes` we can write these desugared types explicitly. Comparing
-`id` and `applyToFive` side-by-side is revealing.
+`-XRankNTypes` we can write these desugared types explicitly. Comparing `id` and
+`applyToFive` side-by-side is revealing.
 
 [code/RankN.hs:id](Snip)
 
@@ -49,11 +53,11 @@ will automatically quantify our type variables, meaning that the type signature
 
 Recall that we intended to give the type of `id` for the first parameter of
 `applyToFive`. However, due to Haskell's implicit quantification of type
-variables, we were lead astray in our attempts. This explains why
-`applyToFive` above didn't compile.
+variables, we were lead astray in our attempts. This explains why `applyToFive`
+above didn't compile.
 
-The solution is easy: we simply need to move the `forall a.` part inside of
-the parentheses.
+The solution is easy: we simply need to move the `forall a.` part inside of the
+parentheses.
 
 [code/RankN.hs:applyToFive](Snip)
 
@@ -67,61 +71,67 @@ interesting uses can do for us.
 
 ### Ranks
 
-The `-XRankNTypes` is best thought of as making polymorphism
-*first-class*. It allows us to introduce polymorphism anywhere a type is
-allowed, rather than only on top-level bindings.
+The `-XRankNTypes` is best thought of as making polymorphism *first-class*. It
+allows us to introduce polymorphism anywhere a type is allowed, rather than only
+on top-level bindings.[^let-bindings]
+
+[^let-bindings]: And let-bound expressions, though this polymorphism is usually
+  invisible to the everyday Haskell programmer.
 
 While relaxing this restriction is "obviously a good thing", it's not without
 its sharp edges. In general, type inference is undecidable in the presence of
-higher-rank polymorphism. Code that doesn't
-interact with such things need not worry, but higher-rank polymorphism always
-requires an explicit type signature.
+higher-rank polymorphism.[^inferrable] Code that doesn't interact with such
+things need not worry, but higher-rank polymorphism always requires an explicit
+type signature.
+
+[^inferrable]: Theoretically it's possible to infer types for rank-2
+  polymorphism, but GHC doesn't at time of writing.
 
 But what exactly *is* a rank?
 
-In type-theory lingo, the rank of a function is the "depth" of its
-polymorphism. A function that has no polymorphic parameters is rank 0. However,
-most, if not all, polymorphic functions you're familiar with---`const :: a ->
-b -> a`, `head :: [a] -> a`, etc---are rank 1.
+In type-theory lingo, the rank of a function is the "depth" of its polymorphism.
+A function that has no polymorphic parameters is rank 0. However, most, if not
+all, polymorphic functions you're familiar with---`const :: a -> b -> a`, `head
+:: [a] -> a`, etc---are rank 1.
 
-The function `applyToFive` above is rank 2, because its `f` parameter
-itself is rank 1.  In principle there is no limit to how high rank a function
-can be, but in practice nobody seems to have gone above rank 3. And for good
+The function `applyToFive` above is rank 2, because its `f` parameter itself is
+rank 1.  In principle there is no limit to how high rank a function can be, but
+in practice nobody seems to have gone above rank 3. And for good
 reason---higher-rank functions quickly become unfathomable. Rather than
 explicitly counting ranks, we usually call any function above rank-1 to be
 rank-n or higher rank.
 
-The intuition behind higher-rank types is that they are *functions which
-take callbacks*. The rank of a function is how often control gets "handed
-off". A rank-2 function will call a polymorphic function for you, while a
-rank-3 function will run a callback which itself runs a callback.
+The intuition behind higher-rank types is that they are *functions which take
+callbacks*. The rank of a function is how often control gets "handed off". A
+rank-2 function will call a polymorphic function for you, while a rank-3
+function will run a callback which itself runs a callback.
 
 Because callbacks are used to transfer control from a called function back to
 its calling context, there's a sort of a seesaw thing going on. For example,
-consider an (arbitrarily chosen) rank-2 function `foo :: forall r. (forall a.
-a -> r) -> r`. As the caller of `foo`, we are responsible for determining the
-instantiation of `r`. However, the *implementation* of `foo` gets to
-choose what type `a` is. The callback you give it must work for whatever
-choice of `a` it makes.
+consider an (arbitrarily chosen) rank-2 function `foo :: forall r. (forall a. a
+-> r) -> r`. As the caller of `foo`, we are responsible for determining the
+instantiation of `r`. However, the *implementation* of `foo` gets to choose what
+type `a` is. The callback you give it must work for whatever choice of `a` it
+makes.
 
 This is exactly why `applyToFive` works. Recall its definition:
 
 [code/RankN.hs:applyToFive](Snip)
 
-Notice that the implementation of `applyToFive` is what calls `f`. Because
-`f` is rank-1 here, `applyToFive` can instantiate it at `Int`. Compare
-it with our broken implementation:
+Notice that the implementation of `applyToFive` is what calls `f`. Because `f`
+is rank-1 here, `applyToFive` can instantiate it at `Int`. Compare it with our
+broken implementation:
 
 [code/RankN.hs:explicitBrokenApply](Snip)
 
 Here, `f` is rank-0 because it is no longer polymorphic---the caller of
-`applyToFive` has already instantiated `a` by the time `applyToFive`
-gets access to it---and as such, it's an error to apply it to `5`. We have no
-guarantees that the caller decided `a ~ Int`.
+`applyToFive` has already instantiated `a` by the time `applyToFive` gets access
+to it---and as such, it's an error to apply it to `5`. We have no guarantees
+that the caller decided `a ~ Int`.
 
 By pushing up the rank of `applyToFive`, we can delay who gets to decide the
-type `a`. We move it from being the caller's choice to being the
-*callee's* choice.
+type `a`. We move it from being the caller's choice to being the *callee's*
+choice.
 
 Even higher-yet ranks also work in this fashion. The caller of the function and
 the implementations seesaw between who is responsible for instantiating the
@@ -131,13 +141,13 @@ polymorphic types. We will look more deeply at these sorts of functions later.
 ### The Nitty Gritty Details
 
 It is valuable to formalize exactly what's going on with this rank stuff. More
-precisely, a function gains higher rank every time a `forall` quantifier
-exists on the left-side of a function arrow.
+precisely, a function gains higher rank every time a `forall` quantifier exists
+on the left-side of a function arrow.
 
-But aren't `forall` quantifiers *always* on the left-side of a function
-arrow? While it might seem that way, this is merely a quirk of Haskell's syntax.
-Because the `forall` quantifier binds more loosely than the arrow type
-`(->)`, the everyday type of `id`,
+But aren't `forall` quantifiers *always* on the left-side of a function arrow?
+While it might seem that way, this is merely a quirk of Haskell's syntax.
+Because the `forall` quantifier binds more loosely than the arrow type `(->)`,
+the everyday type of `id`,
 
 [code/RankN.hs:forall1](Snip)
 
@@ -145,14 +155,14 @@ has some implicit parentheses. When written in full:
 
 [code/RankN.hs:forall2](Snip)
 
-it's easier to see that the arrow is in fact captured by the `forall`.
-Compare this to a rank-*n* type with all of its implicit parentheses inserted:
+it's easier to see that the arrow is in fact captured by the `forall`. Compare
+this to a rank-*n* type with all of its implicit parentheses inserted:
 
 [code/RankN.hs:forall3](Snip)
 
-Here we can see that indeed the `forall a.` *is* to the left of
-a function arrow---the outermost one. And so, the rank of a function is simply
-the number of arrows its deepest `forall` is to the left of.
+Here we can see that indeed the `forall a.` *is* to the left of a function
+arrow---the outermost one. And so, the rank of a function is simply the number
+of arrows its deepest `forall` is to the left of.
 
 Exercise
 
@@ -178,8 +188,8 @@ Solution
 Exercise
 
 :   What is the rank of `((forall x. m x -> b (z m x)) -> b (z m a)) ->
-    m a`? Believe it or not, this is a real type signature we had to write back in
-    the bad old days before `MonadUnliftIO`!
+    m a`? Believe it or not, this is a real type signature we had to write back
+    in the bad old days before `MonadUnliftIO`!
 
 Solution
 
@@ -188,9 +198,8 @@ Solution
 
 ### The Continuation Monad
 
-An interesting fact is that the types `a` and `forall r. (a -> r) -> r`
-are isomorphic. This is witnessed by the following
-functions:
+An interesting fact is that the types `a` and `forall r. (a -> r) -> r` are
+isomorphic. This is witnessed by the following functions:
 
 [code/RankN.hs:cont](Snip)
 
@@ -198,11 +207,11 @@ functions:
 
 Intuitively, we understand this as saying that having a value is just as good as
 having a function that will give that value to a callback. Spend a few minutes
-looking at `cont` and `runCont` to convince yourself you know why these
-things form an isomorphism.
+looking at `cont` and `runCont` to convince yourself you know why these things
+form an isomorphism.
 
-The type `forall r. (a -> r) -> r` is known as being in
-continuation-passing style or more tersely as CPS.
+The type `forall r. (a -> r) -> r` is known as being in continuation-passing
+style or more tersely as CPS.
 
 Recall that isomorphisms are transitive. If we have an isomorphism `t1` &cong;
 `t2`, and another `t2` &cong; `t3`, we must also have one `t1` &cong; `t3`.
@@ -259,19 +268,19 @@ completed.
 
 [code/RankN.hs:withOS](Snip)
 
-We can write a "pyramid of doom"-style function that uses all three callbacks
-to compute a value:
+We can write a "pyramid of doom"-style function that uses all three callbacks to
+compute a value:
 
 [code/RankN.hs:releaseString](Snip)
 
 Notice how the deeper the callbacks go, the further indented this code becomes.
-We can instead use the `Cont` (or `ContT` if we want to believe these
-functions are actually performing `IO`) to flatten this pyramid.
+We can instead use the `Cont` (or `ContT` if we want to believe these functions
+are actually performing `IO`) to flatten this pyramid.
 
 [code/RankN.hs:releaseStringCont](Snip)
 
-When written in continuation-passing style, `releaseStringCont` hides the
-fact that it's doing nested callbacks.
+When written in continuation-passing style, `releaseStringCont` hides the fact
+that it's doing nested callbacks.
 
 Exercise
 

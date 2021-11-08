@@ -1,5 +1,7 @@
 ## Extensible Data
 
+> TODO(sandy): intro
+
 ### Introduction
 
 One heralded feature of dynamic languages---conspicuously missing in
@@ -63,9 +65,9 @@ for defining and working with existential types.
 [code/OpenSum.hs:OpenSum](Snip)
 
 At [1](Ann) we declare `OpenSum` as a GADT. It has two parameters, `f` of kind
-`k -> Type` and `ts` of kind `[k]`. We call `f` an *indexed type*, which means
-it provides a `Type` when given a `k`. We will talk more about these parameters
-in a minute.
+`kind:k -> Type` and `ts` of kind `kind:[k]`. We call `f` an *indexed type*,
+which means it provides a `kind:Type` when given a `kind:k`. We will talk more
+about these parameters in a minute.
 
 The data constructor `UnsafeOpenSum` at [2](Ann) is thus named because, well,
 its unsafe. We'll later provide tools for constructing `OpenSum`s safely, but
@@ -74,9 +76,9 @@ invariants. It's a common pattern in type level programming to label raw data
 constructors as `Unsafe`, and write smart constructors that enforce the safety.
 
 Looking at [3](Ann), we see that `OpenSum` is a container of `f t`, where `t`
-has kind `k`. Because `t` isn't mentioned in the return type of our constructor
-([4](Ann)), `t` is existential. Once `t` enters an `OpenSum`, it can never be
-recovered. Knowledge of what `t` is is lost forever.
+has kind `kind:k`. Because `t` isn't mentioned in the return type of our
+constructor ([4](Ann)), `t` is existential. Once `t` enters an `OpenSum`, it can
+never be recovered. Knowledge of what `t` is is lost forever.
 
 Returning to our parameters, we assign the semantics that the existential `t`
 must be one of the elements of `ts`. If `ts ~ '[ Int, Bool, String ]`, we know
@@ -110,9 +112,9 @@ which can't reduce any further. We can exploit this property and ask whether
 [code/OpenSum.hs:Member](Snip)
 
 A benefit of this approach is that a `KnownNat` constraint allows for
-reification of the `Nat` at the term-level---we can get an `Int` corresponding
-to the `Nat` we had. Additionally, the type-level nature of `FindElem` means we
-pay no runtime cost for the computation.
+reification of the `kind:Nat` at the term-level---we can get an `Int`
+corresponding to the `kind:Nat` we had. Additionally, the type-level nature of
+`FindElem` means we pay no runtime cost for the computation.
 
 [code/OpenSum.hs:findElem](Snip)
 
@@ -223,7 +225,7 @@ For example, `Key @"myData"` is a value whose type is `Key "myData"`. Later
 These are the necessary tools to insert data into an open product. Given a `Key
 key` and a `f k`, we can insert a `'(key, k)` into our `OpenProduct`.
 
-!snipRename{OpenProduct}{badInsert}{insert}
+[code/OpenProduct.hs|badInsert=insert](Snip)
 
 Our function `insert` adds our new `'(key, k)` to the head of the type list, and
 inserts the `f k` to the head of the internal `Vector`. In this way, it
@@ -252,12 +254,12 @@ family which computes whether a key would be unique.
 
 [code/OpenProduct.hs:UniqueKey](Snip)
 
-`UniqueKey` is the type-level equivalent of `null . filter (== key) .  fst`. If
+`UniqueKey` is the type-level equivalent of `null . filter (== key) . fst`. If
 the `key` doesn't exist in `ts`, `UniqueKey` returns `'True`. We can now fix the
 implementation of `insert` by adding a constraint to it that `UniqueKey key ts ~
 'True`.
 
-!snipRename{OpenProduct}{oldInsert}{insert}
+[code/OpenProduct.hs|oldInsert=insert](Snip)
 
 GHCi agrees that this fixes the bug.
 
@@ -281,7 +283,7 @@ themselves.
 
 We will also require another type family to index into `ts` and determine what
 type to return from `get`. `LookupType` returns the `k` associated with the
-`key`ed `Symbol`.
+`key`ed `kind:Symbol`.
 
 [code/OpenProduct.hs:LookupType](Snip)
 
@@ -318,7 +320,7 @@ Exercise
 
 :   Implement `upsert` (update or insert) for `OpenProduct`s.
 
-    Hint: write a type family to compute a `Maybe Nat` corresponding to the
+    Hint: write a type family to compute a `kind:Maybe Nat` corresponding to the
     index of the key in the list of types, if it exists. Use class instances to
     lower this kind to the term-level, and then pattern match on it to implement
     `upsert`.
@@ -344,7 +346,7 @@ Solution
 
     [code/OpenProduct.hs:UpsertLoc](Snip)
 
-    And we can use a typeclass to lower this the `Maybe Nat` into a `Maybe
+    And we can use a typeclass to lower this the `kind:Maybe Nat` into a `Maybe
     Int`:
 
     [code/OpenProduct.hs:FindUpsertElem](Snip)
@@ -361,11 +363,11 @@ Solution
 ### Overloaded Labels
 
 We earlier promised to revisit the syntax behind `Key`. Working with
-`OpenProducts` doesn't yet bring us joy, mostly due to the syntactic noise
-behind constructing `Key`s. Consider `get (Key @"example") foo`; there are nine
-bytes of boilerplate syntactic overhead. While this doesn't seem like a lot, it
-weighs on the potential users of our library. You'd be surprised by how often
-things like these cause users to reach for lighter-weight alternatives.
+`OpenProduct` doesn't yet bring us joy, mostly due to the syntactic noise behind
+constructing `Key`s. Consider `get (Key @"example") foo`; there are nine bytes
+of boilerplate syntactic overhead. While this doesn't seem like a lot, it weighs
+on the potential users of our library. You'd be surprised by how often things
+like these cause users to reach for lighter-weight alternatives.
 
 Thankfully, there *is* a lighter-weight alternative. They're known as overloaded
 labels, and can turn our earlier snippet into `get #example foo`.

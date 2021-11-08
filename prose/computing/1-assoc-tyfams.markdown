@@ -31,8 +31,8 @@ implementation should be `\textbackslash s -> "some number: " <> show s`.
 
 After some thinking, the key insight here turns out that these format strings
 are nothing more than a sequence of types and text to intersperse between them.
-We can model this in Haskell by keeping a type-level list of `Type`s and
-`Symbol`s. The `Type`s describe parameters, and the `Symbol`s are
+We can model this in Haskell by keeping a type-level list of `kind:Type`s and
+`kind:Symbol`s. The `kind:Type`s describe parameters, and the `kind:Symbol`s are
 literal pieces of text to output.
 
 
@@ -97,7 +97,7 @@ Haskell's overlapping typeclasses will greatly simplify our logic.
 
 In the name of implementation parsimony, we will say our format types will
 always be of the form `a :<< ...  :<< "symbol"`---that is to say that they'll
-always end with a `Symbol`. Such a simplification gives us a convenient
+always end with a `kind:Symbol`. Such a simplification gives us a convenient
 base case for the structural recursion we want to build.
 
 Structural recursion refers to the technique of
@@ -113,7 +113,7 @@ In our `printf` example, we will require three cases:
 
 With these three cases, we can tear down any right-associative sequence of
 `(:<<)`s via case 2 or 3 until we run out of `(:<<)` constructors. At that
-point, we will finally be left with a `Symbol` that we can handle via case 1.
+point, we will finally be left with a `kind:Symbol` that we can handle via case 1.
 
 Case 1 corresponds to having no more parameters. Here there is not any
 type-level recursion to be done, and so we should just return our desired output
@@ -139,7 +139,7 @@ arrow type that takes the desired parameter, and recurses.
 [code/PrintfTypes.hs:paramInstance](Snip)
 
 We're saying our formatting type requires a `param`, and then gives back our
-recursively-defined `Printf a` type. Strictly speaking, the `Type` kind
+recursively-defined `Printf a` type. Strictly speaking, the `kind:Type` kind
 signature here isn't necessary---GHC will infer it based on `param -> Printf
 a`---but it adds to the readability, so we'll keep it.
 

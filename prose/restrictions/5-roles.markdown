@@ -39,44 +39,42 @@ function.
 
 [code/Roles.hs:coerce](Snip)
 
-The `Coercible a b`  constraint is a proof that the types
-`a` and `b` do, in fact, have the same runtime representation. Unless
-explicitly prevented (discussed later,) a newtype is always `Coercible` with
-its underlying type.  `Coercible` is a magic constraint. The compiler will
-write instances of it for you, and in fact, insists on this---it's actually an
-error to write your own!
+The `Coercible a b`  constraint is a proof that the types `a` and `b` do, in
+fact, have the same runtime representation. Unless explicitly prevented
+(discussed later,) a newtype is always `Coercible` with its underlying type.
+`Coercible` is a magic constraint. The compiler will write instances of it for
+you, and in fact, insists on this---it's actually an error to write your own!
 
 ```{ghci=code/Roles.hs}
 instance Coercible a b
 ```
 
-Anyway, `coerce` can be used to massage data from one type into another
-without paying any runtime cost. As an example, if we wanted to sum a list
-of `Int`s, we could use the `Sum Int` monoid instance.
+Anyway, `coerce` can be used to massage data from one type into another without
+paying any runtime cost. As an example, if we wanted to sum a list of `Int`s, we
+could use the `Sum Int` monoid instance.
 
 [code/Roles.hs:slowSum](Snip)
 
 While this works, it's not entirely satisfactory; it requires traversing the
-entire list with an `fmap` just in order to get the right `Monoid`
-instance in scope. This is an $O(n)$ we need to pay, for no reason other than to
-satisfy the type system. In such a simple example, list fusion might optimize
-away this penalty, but then again, it might not. And without looking at the
-generated core, we have no way of knowing.
+entire list with an `fmap` just in order to get the right `Monoid` instance in
+scope. This is an $O(n)$ we need to pay, for no reason other than to satisfy the
+type system. In such a simple example, list fusion might optimize away this
+penalty, but then again, it might not. And without looking at the generated
+core, we have no way of knowing.
 
-For comparison, we can instead use `coerce` to transform `[Int]` into
-`[Sum Int]` in $O(0)$ time, giving us access to the right `Monoid` for
-free.
+For comparison, we can instead use `coerce` to transform `[Int]` into `[Sum
+Int]` in $O(0)$ time, giving us access to the right `Monoid` for free.
 
 [code/Roles.hs:fastSum](Snip)
 
 As a general rule, if you ever find yourself writing `fmap NewtypeCtor`, it
-should be replaced with `coerce`---unless the functor instance is
-polymorphic, in which case the compiler will complain and refuse to compile the
-code. Your runtime performance will thank you, and you'll be able to sleep
-peacefully with the satisfaction of a job well done.
+should be replaced with `coerce`---unless the functor instance is polymorphic,
+in which case the compiler will complain and refuse to compile the code. Your
+runtime performance will thank you, and you'll be able to sleep peacefully with
+the satisfaction of a job well done.
 
-Because `Coercible` corresponds to representational *equality*, we
-should expect it to follow all of the usual laws of equality.
+Because `Coercible` corresponds to representational *equality*, we should expect
+it to follow all of the usual laws of equality.
 
 * Reflexivity---`Coercible a a` is true for any type `a`
 * Symmetry---`Coercible a b` implies `Coercible b a`
@@ -89,8 +87,8 @@ By this line of reasoning, we see that it's perfectly acceptable to coerce a
 coerce (1867 :: Sum Int) :: Product Int
 ```
 
-The line of reasoning here is that both `Sum Int` and `Product Int` are
-newtypes over `Int`, therefore they are inter-coercible by transitivity.
+The line of reasoning here is that both `Sum Int` and `Product Int` are newtypes
+over `Int`, therefore they are inter-coercible by transitivity.
 
 A natural question about coercions is whether representationally equal types are
 always safely interchangeable. They're not. To see why, consider the case of
@@ -162,25 +160,23 @@ because `k` must be at role `nominal`. `Coercible (Map k1 v) (Map k2 v)` is only
 the case when `k1 ~ k2`, and so this nominal role on `k` is what keeps `Map`
 safe.
 
-The other role is `phantom`, and as you might have guessed, it is reserved
-for phantom parameters. `Proxy`, for example, has a phantom type variable:
+The other role is `phantom`, and as you might have guessed, it is reserved for
+phantom parameters. `Proxy`, for example, has a phantom type variable:
 
 [code/Misc.hs:Proxy](Snip)
 
-The type variable `a` is at role `phantom`, and as expected, `Coercible
-(Proxy a) (Proxy b)` is always true. Since `a` doesn't actually ever exist at
-runtime, it's safe to change it whenever we'd like.
+The type variable `a` is at role `phantom`, and as expected, `Coercible (Proxy
+a) (Proxy b)` is always true. Since `a` doesn't actually ever exist at runtime,
+it's safe to change it whenever we'd like.
 
-There is an inherent ordering in roles; `phantom` types can be coerced in
-more situations than `representational` types, which themselves can be
-coerced more often than `nominal` types. Upgrading from a weaker role (usable
-in more situations) to a stronger one is known as
-strengthening it.
+There is an inherent ordering in roles; `phantom` types can be coerced in more
+situations than `representational` types, which themselves can be coerced more
+often than `nominal` types. Upgrading from a weaker role (usable in more
+situations) to a stronger one is known as strengthening it.
 
 Just like types, roles are automatically inferred by the compiler, though they
 can be specified explicitly if desired. This inference process is relatively
 simple, and works as follows:
-
 
 1. All type parameters are assumed to be at role `phantom`.
 2. The type constructor `(->)` has two `representational` roles; any type
@@ -232,8 +228,8 @@ dependency on their `Ord` instance. Given a data-type:
 
 [code/Roles.hs:BST](Snip)
 
-After enabling `-XRoleAnnotations`, we're capable of providing a annotation
-for it to strengthen the inferred role.
+After enabling `-XRoleAnnotations`, we're capable of providing a annotation for
+it to strengthen the inferred role.
 
 [code/Roles.hs:role](Snip)
 
