@@ -29,7 +29,7 @@ us.
   type.
 * `'(:<>:)` (of kind `kind:ErrorMessage -> ErrorMessage -> ErrorMessage`.)
   Concatenate two `kind:ErrorMessage`s side-by-side.
-* `'(:\$\$:)` (of kind `kind:ErrorMessage -> ErrorMessage -> ErrorMessage`.)
+* `'(:$$:)` (of kind `kind:ErrorMessage -> ErrorMessage -> ErrorMessage`.)
   Append one `kind:ErrorMessage` vertically atop another.
 
 `TypeError` is usually used as a constraint in an instance context, or as the
