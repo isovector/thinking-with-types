@@ -40,6 +40,55 @@ dependencies:
 - generic-lens
 - barbies
 - higgledy
+- kind-generics
+- kind-generics-th
+
+default-extensions:
+  - BangPatterns
+  - BinaryLiterals
+  - ConstrainedClassMethods
+  - ConstraintKinds
+  - DeriveDataTypeable
+  - DeriveFoldable
+  - DeriveFunctor
+  - DeriveGeneric
+  - DeriveLift
+  - DeriveTraversable
+  - DoAndIfThenElse
+  - EmptyCase
+  - EmptyDataDecls
+  - EmptyDataDeriving
+  - ExistentialQuantification
+  - ExplicitForAll
+  - FlexibleContexts
+  - FlexibleInstances
+  - ForeignFunctionInterface
+  - GADTSyntax
+  - GeneralisedNewtypeDeriving
+  - HexFloatLiterals
+  - ImplicitPrelude
+  - ImportQualifiedPost
+  - InstanceSigs
+  - KindSignatures
+  - MonomorphismRestriction
+  - MultiParamTypeClasses
+  - NamedFieldPuns
+  # - NamedWildCards
+  - NumericUnderscores
+  - PatternGuards
+  - PolyKinds
+  - PostfixOperators
+  - RankNTypes
+  - RelaxedPolyRec
+  - ScopedTypeVariables
+  - StandaloneDeriving
+  - StandaloneKindSignatures
+  - StarIsType
+  - TraditionalRecordSyntax
+  - TupleSections
+  - TypeApplications
+  - TypeOperators
+  - TypeSynonymInstances
 
 library:
   source-dirs: code
