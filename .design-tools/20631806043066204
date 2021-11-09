@@ -1,0 +1,1 @@
+CodeBlock ("",["haskell","ghci"],[]) "> printf (Proxy @\"test\")\n\"test\"\n\n> printf (Proxy @(Int :<< \"+\" :<< Int :<< \"=3\")) 1 2\n\"1+2=3\"\n\n> printf (Proxy @(String :<< \" world!\")) \"hello\"\n\"\\\"hello\\\" world!\"\n\n"

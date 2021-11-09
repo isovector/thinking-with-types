@@ -229,10 +229,10 @@ implementation detail:
 
 Firing up GHCi allows us to try it:
 
-```{ghci=code/Printf.hs}
+```{ghci=code/Printf.hs replace='wrongPrintf=printf'}
 printf (Proxy @"test")
 printf (Proxy @(Int :<< "+" :<< Int :<< "=3")) 1 2
-/wrongPrintf/printf/wrongPrintf (Proxy @(String :<< " world!")) "hello"
+wrongPrintf (Proxy @(String :<< " world!")) "hello"
 ```
 
 > TODO(sandy): why am i cheating here

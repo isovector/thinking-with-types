@@ -234,17 +234,17 @@ in the `Vector`.
 
 We can test this in GHCi with the `:t` command.
 
-```{ghci=code/OpenProduct.hs}
-/badInsert/insert/let result = badInsert (Key @"key") (Just "hello") nil
+```{ghci=code/OpenProduct.hs replace="badInsert=insert"}
+let result = badInsert (Key @"key") (Just "hello") nil
 :t result
-/badInsert/insert/:t badInsert (Key @"another") (Just True) result
+:t badInsert (Key @"another") (Just True) result
 ```
 
 While this looks good, there is a flaw in our implementation.
 
-```{ghci=code/OpenProduct.hs}
+```{ghci=code/OpenProduct.hs replace="badInsert=insert"}
 @let result = badInsert (Key @"key") (Just "hello") nil
-/badInsert/insert/:t badInsert (Key @"key") (Just True) result
+:t badInsert (Key @"key") (Just True) result
 ```
 
 Trying to `insert` a duplicate key into an `OpenProduct` succeeds. While this
@@ -263,9 +263,9 @@ implementation of `insert` by adding a constraint to it that `UniqueKey key ts ~
 
 GHCi agrees that this fixes the bug.
 
-```{ghci=code/OpenProduct.hs}
+```{ghci=code/OpenProduct.hs replace="oldInsert=insert"}
 @let result = oldInsert (Key @"key") (Just "hello") nil
-/oldInsert/insert/:t oldInsert (Key @"key") (Just True) result
+:t oldInsert (Key @"key") (Just True) result
 ```
 
 Informative it is not, but at least it fixes the bug. In the next chapter, we

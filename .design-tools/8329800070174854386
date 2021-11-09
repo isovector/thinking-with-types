@@ -1,0 +1,1 @@
+CodeBlock ("",["haskell","ghci"],[]) "> :t insert (Key @\"key\") (Just True) result\ninsert (Key @\"key\") (Just True) result\n  :: OpenProduct Maybe '[ '(\"key\", Bool), '(\"key\", String)]\n\n"

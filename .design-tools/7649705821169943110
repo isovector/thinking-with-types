@@ -1,0 +1,1 @@
+CodeBlock ("",["ghci"],[]) "> :t insert (Key @\"key\") (Just True) result\n\n<interactive>:1:1: error:\n    \8226 Couldn't match type \8216'False\8217 with \8216'True\8217\n        arising from a use of \8216insert\8217\n    \8226 In the expression: insert (Key @\"key\") (Just True) result\n\n"
