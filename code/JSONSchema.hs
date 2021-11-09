@@ -1,15 +1,8 @@
 -- # pragmas
 {-# LANGUAGE AllowAmbiguousTypes  #-}
 {-# LANGUAGE DataKinds            #-}
-{-# LANGUAGE DeriveGeneric        #-}
-{-# LANGUAGE FlexibleContexts     #-}
-{-# LANGUAGE FlexibleInstances    #-}
-{-# LANGUAGE KindSignatures       #-}
 {-# LANGUAGE OverloadedStrings    #-}
-{-# LANGUAGE ScopedTypeVariables  #-}
-{-# LANGUAGE TypeApplications     #-}
 {-# LANGUAGE TypeFamilies         #-}
-{-# LANGUAGE TypeOperators        #-}
 {-# LANGUAGE UndecidableInstances #-}
 
 -- {-# OPTIONS_GHC -Wall #-}
@@ -19,13 +12,13 @@ module JSONSchema where
 -- # imports
 import Control.Monad.Writer
 import Data.Aeson (Value (..), (.=), object)
-import Data.Kind (Type)
+import Data.Kind (Constraint, Type)
 import Data.Text (Text, pack)
 import Data.Typeable
 import Data.Vector (fromList)
 import GHC.Generics
 import GHC.TypeLits
-import qualified GHC.TypeLits as Err
+import GHC.TypeLits qualified as Err
 
 
 data Person = Person
@@ -37,7 +30,8 @@ data Person = Person
   deriving (Generic)
 
 
-class GSchema (a :: Type -> Type) where
+type GSchema :: (Type -> Type) -> Constraint
+class GSchema a where
   gschema :: Writer [Text] Value
 
 makePropertyObj
@@ -63,21 +57,20 @@ emitRequired
     => Writer [Text] ()
 emitRequired = tell . pure . pack . symbolVal $ Proxy @nm
 
-type family ToJSONType (a :: Type) :: Symbol where
+type ToJSONType :: Type -> Symbol
+type family ToJSONType t where
   ToJSONType Int     = "integer"
   ToJSONType Integer = "integer"
   ToJSONType Float   = "number"
   ToJSONType Double  = "number"
   ToJSONType String  = "string"
   ToJSONType Bool    = "boolean"
-  ToJSONType [a]     = "array"
-  ToJSONType a       = TypeName a
+  ToJSONType [t]     = "array"
+  ToJSONType t       = RepName (Rep t)
 
-type family RepName (x :: Type -> Type) :: Symbol where
+type RepName :: (Type -> Type) -> Symbol
+type family RepName x where
   RepName (D1 ('MetaData nm _ _ _) _) = nm
-
-type family TypeName (t :: Type) :: Symbol where
-  TypeName t = RepName (Rep t)
 
 -- # gschemaMaybe
 instance {-# OVERLAPPING #-}

@@ -1,10 +1,6 @@
 -- # pragmas
 {-# LANGUAGE DataKinds            #-}
-{-# LANGUAGE TypeOperators        #-}
 {-# LANGUAGE UndecidableInstances #-}
-
-{-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE GADTs #-}
 
 {-# OPTIONS_GHC -fno-warn-missing-methods #-}
 

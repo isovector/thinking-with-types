@@ -1,9 +1,6 @@
 -- # pragmas
-{-# LANGUAGE StandaloneKindSignatures #-}
-{-# LANGUAGE DataKinds     #-}
-{-# LANGUAGE PolyKinds     #-}
-{-# LANGUAGE TypeFamilies  #-}
-{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE DataKinds    #-}
+{-# LANGUAGE TypeFamilies #-}
 
 module Kinds where
 

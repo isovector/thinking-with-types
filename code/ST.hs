@@ -1,5 +1,4 @@
 -- # pragmas
-{-# LANGUAGE RankNTypes #-}
 
 module ST where
 

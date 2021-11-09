@@ -1,9 +1,4 @@
 -- # pragmas
-{-# LANGUAGE TypeApplications #-}
-
-{-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE RankNTypes #-}
-
 module Kan where
 
 -- # imports

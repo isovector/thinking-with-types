@@ -33,6 +33,9 @@ library
       DeriveAnyClass
       FCTF
       GADTs
+      Generic.HKDNames
+      Generic.Monoid
+      Generic.Omit
       HKD
       JSONSchema
       Kan
@@ -58,6 +61,51 @@ library
       Paths_thinking_with_types
   hs-source-dirs:
       code
+  default-extensions:
+      BangPatterns
+      BinaryLiterals
+      ConstrainedClassMethods
+      ConstraintKinds
+      DeriveDataTypeable
+      DeriveFoldable
+      DeriveFunctor
+      DeriveGeneric
+      DeriveLift
+      DeriveTraversable
+      DoAndIfThenElse
+      EmptyCase
+      EmptyDataDecls
+      EmptyDataDeriving
+      ExistentialQuantification
+      ExplicitForAll
+      FlexibleContexts
+      FlexibleInstances
+      ForeignFunctionInterface
+      GADTSyntax
+      GeneralisedNewtypeDeriving
+      HexFloatLiterals
+      ImplicitPrelude
+      ImportQualifiedPost
+      InstanceSigs
+      KindSignatures
+      MonomorphismRestriction
+      MultiParamTypeClasses
+      NamedFieldPuns
+      NumericUnderscores
+      PatternGuards
+      PolyKinds
+      PostfixOperators
+      RankNTypes
+      RelaxedPolyRec
+      ScopedTypeVariables
+      StandaloneDeriving
+      StandaloneKindSignatures
+      StarIsType
+      TraditionalRecordSyntax
+      TupleSections
+      TypeApplications
+      TypeOperators
+      TypeSynonymInstances
   build-depends:
       aeson
     , aeson-pretty
@@ -71,6 +119,8 @@ library
     , higgledy
     , inspection-testing
     , kan-extensions
+    , kind-generics
+    , kind-generics-th
     , lens
     , mtl
     , singletons
