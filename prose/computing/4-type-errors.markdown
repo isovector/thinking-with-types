@@ -78,7 +78,7 @@ friendlyPrj foo :: Maybe (Identity Int)
 Let's return to the example of `insert` for `OpenProduct`. Recall the `UniqueKey
 key ts ~ 'True` constraint we added to prevent duplicate keys.
 
-[code/OpenProduct.hs](Snip){oldInsert=insert}
+[code/OpenProduct.hs:oldInsert](Snip){oldInsert=insert}
 
 This is another good place to add a custom type error; it's likely to happen,
 and the default one GHC will emit is unhelpful at best and horrendous at worst.
