@@ -1,1 +1,1 @@
-CodeBlock ("",["haskell","ghci"],[]) "> printf (Proxy @\"test\")\n\"test\"\n\n> printf (Proxy @(Int :<< \"+\" :<< Int :<< \"=3\")) 1 2\n\"1+2=3\"\n\n> /wrongPrintf/printf/wrongPrintf (Proxy @(String :<< \" world!\")) \"hello\"\n\n<interactive>:4:1: error: parse error on input \8216/\8217\n\n"
+CodeBlock ("",["ghci"],[]) "> printf (Proxy @\"test\")\n\"test\"\n\n> printf (Proxy @(Int :<< \"+\" :<< Int :<< \"=3\")) 1 2\n\"1+2=3\"\n\n> /wrongPrintf/printf/wrongPrintf (Proxy @(String :<< \" world!\")) \"hello\"\n\n<interactive>:4:1: error: parse error on input \8216/\8217\n\n"

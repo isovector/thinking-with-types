@@ -1,1 +1,1 @@
-CodeBlock ("",["haskell","ghci"],[]) "> :t sing @'True\n\n<interactive>:1:7: error:\n    \8226 Expected a type, but \8216'True\8217 has kind \8216Bool\8217\n    \8226 In the type \8216'True\8217\n      In the expression: sing @'True\n\n"
+CodeBlock ("",["ghci"],[]) "> :t sing @'True\n\n<interactive>:1:7: error:\n    \8226 Expected a type, but \8216'True\8217 has kind \8216Bool\8217\n    \8226 In the type \8216'True\8217\n      In the expression: sing @'True\n\n"

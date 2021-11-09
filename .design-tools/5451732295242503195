@@ -1,1 +1,1 @@
-CodeBlock ("",["haskell","ghci"],[]) "> /badInsert/insert/:t badInsert (Key @\"key\") (Just True) result\n\n<interactive>:3:1: error: parse error on input \8216/\8217\n\n"
+CodeBlock ("",["ghci"],[]) "> /badInsert/insert/:t badInsert (Key @\"key\") (Just True) result\n\n<interactive>:3:1: error: parse error on input \8216/\8217\n\n"

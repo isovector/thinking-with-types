@@ -1,1 +1,1 @@
-CodeBlock ("",["haskell","ghci"],[]) "> instance Coercible a b\n\n<interactive>:2:10: error:\n    \8226 Class \8216Coercible\8217 does not support user-specified instances\n    \8226 In the instance declaration for \8216Coercible a b\8217\n\n"
+CodeBlock ("",["ghci"],[]) "> instance Coercible a b\n\n<interactive>:2:10: error:\n    \8226 Class \8216Coercible\8217 does not support user-specified instances\n    \8226 In the instance declaration for \8216Coercible a b\8217\n\n"

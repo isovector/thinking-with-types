@@ -1,1 +1,1 @@
-CodeBlock ("",["haskell","ghci"],[]) "> schema @Bool\n\n<interactive>:2:1: error:\n    \8226 JSON Schema does not support sum types\n    \8226 In the expression: schema @Bool\n      In an equation for \8216it\8217: it = schema @Bool\n\n"
+CodeBlock ("",["ghci"],[]) "> schema @Bool\n\n<interactive>:2:1: error:\n    \8226 JSON Schema does not support sum types\n    \8226 In the expression: schema @Bool\n      In an equation for \8216it\8217: it = schema @Bool\n\n"
