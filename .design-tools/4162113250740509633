@@ -1,1 +1,1 @@
-CodeBlock ("",["haskell","ghci"],[]) "> 1 True\nLeaving GHCi.\n\n"
+CodeBlock ("",["haskell","ghci"],[]) "> 1 True\n\n<interactive>:2:1: error:\n    \8226 Attempting to interpret a number as a function \n      in the type `Bool -> t'\n      Did you forget to specify the function you wanted?\n    \8226 When checking the inferred type\n        it :: forall {t}. (TypeError ...) => t\n\n"

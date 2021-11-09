@@ -1,1 +1,1 @@
-CodeBlock ("",["haskell","ghci"],[]) "> :t undefined :: Proxy (Map (Or 'True) '[ 'True, 'False, 'False ])\nLeaving GHCi.\n\n"
+CodeBlock ("",["haskell","ghci"],[]) "> :t undefined :: Proxy (Map (Or 'True) '[ 'True, 'False, 'False ])\n\n<interactive>:1:14: error:\n    \8226 The type family \8216Or\8217 should have 2 arguments, but has been given 1\n    \8226 In an expression type signature:\n        Proxy (Map (Or 'True) '[ 'True, 'False, 'False])\n      In the expression:\n          undefined :: Proxy (Map (Or 'True) '[ 'True, 'False, 'False])\n\n"

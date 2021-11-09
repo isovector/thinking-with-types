@@ -1,1 +1,1 @@
-CodeBlock ("",["haskell","ghci"],[]) "> :kind '[ 'True ]\n'[ 'True ] :: [Bool]\n\n> :kind '['True]\nLeaving GHCi.\n\n"
+CodeBlock ("",["haskell","ghci"],[]) "> :kind '[ 'True ]\n'[ 'True ] :: [Bool]\n\n> :kind '['True]\n\n<interactive>:1:1: error: parse error on input \8216'\8217\n\n"
