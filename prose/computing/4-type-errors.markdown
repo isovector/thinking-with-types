@@ -111,9 +111,9 @@ Solution
 
 :   [code/OpenProduct.hs:FriendlyFindElem](Snip)
 
-    [code/OpenProduct.hs](Snip){friendlyUpdate=update}
+    [code/OpenProduct.hs:friendlyUpdate](Snip){friendlyUpdate=update}
 
-    [code/OpenProduct.hs](Snip){friendlyDelete=delete}
+    [code/OpenProduct.hs:friendlyDelete](Snip){friendlyDelete=delete}
 
     These functions could be cleaned up a little by moving the
     `FriendlyFindElem` constraint to `findElem`, which would remove the need for

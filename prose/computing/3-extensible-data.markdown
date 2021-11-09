@@ -225,7 +225,7 @@ For example, `Key @"myData"` is a value whose type is `Key "myData"`. Later
 These are the necessary tools to insert data into an open product. Given a `Key
 key` and a `f k`, we can insert a `'(key, k)` into our `OpenProduct`.
 
-[code/OpenProduct.hs](Snip){badInsert=insert}
+[code/OpenProduct.hs:badInsert](Snip){badInsert=insert}
 
 Our function `insert` adds our new `'(key, k)` to the head of the type list, and
 inserts the `f k` to the head of the internal `Vector`. In this way, it
@@ -259,7 +259,7 @@ the `key` doesn't exist in `ts`, `UniqueKey` returns `'True`. We can now fix the
 implementation of `insert` by adding a constraint to it that `UniqueKey key ts ~
 'True`.
 
-[code/OpenProduct.hs](Snip){oldInsert=insert}
+[code/OpenProduct.hs:oldInsert](Snip){oldInsert=insert}
 
 GHCi agrees that this fixes the bug.
 
