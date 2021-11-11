@@ -1,52 +1,56 @@
-## Generics
+## Generic Programming {.rev2}
 
 When writing Haskell, we have two tools in our belt for introducing
 polymorphism: parametric and ad-hoc polymorphism.
 
-Parametric polymorphism gives one definition for every possible type (think
-`head :: [a] -> a`.) It's what you get when you write a standard Haskell
-function with type variables. This flavor of polymorphism is predictable---the
-same function must always do the same thing, regardless of the types it's called
-with.
+As a gentle recap, parametric polymorphism gives one definition for every
+possible type (think `head :: [a] -> a`.) It's what you get when you write a
+standard Haskell function with type variables. This flavor of polymorphism is
+predictable---the same function must always do the same thing, regardless of the
+types it's called with.
 
-Ad-hoc polymorphism, like its name implies, allows us to write a different
-implementation for every type---as made possible by typeclasses.
+On the other hand, ad-hoc polymorphism allows us to write a different
+implementation for every type---as made possible by typeclasses. Different
+instantiations of ad-hoc polymorphism are meant to be *spiritually* similar,
+though the particulars might be wildly different. Think of the `mempty`
+function---it picks out a particular element from any monoidal type, but the
+similarities between these values come only from context clues.
 
-But for our purposes, there's also a third category---a sort of no man's land
-between the parametric and the ad-hoc: structural polymorphism.  Structural
-polymorphism is ad-hoc in the sense of being different for each type, but it is
-also highly regular and predictable. It's what's colloquially known as
-"boilerplate." It's the boring, uninteresting code that is repetitive but just
-different enough to be hard to automate away. While structural polymorphism
+In this chapter, we will discuss a third variety of polymorphism---a sort of no
+man's land between the parametric and the ad-hoc: *structural polymorphism.*
+Structural polymorphism is ad-hoc in the sense of being different for each type,
+but it is also *highly regular and predictable.* It's what's colloquially known
+as "boilerplate." It's the boring, uninteresting code that is repetitive but
+just different enough to be hard to automate away. While structural polymorphism
 doesn't have any formal definition, it's the sort of thing you recognize when
 you see it.
 
 `Eq`, `Show` and `Functor` instances are good examples of structural
 polymorphism---there's nothing interesting about writing these instances. The
 tedium of writing boilerplate polymorphism is somewhat assuaged by the
-compiler's willingness to write some of them for us.
+compiler's willingness to write these particular instances for us.
 
 Consider the `Eq` typeclass; while every type needs its own implementation of
-`(==)`, these implementations are always of the form:
+`(==)`, instances witnessing structural[^not-quotient] equality are always of
+the form:
 
 [code/DeriveAnyClass.hs:eqFoo](Snip)
 
-There's no creativity involved in writing an `Eq` instance, nor should there be.
-The same data constructors are equal if and only if all of their components are
-equal.
+[^not-quotient]: As opposed to quotienting equality, in which we say that any
+  particular value might have a non-unique representation.
+
+There's no creativity involved in writing a structural `Eq` instance, nor should
+there be.  The same data constructors are equal if and only if all of their
+components are equal.
 
 Structural polymorphism is mindless work to write, but needs to be done. In the
 case of some of the standard Haskell typeclasses, GHC is capable of writing
 these instances for you via the `deriving` machinery. Unfortunately, for custom
-typeclasses we're on our own, without any direct support from the
-compiler.[^deriving-via]
+typeclasses we're on our own, without any bespoke support from the compiler!
 
-[^deriving-via]: The `-XDerivingVia` language extension allows for first-class
-  deriving of typeclasses in terms of other types.
-
-As terrible as this situation appears, all hope is not lost. Using
-`GHC.Generics`, we're capable of writing our own machinery for helping GHC
-derive our typeclasses, all in regular Haskell code.
+As terrible as this situation appears, all hope is not lost. Using *generic
+programming,* we can abstract over structural polymorphism and write first-class
+programs much in the same way that GHC's internal `deriving` machinery does.
 
 
 ### Generic Representations
@@ -58,46 +62,54 @@ example, `Maybe a`, which is defined as:
 [code/Misc.hs:Maybe](Snip)
 
 `Maybe a` has a canonical sum-of-products form as `Either () a`. This can be
-proven via an isomorphism:
+proven via a (non-unique) isomorphism:
 
 [code/DeriveAnyClass.hs:toCanonical](Snip)
 
 [code/DeriveAnyClass.hs:fromCanonical](Snip)
 
-`toCanonical` and `fromCanonical` convert between `Maybe a` and `Either () a`
-without losing any information. This witnesses an isomorphism between the two
-types.
+Via `toCanonical` and `fromCanonical`, we can convert between `Maybe a` and
+`Either () a` without losing any information.
 
-Why is this an interesting fact? Well, if we have a small number of primitive
-building blocks, we can write code that is generic over those primitives.
-Combined with the ability to convert to and from canonical representations, we
-have the workings for dealing with structural polymorphism.
+Why is this an interesting fact? If we have a small number of primitive
+building blocks, ad-hoc polymorphic code can be written over each. By
+manipulating canonical forms, we can solve generic programming problems. The
+technique is simple: transform a value into its canonical representation, solve
+the problem in the canonical domain, and finally "untransform" it.
 
-How can such a thing be possible? The secret is in the `-XDeriveGeneric`
-extension, which will automatically derive an instance of `Generic` for you:
+You might have spotted a problem here. Witnessing the isomorphism between values
+and their canonical forms is itself a generic programming problem; at best,
+we've just shuffled the problem. Thankfully, `GHC` has built-in support for
+deriving these canonical isomorphisms, and we can piggy-back off of that. The
+`GHC.Generics` module defines the machinery we will need:
 
 [code/DeriveAnyClass.hs:Generic](Snip)
 
 The associated type `Rep a` at [1](Ann) corresponds to the canonical form of the
-type `a`. Notice however the kinds; while `a` has kind `kind:Type`, `Rep a` is
+type `a`. Notice, however, the kinds: while `a` has kind `kind:Type`, `Rep a` is
 of kind `kind:Type -> Type`. We will investigate why this is the case in a
 moment.
 
 The functions `from` and `to` at [2](Ann) and [3](Ann) form the isomorphism
-between `a` and `Rep a`. Somewhat confusingly, their implied directionality
-might be the opposite of what you'd expect. `to` converts *to* the usual (type
-`a`) form, and `from` converts *from* the usual form.
+between `a` and `Rep a`. It always takes me a moment to remember which direction
+is which---it helps to remember that the directionality here is *with respect
+to the non-generic type!*
 
-Let's look at `Rep Bool` for inspiration about what this thing might look like.
+GHC's generic representations are compositions of a handful of
+highly-polymorphic building blocks. Not only do we get access to the structure
+of the data inside, but the `Rep` types also give us lots of metadata.
+
+For an idea about what this thing might look like, let's analyze `Rep Bool`.
 
 ```{ghci=code/DeriveAnyClass.hs}
 :kind! Rep Bool
 ```
 
-Quite a mouthful, but at it's heart the interesting parts of this are the
-`(:+:)` and `U1` types. These correspond to the canonical sum and canonical
-unit, respectively. Cutting out some of the excess data for a second, we can see
-the gentle shape of `Bool` peeking out.
+Quite a mouthful. The `D1` and `C1` types are metadata about the type definition
+and data constructors, respectively. Let's ignore these for a moment. At the
+heart of `Rep Bool` are the `(:+:)` and `U1` types. These correspond to the
+canonical sum and canonical unit, respectively. Cutting out some of the excess
+data for a second, we can see the gentle shape of `Bool` peeking out.
 
 [code/DeriveAnyClass.hs:RepBool](Snip)
 
@@ -105,11 +117,11 @@ Compare this against the definition of `Bool` itself.
 
 [code/DeriveAnyClass.hs:Bool](Snip)
 
-The `(:+:)` type is the canonical analogue of the `|` that separates data
-constructors from one another. And because `True` and `False` contain no
-information, each is isomorphic to the unit type `()`. As a result, the
-canonical representation of `Bool` is conceptually just `Either () ()`, or in
-its `GHC.Generics` form as `... (... U1 :+: ... U1)`.
+The `(:+:)` type is the generic analogue of the `|` that separates data
+constructors from one another. Because, as data constructors, `True` and `False`
+contain no information, each is isomorphic to the unit type `()`.  As a result,
+the canonical representation of `Bool` is conceptually just `Either () ()`, or
+in its `GHC.Generics` form as `... (... U1 :+: ... U1)`.
 
 With some idea of what's going on, let's look again at `Rep Bool`.
 
@@ -118,50 +130,107 @@ With some idea of what's going on, let's look again at `Rep Bool`.
 ```
 
 The `D1` and `C1` types contain metadata about `Bool`'s definition in source
-code as promoted `-XDataKinds`. `D1` describes its *type*---its name, where it
+code as promoted data kinds. `D1` describes its *type*---its name, where it
 was defined, and whether or not it's a newtype.
 
 `C1` describes a data constructor---its name, fixity definition, and whether or
 not it has record selectors for its data.
 
-Structural polymorphism that is interested in any of this information is capable
-of extracting it statically from these data kinds, and code that isn't can
-easily ignore it. In my experience, very rarely will you need access to these
-things, but it's nice to have the option.
+Generic programming that is interested in any of this information can statically
+extract it from these data kinds; code that isn't interested can easily ignore
+it.  In my experience, very rarely will you need access to these things, but
+it's nice to have the option.
 
 
-### Deriving Structural Polymorphism
+### The Generic Building Blocks {.rev2}
 
-Armed with the knowledge of `Rep`, we can write an illustrative example of
-generically deriving `Eq`. Of course, it's unnecessary because `Eq` is one of
-those classes the compiler can write for us. Nevertheless, it's a good
-introduction to the topic, and we must walk before we can run. We will look at
-more challenging classes afterwards.
+The `GHC.Generics` module gives us six composable pieces from which `Rep`
+type instances can be built. There are three for describing values, two for
+combining values, and one for storing metadata. Let's quickly go over each.
 
-The approach to generically deriving structural polymorphism is threefold:
+The three sorts of types that `GHC.Generics` can describe are:
 
-1. Define a typeclass to act as a carrier.
+* **Nullary types** are represented via `V1`, which has no inhabitants. As such,
+the only time you'll run into `V1` is for types that have no data constructors
+(and thus no inhabitants.)
+
+* **Unary types** are represented via `U1`, whose only inhabitants is `U1`. This
+type is used for *nullary* data constructors like `True` and `False`.
+
+* **Constant types** are represented via `K1 R a`, where `a` is the constant type
+in question. For example, the `Int` in `data Foo = Foo Int` is represented by a
+`K1 R Int` node. The `R` thing is an extension point that never ended up being
+used; you can ignore it in all cases. `K1` has a single data constructor: `K1`.
+
+Generic representations can be combined in the usual two ways:
+
+* **Sum types** of `f` and `g` are represented via `f :+: g`. There are two
+data constructors of `(:+:)`, namely `L1` (for `f`) and `R1` (for `g`.)
+
+* **Product types** of `f` and `g` are represented via `f :*: g`. The generic
+product has only one data constructor, namely `(:*:)`.
+
+Finally, **metadata** of types is stored in `M1 tag meta` nodes. The `tag`
+parameter can be one of `D` (for metadata on data types), `C` (for
+constructors), or `S` (for record selectors.) `GHC.Generics` comes with type
+synonyms for each of these cases, for example `type C1 = M1 C`. This design
+seems slightly roundabout, but it has practical applications: if we are
+disinterested in all metadata, we only need to give a rule for `M1`. But if we'd
+like only a certain sort of metadata, we can use one of the type synonyms.
+
+Of course, these type constructors aren't powerful enough to describe *every*
+type. Noticeably absent here is support for GADTs and existential types, which
+we will return to later.
+
+Don't forget that you can always use `:kind!` in GHCi to inspect the `Rep`s of
+any types you're interested in. Getting a good intuition for how `Rep`s are put
+together will make your life significantly easier when doing generic
+programming.
+
+
+### Implementing Semigroups Generically {.rev2}
+
+Enough theory. How do we actually get work done? Let's try our hand at doing
+something useful: generically implementing `Semigroup` instances. Because
+product types preserve `Semigroup`s, giving instances is both straightforward
+*and* an $O(n)$ amount of work. To illustrate:
+
+[code/Generic/Monoid.hs:BigProduct](Snip)
+
+[code/Generic/Monoid.hs:BigProductSemigroup](Snip)
+
+Any `Semigroup` instance over a product type like this is completely mechanical,
+and grows linearly with the size of the product. This is an excellent use-case
+for generic programming: there is an $O(1)$ (albeit with a rather large constant
+factor) amount of work to solve a problem generically, so in common cases like
+this, we will be saving effort.
+
+The approach to generic programming is threefold:
+
+1. Define a typeclass to act as a *carrier.*
 2. Provide inductive instances of the class for the generic constructors.
-3. Finally, write a helper function to map between the `Rep` and the
-   desired type.
+3. Finally, write a helper function to lift the carrier class over the desired
+   type.
 
 We begin by defining our carrier typeclass. The carrier mirrors the typeclass
 we'd like to derive, but is shaped to be able to give instances for the `Rep`
 constructors.
 
-A good convention is add a `G` prefix to the carrier typeclass---if you want to
-derive `Eq` generically, call your carrier typeclass `GEq`.
+A good convention is add a `G` prefix to the carrier typeclass. Because we are
+implementing `Semigroup` generically, a good name is `GSemigroup`---but this is
+merely convention!
 
-[code/DeriveAnyClass.hs:GEq](Snip)
+[code/Generic/Monoid.hs:GSemigroup](Snip)
 
-Our `GEq` class has a single method, `geq`, whose signature closely matches
-`(==) :: a -> a -> Bool`.
+Our `GSemigroup` class has a single method, `gappend`, whose signature closely
+matches `(<>) :: a -> a -> a`.
 
-Notice that the type parameter `a` to `GEq` has kind `kind:Type -> Type`.  This
-is a quirk of `GHC.Generics`, and allows the same `Rep` machinery when dealing
-with higher-kinded classes. When writing carrier classes for types of kind
-`kind:Type`, we will always saturate `a` with a dummy type `x` whose only
-purpose is to make the whole thing kind check.
+Notice that the type parameter `f` to `GSemigroup` has kind `kind:k -> Type`.
+This is a quirk of `GHC.Generics`, and allows the same `Rep` machinery when
+dealing with higher-kinded classes. For generic programming over things of
+kind `kind:Type`, this parameter will always be a phantom, and we can safely
+ignore it for now. The dummy type `x` in `gappend` is thus necessary only to
+make everything kind check.
 
 With our carrier defined, the next step is to provide instances for the generic
 `Rep` constructors. A good approach when writing generic instances is to work
@@ -170,124 +239,111 @@ these are the base cases of our structural induction.
 
 In this case, `U1` is the simplest, so we will start there. Recall that `U1`
 represents a data constructor with no parameters, in which case it's just `()`
-with a different name. Since `()` is always equal to itself, so too should `U1`
-be.
+with a different name. Since in this case, we have no data which needs to be
+semigroup-ed together, our implementation of `gappend` can simply give back
+`U1`:
 
-[code/DeriveAnyClass.hs:geqU1](Snip)
+[code/Generic/Monoid.hs:GSemigroupU1](Snip)
 
-Similarly for `V1` which corresponds to types that can't be constructed.  `V1`
-is the generic representation of `Void`---the `Type` with no inhabitants. It
-might seem silly to provide an `Eq` instance for such types, but it costs us
-nothing. Consider instances over `V1` as being vacuous; if you *could* give me a
-value of `V1`, I claim that I could give you back a function comparing it for
-equality. Since you *can't* actually construct a `V1`, then my claim can never
-be tested, and so we might as well consider it true.
+We can also give an instance of `GSemigroup` for `V1`, which corresponds to
+types that can't be constructed. It might seem silly to provide a `Semigroup`
+instance for such types, but it costs us nothing. Consider instances over `V1`
+as being vacuous; if you *could* give me a value of `V1`, I claim that I could
+give you back a function combining it. Since you *can't* actually construct a
+`V1`, then my claim can never be tested, and so we might as well consider it
+true.
 
 Strictly speaking, `V1` instances usually aren't necessary, but we might as well
 provide one if we can.
 
-[code/DeriveAnyClass.hs:geqV1](Snip)
+[code/Generic/Monoid.hs:GSemigroupV1](Snip)
+
+The `case` stuff at [1](Ann) is a Haskell trick for dealing with empty data
+types. We need to case-scrutinize an empty value in order for GHC to learn that
+the type is empty, and thus that no resulting value is necessary.
 
 The one other case we need to consider is what should happen for concrete types
 inside of data constructors? Such things are denoted via `K1`, and in this case,
-we want to fall back on an `Eq` (*not* `GEq`!) instance to compare the two. The
-analogous non-generic behavior for this is how the `Eq` instance for `Maybe a`
-is `Eq a => Eq (Maybe a)`; most data types simply want to lift equality over
-their constituent fields.
+we want to fall back on a `Semigroup` (*not* `GSemigroup`!) instance to combine
+the two. This corresponds to our manual implementation of `Semigroup` for
+`BigProduct`---at some point, we actually do want to combine things in terms of
+their underlying `(<>)` function!
 
-[code/DeriveAnyClass.hs:geqK1](Snip)
+[code/Generic/Monoid.hs:GSemigroupK1](Snip)
 
-But why should we use an `Eq` constraint rather than `GEq`? Well we're using
-`GEq` to help derive `Eq`, which implies `Eq` is the actual type we care about.
-If we were to use a `GEq` constraint, we'd remove the ability for anyone to
-write a non-generic instance of `Eq`!
+With our base cases complete, we're ready to lift them over product types. By
+giving an instance for `GSemigroup (f :*: g)` in terms of underlying
+`GSemigroup` instances for `f` and `g`, the code writes itself. This case
+implements the "zipping together" of values that we saw in the `BigProduct`
+instance.
 
-With our base cases complete, we're ready to lift them over sums. Two sums are
-equal if and only if they are the same data constructor (left or right), and if
-their internal data is equal.
+[code/Generic/Monoid.hs:GSemigroupProduct](Snip)
 
-[code/DeriveAnyClass.hs:geqPlus](Snip)
+Next, we want to give an instance of `GSemigroup` for sum types---or do we? As
+it happens, sums do not preserve semigroups, thus there is no sensible generic
+implementation we can give for sum types. That's not to say sum types aren't
+semigroups, just that we can't get it for free. By explicitly *not* giving a
+`GSemigroup (f :+: g)` instance, we can ensure our generic program sputters out
+on sum types. Alternatively, we could give a dummy instance with a custom type
+error, but we will ignore that option in this chapter.
 
-We will also want to provide `GEq` instances for products---two pieces of data
-side-by-side. Products are represented with the `(:*:)` type and data
-constructors.
+All that's left is to deal with the metadata nodes. Since our generic program
+doesn't need to change its behavior based on the source names of its
+constructors, or on whether something is a newtype, or the fixity of its
+operators, we can ignore the metadata notes and simply lift a `GSemigroup`
+instance over them all:
 
-[code/DeriveAnyClass.hs:geqTimes](Snip)
+[code/Generic/Monoid.hs:GSemigroupM1](Snip)
 
-Finally, we want to lift all of our `GEq` instances through the `Rep`'s metadata
-constructors, since the names of things aren't relevant for defining `Eq`.
-Fortunately, all of the various types of metadata (`D1`, `C1` and `S1`) provided
-by `GHC.Generics` are all type synonyms of `M1`. Because we don't care about any
-metadata, we can simply provide a `M1` instance and ignore it.
+This completes step two. We now have a generic program capable of lifting
+semigroup instances. All that's left is to lift `gappend` over real (rather than
+generic) values of our type:
 
-[code/DeriveAnyClass.hs:geqM1](Snip)
+[code/Generic/Monoid.hs:genericMappend](Snip)
 
-This completes step two; we're now capable of getting `Eq` instances for free.
-However, to convince ourselves that what we've done so far works, we can write a
-function that performs our generic equality test.
+The real work here is happening at [3](Ann), which uses `from` to get to the
+generic representations, calls `gappend`, and then transforms the whole thing
+back via `to`. But notice the type signature here---we need to assert both that
+`a` has a representation ([1](Ann)), and that can `GSemigroup` over that
+particular generic representation ([2](Ann)). These two constraints are
+characteristic of all generic programs.
 
-[code/DeriveAnyClass.hs:genericEq](Snip)
+Let's convince ourselves that this works:
 
-```{ghci=code/DeriveAnyClass.hs}
-genericEq True False
-genericEq "ghc.generics" "ghc.generics"
+```{ghci=code/Generic/Monoid.hs}
+let x = BigProduct (Sum 5) (All True) (Last Nothing) ["Erin"]
+let y = BigProduct (Sum 2) (All False) (Last $ Just 5) ["Lee"]
+genericMappend x y
+genericMappend ("hello", Sum 2) ("world", Sum 5)
 ```
 
-`genericEq` is powerful step in the right direction. We can define actual `Eq`
-instances in terms of it. Given our `Foo` datatype from earlier:
+`genericMappend` is powerful step in the right direction. We can define actual
+`Semigroup` instances in terms of it:
 
-[code/DeriveAnyClass.hs:Foo1](Snip)
-
-We can give an `Eq` instance with very little effort.
-
-[code/DeriveAnyClass.hs:EqFoo](Snip)
+[code/Generic/Monoid.hs:BigProductGSemigroup](Snip)
 
 
 Exercise
 
-:   Provide a generic instance for the `Ord` class.
+:   Write a generic program that implements `mempty` from the `Monoid` class.
+    Hint: fewer generic building blocks are admissable when writing `gmempty`
+    than were available for `gappend`.
 
 Solution
 
-:   [code/DeriveAnyClass.hs:GOrd](Snip)
+:   [code/Generic/Monoid.hs:GMonoid](Snip)
 
-    [code/DeriveAnyClass.hs:gordU1](Snip)
+    [code/Generic/Monoid.hs:GMonoidU1](Snip)
 
-    [code/DeriveAnyClass.hs:gordV1](Snip)
+    [code/Generic/Monoid.hs:GMonoidK1](Snip)
 
-    [code/DeriveAnyClass.hs:gordK1](Snip)
+    [code/Generic/Monoid.hs:GMonoidProduct](Snip)
 
-    [code/DeriveAnyClass.hs:gordTimes](Snip)
+    [code/Generic/Monoid.hs:GMonoidM1](Snip)
 
-    [code/DeriveAnyClass.hs:gordPlus](Snip)
+    [code/Generic/Monoid.hs:genericMempty](Snip)
 
-    [code/DeriveAnyClass.hs:gordM1](Snip)
-
-    [code/DeriveAnyClass.hs:genericOrd](Snip)
-
-
-Exercise
-
-:   Use `GHC.Generics` to implement the function `exNihilo :: Maybe a`. This
-    function should give a value of `Just a` if `a` has exactly one data
-    constructor which takes zero arguments. Otherwise, `exNihilo` should return
-    `Nothing`.
-
-Solution
-
-:   [code/DeriveAnyClass.hs:GExNihilo](Snip)
-
-    [code/DeriveAnyClass.hs:gexNihiloU1](Snip)
-
-    [code/DeriveAnyClass.hs:gexNihiloV1](Snip)
-
-    [code/DeriveAnyClass.hs:gexNihiloK1](Snip)
-
-    [code/DeriveAnyClass.hs:gexNihiloTimes](Snip)
-
-    [code/DeriveAnyClass.hs:gexNihiloPlus](Snip)
-
-    [code/DeriveAnyClass.hs:gexNihiloM1](Snip)
+/* TODO(sandy): */ stopping place
 
 
 This is about as good as we can do for classes we haven't defined ourselves.

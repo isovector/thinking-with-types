@@ -1,1 +1,7 @@
+> It is another example of why you need to know the fundamentals very well; the
+> fancy parts then follow easily and you can do things that they never told you
+> about.
+>
+> --Richard Hamming
+
 # Fundamentals

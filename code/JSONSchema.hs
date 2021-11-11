@@ -66,7 +66,9 @@ type family ToJSONType t where
   ToJSONType String  = "string"
   ToJSONType Bool    = "boolean"
   ToJSONType [t]     = "array"
-  ToJSONType t       = RepName (Rep t)
+  ToJSONType t       = TypeName t
+
+type TypeName t = RepName (Rep t)
 
 type RepName :: (Type -> Type) -> Symbol
 type family RepName x where
