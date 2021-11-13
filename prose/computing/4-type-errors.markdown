@@ -70,7 +70,8 @@ it.
 Rewriting `prj` to use `KnownNat (FriendlyFindElem t ts f ts)` instead of
 `Member t ts` is enough to fix our error messages.
 
-```{ghci=code/OpenSum.hs}
+```{ghci=code/OpenSum.hs replace="friendlyPrj=prj"}
+@:set -XDataKinds
 let foo = inj (Identity True) :: OpenSum Identity '[Bool, String]
 friendlyPrj foo :: Maybe (Identity Int)
 ```

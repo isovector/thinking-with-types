@@ -355,7 +355,7 @@ To illustrate the point, let's define a new typeclass `MyEq`. For all intents
 and purposes `MyEq` is exactly the same as `Eq`, except that we've defined it
 ourselves.
 
-[code/DeriveAnyClass.hs:MyEq](Snip)
+# [code/DeriveAnyClass.hs:MyEq](Snip)
 
 Using `-XDefaultSignatures`, at [1](Ann) we can provide a default implementation
 of `eq` in terms of `genericEq`. `-XDefaultSignatures` is necessary to provides
