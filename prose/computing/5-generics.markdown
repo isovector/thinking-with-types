@@ -343,39 +343,135 @@ Solution
 
     [code/Generic/Monoid.hs:genericMempty](Snip)
 
-/* TODO(sandy): */ stopping place
+
+### Deriving Instances Via Generics {.rev2}
+
+You might be wondering whether we can extend GHC's `deriving` machinery to
+support our generic `Semigroup` implementation. And indeed we can. The
+`-XDerivingVia` extension (@blondal_deriving_2018) allows us to derive an
+instance in terms of some other type, which we can co-opt for this purpose.
+
+The trick is to create a `newtype` wrapper and give it the instance we'd like to
+be able to derive:
+
+[code/Generic/Monoid.hs:Generically](Snip)
+
+[code/Generic/Monoid.hs:GenericallySemigroup2](Snip){Generically2="Generically"}
+
+Of course, because `Generically` is a newtype, we can instead exploit the
+representational equality, and just `coerce` the `genericMappend` function
+instead:
+
+[code/Generic/Monoid.hs:GenericallySemigroup](Snip)
+
+Either way is acceptable; the important part is just that we've given a
+`Semigroup (Generically a)` instance. Finally, after enabling
+`-XDerivingStrategies` and `-XDerivingVia`, we can get a free `Semigroup`
+instance for any type that our generic program works on:
+
+[code/Generic/Monoid.hs:Foo](Snip)
+
+This approach scales nicely. For example, we can also give an instance of
+`Monoid (Generically a)`:
+
+[code/Generic/Monoid.hs:GenericallyMonoid](Snip)
+
+and then derive both `Semigroup` and `Monoid` for `Foo` in one go:
+
+[code/Generic/Monoid.hs:Foo2](Snip)
+
+The `-XDerivingStrategies` extension allows us to add multiple `deriving`
+clauses to a type---meaning, we can also simultaneously derive generic instances
+from different `newtype` wrappers.
 
 
-This is about as good as we can do for classes we haven't defined ourselves.
-However, for our own typeclasses we can go further and have the compiler
-actually write that last piece of boilerplate for us too. We'll get full access
-to the `deriving` machinery.
+### Using Metadata in Generic Programs {.rev2}
 
-To illustrate the point, let's define a new typeclass `MyEq`. For all intents
-and purposes `MyEq` is exactly the same as `Eq`, except that we've defined it
-ourselves.
+Let's now look at an example of a generic program that uses the metadata present
+in `M1` nodes. Consider the common case in which you'd like to an `Eq` instance,
+but your type *just barely* doesn't admit one. For example:
 
-# [code/DeriveAnyClass.hs:MyEq](Snip)
+[code/Generic/Omit.hs:Weird](Snip)
 
-Using `-XDefaultSignatures`, at [1](Ann) we can provide a default implementation
-of `eq` in terms of `genericEq`. `-XDefaultSignatures` is necessary to provides
-the correct `GEq (Rep a)` context.
+Here, we can't derive an `Eq` instance for `Weird` because there is (computable)
+way to check the `result` function for equality. But suppose we've determined
+that it's acceptable to equate `Weird` values which agree on both their `name`
+and `value`. In essence, we'd like to derive `Eq` instances that omit some
+fields.
 
-Finally, by enabling `-XDeriveAnyClass`, we can convince the compiler to give us
-an instance of `MyEq` for free!
+We begin, as always, by writing a carrier typeclass:
 
-[code/DeriveAnyClass.hs:Foo](Snip)
+[code/Generic/Omit.hs:GEqOmit](Snip)
 
-Notice how at [1](Ann), we simply ask for a derived instance of `MyEq`, and the
-compiler happily gives it to us. We can fire up the REPL to see how we did:
+If you squint, you can see the type of `(==)` hiding inside of `geqomit`, but
+here we also have a `[String]` parameter. We'll use this parameter to store the
+list of field names we'd like to omit. It's not strictly necessary to solve the
+problem like this, but it's much simpler than using singletons (see
+@sec:singletons.)
 
-```{ghci=code/DeriveAnyClass.hs}
-:t eq
-eq F0 F0
-eq (F1 "foo") (F1 "foo")
-eq F0 (F1 "hello")
-eq (F1 "foo") (F1 "bar")
-```
+As usual, we can start with instances for `U1`, `V1` and `K1`:
+
+[code/Generic/Omit.hs:GEqOmitU1](Snip)
+
+[code/Generic/Omit.hs:GEqOmitV1](Snip)
+
+[code/Generic/Omit.hs:GEqOmitK1](Snip)
+
+Products are easy---just ensure that both sides are equal:
+
+[code/Generic/Omit.hs:GEqOmitProduct](Snip)
+
+Sum types are a little trickier in that we must ensure both arguments come from
+the same constructor:
+
+[code/Generic/Omit.hs:GEqOmitSum](Snip)
+
+Next come the metadata constructors, which are the interesting part of the
+problem. Unlike the other examples we've seen, here we want to actually use the
+metadata, so we can't just give an instance that lifts over `M1`.  We need
+custom logic for `S1` (metadata about field selectors), but can still ignore
+`D1` and `C1`. So we'll lift over those, saving the `S1` logic for last.
+
+[code/Generic/Omit.hs:GEqOmitD1](Snip)
+
+[code/Generic/Omit.hs:GEqOmitC1](Snip)
+
+Finally we come to `S1`, which stores the metadata we need. It's of the form `S1
+('MetaSel ...) f`, where `'MetaSel` is:
+
+[code/Generic/Omit.hs:Meta](Snip)
+
+A field selector's name is stored in the first field of the `'MetaSel`
+constructor ([1](Ann)). For data types defined with record syntax, this field
+will always be of the form `'Just name`. Thus, we can write an instance that
+matches on that case:
+
+[code/Generic/Omit.hs:GEqOmitS1Just](Snip)
+
+`KnownSymbol` instances are always available for metadata `kind:Symbol`s, but we
+need to explicitly tell GHC that fact at [1](Ann). Using `symbolVal` at [2](Ann)
+we can get the name of the constructor at the value level, and look it up in the
+list of fields to omit. If it should be omitted, we simply return `True`,
+otherwise we use `geqomit` to generically check it for equality.
+
+There's one last case, which is if our field wasn't defined in record syntax. In
+this case it won't have a symbolic name, so we should still check it:
+
+[code/Generic/Omit.hs:GEqOmitS1Nothing](Snip)
+
+[code/Generic/Omit.hs:DemoteSymbolList](Snip)
+
+[code/Generic/Omit.hs:DemoteNil](Snip)
+
+[code/Generic/Omit.hs:DemoteCons](Snip)
+
+[code/Generic/Omit.hs:Omit](Snip)
+
+[code/Generic/Omit.hs:EqOmit](Snip)
+
+> TODO(sandy): Oops it doesn't work
+
+
 
 
 ### Using Generic Metadata

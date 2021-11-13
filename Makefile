@@ -10,9 +10,8 @@ PANDOC_OPTS := --highlight-style theme/highlighting.theme \
                -F pandoc-citeproc \
                --from markdown+fancy_lists \
                -s \
+               --bibliography=bib.bib \
                --top-level-division=part
-
-               # --bibliography=prose/bib.bib \
 
 PANDOC_PDF_OPTS := --template format/tex/template.tex \
                    -t latex
@@ -43,7 +42,7 @@ build/missing-from-sample.pdf:
 
 sources = $(addsuffix .tex,$(addprefix build/tex/,$(RULES)))
 prose = $(addsuffix /*.markdown,$(addprefix prose/,$(CONTENT)))
-$(sources): build/tex/%.tex: prose/metadata.markdown prose/%.markdown $(prose) format/tex/template.tex theme/* format/tex/cover.pdf
+$(sources): build/tex/%.tex: prose/metadata.markdown prose/%.markdown $(prose) format/tex/template.tex theme/* format/tex/cover.pdf bib.bib
 	pandoc $(PANDOC_OPTS) $(PANDOC_PDF_OPTS) -o $@ $(filter %.markdown,$^)
 	# cp .design-tools/*.png build/.design-tools
 	sed -i 's/\CommentTok{{-}{-} ! \([0-9]\)}/annotate{\1}/g' $@

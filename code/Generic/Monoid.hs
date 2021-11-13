@@ -1,9 +1,13 @@
+{-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE DerivingStrategies #-}
+{-# LANGUAGE DerivingVia #-}
 module Generic.Monoid where
 
 import Data.Kind
 import GHC.Generics
 
 import Data.Monoid
+import Data.Coerce (coerce)
 
 type GSemigroup :: (k -> Type) -> Constraint
 class GSemigroup f where
@@ -99,5 +103,51 @@ instance Monoid a
 instance GMonoid U1 where
   gmempty = U1
 
--- NO V1 INSTANCE ON PURPOSE
+
+newtype Generically a = Generically a
+
+newtype Generically2 a = Generically2 a
+
+-- # GenericallySemigroup
+instance (Generic a, GSemigroup (Rep a))
+      => Semigroup (Generically a)
+         where
+  (<>) = coerce $ genericMappend @a
+
+-- # GenericallySemigroup2
+instance (Generic a, GSemigroup (Rep a))
+      => Semigroup (Generically2 a)
+         where
+  Generically2 a <> Generically2 b =
+    Generically2 $ genericMappend a b
+
+-- # GenericallyMonoid
+instance ( Generic a
+         , GMonoid (Rep a)
+         , Semigroup (Generically a)
+         )
+      => Monoid (Generically a)
+         where
+  mempty = coerce $ genericMempty @a
+
+data Foo = Foo
+  { f_total  :: Sum Int
+  , f_valid  :: All
+  }
+  deriving (Show, Generic)
+  deriving Semigroup
+    via Generically Foo
+
+{-
+
+-- # Foo2
+data Foo = Foo
+  { f_total  :: Sum Int
+  , f_valid  :: All
+  }
+  deriving (Show, Generic)
+  deriving (Semigroup, Monoid)
+    via Generically Foo
+
+-}
 
