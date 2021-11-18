@@ -43,6 +43,9 @@ dependencies:
 - kind-generics
 - kind-generics-th
 
+ghc-options:
+- -Wall
+
 default-extensions:
   - BangPatterns
   - BinaryLiterals

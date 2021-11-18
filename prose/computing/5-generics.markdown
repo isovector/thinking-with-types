@@ -391,9 +391,9 @@ Let's now look at an example of a generic program that uses the metadata present
 in `M1` nodes. Consider the common case in which you'd like to an `Eq` instance,
 but your type *just barely* doesn't admit one. For example:
 
-[code/Generic/Omit.hs:Weird](Snip)
+[code/Generic/Omit.hs:BadWeird](Snip)
 
-Here, we can't derive an `Eq` instance for `Weird` because there is (computable)
+This deriving clause for `Eq Weird` will fail, because there is no (computable)
 way to check the `result` function for equality. But suppose we've determined
 that it's acceptable to equate `Weird` values which agree on both their `name`
 and `value`. In essence, we'd like to derive `Eq` instances that omit some
@@ -403,11 +403,15 @@ We begin, as always, by writing a carrier typeclass:
 
 [code/Generic/Omit.hs:GEqOmit](Snip)
 
-If you squint, you can see the type of `(==)` hiding inside of `geqomit`, but
-here we also have a `[String]` parameter. We'll use this parameter to store the
-list of field names we'd like to omit. It's not strictly necessary to solve the
-problem like this, but it's much simpler than using singletons (see
-@sec:singletons.)
+This one is a little different than your "standard" carrier typeclass. As
+a quirk of how Haskell's instance resolution works, you'll often find yourself
+needing to pass extra parameters to the carrier. Here, the `o` parameter is
+a `kind:[Symbol]` which keeps track of the field names we'd like to omit from
+our equality check.
+
+Because `o` is purely "stowaway" type-level data, we add a `Proxy o` parameter
+to the type of `geqomit`---otherwise it'd be an ambiguous type, and we'd need to
+type-apply `o` every time we needed it.
 
 As usual, we can start with instances for `U1`, `V1` and `K1`:
 
@@ -421,8 +425,8 @@ Products are easy---just ensure that both sides are equal:
 
 [code/Generic/Omit.hs:GEqOmitProduct](Snip)
 
-Sum types are a little trickier in that we must ensure both arguments come from
-the same constructor:
+Sum types are slightly more work, in that we must ensure both arguments come
+from the same constructor:
 
 [code/Generic/Omit.hs:GEqOmitSum](Snip)
 
@@ -443,263 +447,63 @@ Finally we come to `S1`, which stores the metadata we need. It's of the form `S1
 
 A field selector's name is stored in the first field of the `'MetaSel`
 constructor ([1](Ann)). For data types defined with record syntax, this field
-will always be of the form `'Just name`. Thus, we can write an instance that
-matches on that case:
+will always be of the form `'Just name`.
 
-[code/Generic/Omit.hs:GEqOmitS1Just](Snip)
+We have three cases we need to handle here:
 
-`KnownSymbol` instances are always available for metadata `kind:Symbol`s, but we
-need to explicitly tell GHC that fact at [1](Ann). Using `symbolVal` at [2](Ann)
-we can get the name of the constructor at the value level, and look it up in the
-list of fields to omit. If it should be omitted, we simply return `True`,
-otherwise we use `geqomit` to generically check it for equality.
+1. The selector doesn't have a field name.
+2. The selector has an omitted field name.
+2. The selector has an field name, but it's not omitted.
 
-There's one last case, which is if our field wasn't defined in record syntax. In
-this case it won't have a symbolic name, so we should still check it:
+The first case is easy---we just need to fall through the `M1` constructor if
+the name is `'Nothing`:
 
 [code/Generic/Omit.hs:GEqOmitS1Nothing](Snip)
 
-[code/Generic/Omit.hs:DemoteSymbolList](Snip)
+Similarly, if the head of our list of omitted names (`o`) is the name of the
+selector, we can ignore this field and just return `True`:
 
-[code/Generic/Omit.hs:DemoteNil](Snip)
+[code/Generic/Omit.hs:GEqOmitS1Omitted](Snip)
 
-[code/Generic/Omit.hs:DemoteCons](Snip)
+The third case is the tricky one. Because our only way to know if the current
+field is omitted is by checking the head of `o`, we only know a field wasn't
+omitted if we haven't seen it by the time we get to the end of the list. If that
+happens, we're free to fall through into `geqomit` on the wrapped generic
+constructor:
+
+[code/Generic/Omit.hs:GEqOmitS1NotOmitted](Snip)
+
+Finally, if we are matching a field whose name isn't the head of the list, we
+need to continue checking the list:
+
+[code/Generic/Omit.hs:GEqOmitS1Induction](Snip)
+
+This instance is a bit crazy. At [1](Ann), our instance head matches `other_name
+': o`, but the name of our field at [2](Ann) is `name`. Remember that these are
+just variables, so there is nothing stopping `other_name` from being the same
+`kind:Symbol` as `name`. We use the `OVERLAPPABLE` pragma at [3](Ann) to ensure
+that these two `kind:Symbol`s are differentiated, since this instance will be
+overlapped by the case in which they *are* the same.
+
+At [4](Ann) our instance has a context of `GEqOmit` on the tail of the current
+omission list. This ensures the instance resolution will iterate through the
+entire omission list, checking to see if we should ignore this field. Finally,
+at [5](Ann), we need to help this recursion along by explicitly crafting
+a `Proxy` for the tail of the list.
+
+That wraps up the generic machinery. All that's left is to attach it as an
+instance for `Eq` on a suitable datatype. We introduce the `Omit` newtype, which
+has a phantom parameter for the omission list:
 
 [code/Generic/Omit.hs:Omit](Snip)
 
+and after a quick `Eq` instance that delegates to `GEqOmit`, we're done:
+
 [code/Generic/Omit.hs:EqOmit](Snip)
 
-> TODO(sandy): Oops it doesn't work
+Users can now get an instance of `Eq` for whatever weird types they want via `DerivingVia`:
 
-
-
-
-### Using Generic Metadata
-
-JavaScript's lack of a proper type system is widely known. However, in an
-attempt to add some degree of type-safety, its proponents recommend a thing
-called JSON Schema. If you're unfamiliar with it, JSON Schema is, in its own,
-words "a vocabulary that allows you to annotate and validate JSON documents."
-It's sort of like a type system, but described in JSON itself.
-
-For example, the following Haskell type:
-
-[code/JSONSchema.hs:Person](Snip)
-
-would be described in JSON Schema as:
-
-```json
-  { "title": "Person"
-  , "type": "object"
-  , "properties":
-      { "name":  { "type": "string"  }
-      , "age":   { "type": "integer" }
-      , "phone": { "type": "string"  }
-      , "permissions":
-          { "type": "array", "items": { "type": "boolean" }}
-      }
-  , "required": ["name" , "age", "permissions"]
-  }
-```
-
-When sharing data between Haskell and JavaScript, providing JSON Schema as a
-common format between the two languages seems like it might help mitigate
-JavaScript's weak typing. But writing JSON Schema by hand is no fun, and so we
-find ourselves with a motivating example of generating code generically.
-
-As always, we begin with a definition of the carrier typeclass. Such a thing
-needs to produce a `Value` (`aeson`'s @cite:aeson representation of a JSON
-value.) However, we'll also need to propagate information in order to fill the
-`required` property. As such, we decide on a single method of type `Writer
-[Text] Value`. The `[Text]` will be used to track the required properties, and
-the `Value` is the schema we're building.
-
-[code/JSONSchema.hs:GSchema](Snip)
-
-Notice that `gschema` doesn't reference the `a` type parameter anywhere.  While
-we *could* use a `Proxy` to drive the instance lookups the way we did for
-`HasPrintf`, a cleaner interface is to enable `-XAllowAmbiguousTypes` and later
-use `-XTypeApplications` to fill in the desired variable.
-
-For our purposes, we will assume we only want to generate JSON Schema for
-Haskell records. In fact, it will be an error to ask for a schema for any
-sum-types, since it's not clear how to embed them into JSON.
-
-Before diving in, we'll need some helper functions for manipulating JSON
-objects. For example, we'll want to merge two of them by taking the union of
-their properties.
-
-[code/JSONSchema.hs:mergeObjects](Snip)
-
-We will also write a helper function that takes a `KnownSymbol nm` and `tell`s
-the corresponding term-level string.
-
-[code/JSONSchema.hs:emitRequired](Snip)
-
-```{ghci=code/JSONSchema.hs}
-runWriter (emitRequired @"required property")
-```
-
-`symbolVal` is a function that converts a `kind:Symbol` into a `String`. It comes
-from `GHC.TypeLits`. For example:
-
-```{ghci=code/Printf.hs}
-:t symbolVal
-symbolVal (Proxy @"i am a symbol")
-```
-
-The `KnownSymbol` stuff in `symbolVal`'s type is simply a proof that GHC knows
-what `kind:Symbol` we're talking about; it will automatically generate the
-`KnownSymbol` instance for us, so it's nothing we need to worry about.
-
-Anyway, in JSON Schema, the boolean type `Bool` is represented via `"boolean"`.
-Along the same vein, integral types are `"integer"`, but all other numeric types
-are simply `"number"`. User types should be serialized with their given name.
-This is a good opportunity to use a closed type family to convert from Haskell
-type names to their JSON Schema counterparts.
-
-[code/JSONSchema.hs:ToJSONType](Snip)
-
-Unfortunately, there is no straightforward means of getting the name of a type
-as a symbol. We can use generic metadata to retrieve a type's name.
-
-[code/JSONSchema.hs:RepName](Snip)
-
-[code/JSONSchema.hs:TypeName](Snip)
-
-```{ghci=code/JSONSchema.hs}
-:kind! ToJSONType Double
-:kind! ToJSONType String
-:kind! ToJSONType [Int]
-:kind! ToJSONType Person
-```
-
-Something we'll find ourselves generating often are objects of the form
-`{"type": "foo"}`. The function `makeTypeObj` is type-applicable, and will use
-the `ToJSONType` of the applied type.
-
-[code/JSONSchema.hs:makeTypeObj](Snip)
-
-```{ghci=code/JSONSchema.hs}
-makeTypeObj @Int
-```
-
-One last helper function we'll need before getting to the meat of the
-`GHC.Generics` code is to be able to wrap an object with the name of a property.
-This will be used to build the `"properties"` property in the JSON Schema
-document.
-
-[code/JSONSchema.hs:makePropertyObj](Snip)
-
-Like `makeTypeObj`, `makePropertyObj` also is intended to be called with a type
-application. In this case, it takes a `Symbol` corresponding to the name of the
-property to emit. These `Symbol`s will come directly from the `Rep` of the
-data-structure's record selectors.
-
-In order to get access to the record name, it's insufficient to simply define an
-instance of `GSchema` for `K1`. By the time we get to `K1` we've lost access to
-the metadata---the metadata is stored in an outer wrapper.  Instead, we can do
-type-level pattern matching on `M1 S meta (K1 _ a)`. The `S` type is used as a
-parameter to `M1` to describe *record selector metadata*.
-
-[code/JSONSchema.hs:gschemaK1](Snip)
-
-At [1](Ann), this instance says that the property `nm` is required. It then
-builds and returns a property object.
-
-```{ghci=code/JSONSchema.hs}
-import qualified Data.ByteString.Lazy.Char8 as LC8
-import Data.Aeson.Encode.Pretty (encodePretty)
-let pp = LC8.putStrLn . encodePretty
-pp (makePropertyObj @"myproperty" (makeTypeObj @Bool))
-```
-
-There are other base cases of `M1 .. K1` we still need to handle, but we will
-build the rest of the machinery first. If we have a product of fields, we need
-to merge them together.
-
-[code/JSONSchema.hs:gschemaTimes](Snip)
-
-For coproduct types, we will simply error out as the JSON Schema documentation
-is conspicuously quiet about the encoding of sums.
-
-[code/JSONSchema.hs:gschemaPlus](Snip)
-
-Because sum-types are not allowed, information about data constructors isn't
-interesting to us. We simply lift a `GSchema` instance through `M1 C` (metadata
-for data constructors.)
-
-[code/JSONSchema.hs:gschemaM1C](Snip)
-
-To close out our induction cases, we need an instance of `GSchema` for `M1
-D`---type constructors. Here we have access to the type's name, and all of its
-properties.
-
-[code/JSONSchema.hs:gschemaM1D](Snip)
-
-Finally, we need to run our `Writer [Text]` and transform that into the list of
-required properties `"required"`. We'll use the opportunity to also act as our
-interface between `a` and `Rep a`.
-
-[code/JSONSchema.hs:schema](Snip)
-
-`schema` already works quite well. It will dump out a JSON Schema for our
-`Person` type, though the encoding won't work correctly with optional values,
-lists or strings. Each of these corresponds to a different base case of `M1 ..
-K1`, and so we can provide some overlapping instances to clear them up.
-
-The easiest case is that of `Maybe a`, which we'd like to describe as a field of
-`a`, though without calling `emitRequired`.
-
-[code/JSONSchema.hs:gschemaMaybe](Snip)
-
-This instance is identical to `K1 _ a` except for the omission of
-`emitRequired`.
-
-Lists are serialized oddly in JSON Schema; their type is `"array"`, but the
-descriptor object comes with an extra property `"items"` which *also* contains a
-`"type"` property:
-
-```json
-{ "type": "array", "items": { "type": "boolean" }}
-```
-
-We can implement this with an overlapping instance which targets `K1 _ [a]`.
-
-[code/JSONSchema.hs:gschemaList](Snip)
-
-This works well, but because in Haskell, `String`s are simply lists of `Char`s,
-our emitted JSON Schema treats `String`s as arrays. The correct behavior for
-`String` is the same as the default `K1 _ a` case, so we add yet another
-overlapping instance.
-
-[code/JSONSchema.hs:gschemaString](Snip)
-
-This instance overrides the behavior for `[a]`, which in itself overrides the
-behavior for `a`. Programming with typeclass instances is not always the most
-elegant experience.
-
-And we're done. We've successfully used the metadata in `GHC.Generics` to
-automatically marshall a description of our Haskell data types into JSON Schema.
-We didn't need to resort to using code generation---which would have complicated
-our compilation pipeline---and we've written nothing but everyday Haskell in
-order to accomplish it.
-
-We can admire our handiwork:
-
-```{ghci=code/JSONSchema.hs}
-@import qualified Data.ByteString.Lazy.Char8 as LC8
-@import Data.Aeson.Encode.Pretty (encodePretty)
-@let pp = LC8.putStrLn . encodePretty
-pp (schema @Person)
-```
-
-And, as expected, sum types fail to receive a schema with a helpful error
-message.
-
-```{ghci=code/JSONSchema.hs}
-schema @Bool
-```
+[code/Generic/Omit.hs:Weird](Snip)
 
 
 ### Performance

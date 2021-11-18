@@ -4,7 +4,7 @@
 
 module War.Ecstasy where
 
-import           Control.Applicative (liftA2, Alternative ((<|>)))
+import           Control.Applicative (Alternative ((<|>)))
 import           Control.Lens (Lens', (^.), (?~), (.~), (%~), at, (<>~))
 import           Control.Lens (view)
 import           Data.Bool
@@ -17,7 +17,7 @@ import           Data.IntMap (IntMap)
 import qualified Data.IntMap as IM
 import           Data.IntSet (IntSet)
 import qualified Data.IntSet as IS
-import           Data.Monoid (Endo (..), First(..))
+import           Data.Monoid (Endo (..))
 import           Data.Ord
 import           Data.Proxy
 import           GHC.Generics

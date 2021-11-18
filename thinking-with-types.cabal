@@ -106,6 +106,7 @@ library
       TypeApplications
       TypeOperators
       TypeSynonymInstances
+  ghc-options: -Wall
   build-depends:
       aeson
     , aeson-pretty

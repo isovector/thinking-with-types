@@ -44,8 +44,8 @@ instance MapAge Range where
 
 data TrackedStale a where
   TrackedStale
-      :: Tracked (Stale s) a
-      -> PositionMap (Stale s) Current
+      :: Tracked ('Stale s) a
+      -> PositionMap ('Stale s) 'Current
       -> TrackedStale a
 
 fromCurrentRange :: PositionMapping -> Range -> Range
