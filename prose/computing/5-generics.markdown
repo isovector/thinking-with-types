@@ -629,10 +629,11 @@ enlightening:
 
 [code/Kan.hs:FunctorYoneda](Snip)
 
-Note the lack of a `Functor f` constraint on this instance! `Yoneda f` is a
-`Functor` *even when* `f` *isn't.* In essence, `Yoneda f` gives us a instance of
-`Functor` for free. Any type of kind `kind:Type -> Type` is eligible. There's lots of
-interesting category theory behind all of this, but it's not important to us.
+Note the lack of a `Functor f` constraint on this instance! `Yoneda f` is
+a `Functor` *even when* `f` *isn't.* In essence, `Yoneda f` gives us a instance
+of `Functor` for free. Any type of kind `kind:Type -> Type` is eligible. There's
+lots of interesting category theory behind all of this, but it's not important
+to us.
 
 But how does `Yoneda` work? Keep in mind the functor law that `fmap f .  fmap g
 = fmap (f . g)`. The implementation of `Yoneda`'s `Functor` instance abuses this
