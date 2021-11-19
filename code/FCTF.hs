@@ -8,8 +8,6 @@ module FCTF where
 -- # imports
 import Data.Kind (Constraint, Type)
 
-import GHC.TypeLits (Nat, Symbol)
-
 data Map :: (a -> Exp b) -> f a -> Exp (f b)
 
 -- # Map4Lists

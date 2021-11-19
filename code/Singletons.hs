@@ -7,7 +7,6 @@
 module Singletons where
 
 -- # imports
-import Data.Kind (Type)
 import Data.Typeable
 import Data.Void
 import Unsafe.Coerce (unsafeCoerce)
@@ -140,5 +139,6 @@ instance SDecide a => SDecide (Maybe a) where
       Proved Refl -> Proved Refl
       Disproved _ -> Disproved $ const undefined
   SNothing %~ SNothing = Proved Refl
+  _ %~ _ = Disproved $ const undefined
 
 

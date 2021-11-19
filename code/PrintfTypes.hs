@@ -6,8 +6,6 @@
 module PrintfTypes where
 
 import Data.Kind   (Type, Constraint)
-import Data.Monoid ((<>))
-import Data.Proxy  (Proxy (..))
 import GHC.TypeLits
 
 data (a :: k1) :<< (b :: k2)

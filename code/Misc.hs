@@ -3,6 +3,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 
 {-# OPTIONS_GHC -fno-warn-missing-methods #-}
+{-# OPTIONS_GHC -Wno-orphans #-}
 
 module Misc where
 
@@ -11,11 +12,11 @@ import GHC.TypeLits
 -- # showFunc
 instance
     ( TypeError
-        ( Text "Attempting to interpret a number as a function "
-     :$$: Text "in the type `"
-     :<>: ShowType (a -> b)
-     :<>: Text "'"
-     :$$: Text "Did you forget to specify the function you wanted?"
+        ( 'Text "Attempting to interpret a number as a function "
+    ':$$: 'Text "in the type `"
+    ':<>: 'ShowType (a -> b)
+    ':<>: 'Text "'"
+    ':$$: 'Text "Did you forget to specify the function you wanted?"
         )
     ) => Num (a -> b) where
 

@@ -10,7 +10,7 @@ module OpenProduct where
 
 -- # imports
 import           Data.Constraint
-import           Data.Kind (Constraint, Type)
+import           Data.Kind (Type)
 import           Data.Proxy (Proxy (..))
 import qualified Data.Vector as V
 import           Fcf hiding (Any)
@@ -151,7 +151,7 @@ upsert
     -> f t
     -> OpenProduct f ts
     -> OpenProduct f (Eval (UpsertElem key t ts))
-upsert k ft (OpenProduct v) =
+upsert _ ft (OpenProduct v) =
   OpenProduct $ case upsertElem @(UpsertLoc key ts) of
     Nothing -> V.cons (Any ft) v
     Just n  -> v V.// [(n, Any ft)]
@@ -218,10 +218,10 @@ type family FriendlyFindElem funcName key ts where
 
 type ShowList :: [k] -> ErrorMessage
 type family ShowList ts where
-  ShowList '[] = Text ""
-  ShowList (a ': '[]) = ShowType a
+  ShowList '[] = 'Text ""
+  ShowList (a ': '[]) = 'ShowType a
   ShowList (a ': as)  =
-    ShowType a ':<>: Text ", " ':<>: ShowList as
+    'ShowType a ':<>: 'Text ", " ':<>: ShowList as
 
 type FriendlyFindElem2 :: Symbol -> Symbol -> [(Symbol, k)] -> k
 type family FriendlyFindElem2 funcName key ts where

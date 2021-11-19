@@ -2,10 +2,12 @@
 {-# LANGUAGE RoleAnnotations #-}
 {-# LANGUAGE TypeFamilies    #-}
 
+{-# OPTIONS_GHC -fno-warn-unused-imports #-}
+
 module Roles where
 
 -- # imports
-import Data.Coerce (Coercible(..), coerce)
+import Data.Coerce (Coercible, coerce)
 import Data.Foldable (toList)
 import qualified Data.Map as M
 import Data.Monoid (Sum (..), Product (..))

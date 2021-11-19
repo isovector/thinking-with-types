@@ -8,15 +8,9 @@
 module QuantifiedConstraints where
 
 import Data.Coerce
-import Control.Monad
 import Data.Maybe
-import Data.Functor.Compose
 import Data.Functor.Identity
-import Data.Bifoldable
-import Data.Monoid
 import Control.Applicative
-import Data.Bifunctor
-import Data.Functor.Contravariant
 
 class (forall m. Monad m => Monad (t m)) => MonadTrans t where
   lift :: Monad m => m a -> t m a

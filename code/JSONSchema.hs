@@ -126,6 +126,7 @@ instance (KnownSymbol nm, KnownSymbol (ToJSONType a))
 
 mergeObjects :: Value -> Value -> Value
 mergeObjects (Object a) (Object b) = Object $ a <> b
+mergeObjects _ _ = error "unsafe use of mergeObjects"
 
 -- # gschemaTimes
 instance (GSchema f, GSchema g)

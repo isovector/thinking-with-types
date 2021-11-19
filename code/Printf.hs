@@ -7,7 +7,6 @@ module Printf where
 
 -- # imports
 import Data.Kind   (Type, Constraint)
-import Data.Monoid ((<>))
 import Data.Proxy  (Proxy (..))
 import GHC.TypeLits
 

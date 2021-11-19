@@ -14,8 +14,6 @@ import Fcf
 import GHC.TypeLits hiding (type (+))
 import Unsafe.Coerce
 
-import Data.Functor.Identity
-
 type OpenSum :: (k -> Type) -> [k] -> Type
 data OpenSum f ts where -- ! 1
   UnsafeOpenSum  -- ! 2

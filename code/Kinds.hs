@@ -2,11 +2,12 @@
 {-# LANGUAGE DataKinds    #-}
 {-# LANGUAGE TypeFamilies #-}
 
+{-# OPTIONS_GHC -Wno-unused-imports #-}
+
 module Kinds where
 
 -- # imports
 import Prelude (IO)
-import Data.Proxy (Proxy (..))
 
 -- # typelits
 import GHC.TypeLits

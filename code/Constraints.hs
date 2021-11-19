@@ -2,6 +2,8 @@
 {-# LANGUAGE GADTs                #-}
 {-# LANGUAGE UndecidableInstances #-}
 
+{-# OPTIONS_GHC -Wno-unused-imports #-}
+
 module Constraints where
 
 -- # imports

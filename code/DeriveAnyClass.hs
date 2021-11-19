@@ -33,6 +33,7 @@ instance (Eq a, Eq b, Eq c)
   F0       == F0       = True
   F1 a1    == F1 a2    = a1 == a2
   F2 b1 c1 == F2 b2 c2 = b1 == b2 && c1 == c2
+  _        == _        = False
 
 -- # Foo1
 data Foo a b c

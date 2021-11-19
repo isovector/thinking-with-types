@@ -4,7 +4,6 @@
 module RankN where
 
 -- # imports
-import Control.Applicative (Alternative (..))
 import Data.Foldable (asum)
 import Data.Kind (Constraint, Type)
 import Data.Maybe (fromMaybe)
@@ -198,7 +197,7 @@ pyPlus a b =
 
 
 typeOf :: Dynamic -> String
-typeOf = elimDynamic $ \(a :: t) ->
+typeOf = elimDynamic $ \(_ :: t) ->
   show . typeRep $ Proxy @t
 
 type MonoidAndEq a = (Monoid a, Eq a)
