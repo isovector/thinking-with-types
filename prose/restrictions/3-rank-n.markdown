@@ -295,7 +295,9 @@ Solution
     identical to `Codensity`.
 
 
-### War Story: Improving Monad Asymptotics with Codensity
+### War Story: Improving Asymptotics with Codensity
+
+> TODO(sandy): play up the personal stakes
 
 Several years ago, I became really excited about free monads. This was spurred
 on by an *expensive,* yet avoidable, bug stemming from an untestable codebase.
@@ -381,4 +383,15 @@ accomplished by a helper function:
 and a corresponding change to `sayHello`:
 
 [code/War/Polysemy.hs:sayHelloImproved](Snip){sayHelloImproved="sayHello"}
+
+This is a powerful example of why isomorphisms can be useful. Even though `Free
+Console a` is isomorphic to `CodensityT (Free Console) a`, the latter is
+significantly more performant! Different representations of types have different
+strengths and weaknesses---clarity of formulation and performance are two common
+trade-offs---and thus being able to spot isomorphisms can be a super power.
+
+Concluding the story, I manually fused the `Codensity` formulation with the
+operational functor I needed, which gave the benefit of fast binds without all
+the machinery. After all, the fastest data structure is the one that you never
+built in the first place. The library was released as
 
