@@ -57,6 +57,7 @@ library
       TypeApps
       War.Age
       War.Ecstasy
+      War.Refinery
   other-modules:
       Paths_thinking_with_types
   hs-source-dirs:

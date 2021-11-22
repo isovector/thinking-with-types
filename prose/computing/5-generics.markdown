@@ -506,154 +506,21 @@ Users can now get an instance of `Eq` for whatever weird types they want via `De
 [code/Generic/Omit.hs:Weird](Snip)
 
 
-### Performance
+### War Story: Checkers
 
-With all of the fantastic things we're capable of doing with `GHC.Generics`,
-it's worth wondering whether or not we need to pay a runtime cost to perform
-these marvels. After all, converting to and from `Rep`s probably isn't free.
+The `checkers` library (@elliott_checkers_2008) automatically checks types for
+lawful instances of common Haskell typeclasses. This was exactly the tool I
+needed when a friend and I found our software subtly misbehaving in production.
+The program in question was a proof assistant, capable of elaborating sketches
+of ideas into full, well-typed programs. Well---it was supposed to be capable of
+that, at least. But when we went to generate programs, what we got back were
+ill-typed messes. Something was wrong, and I suspected one of our instances was
+subtly wrong.
 
-If there is indeed a hefty cost for using `GHC.Generics`, the convenience to the
-programmer might not be worthwhile. After all, code gets executed much more
-often than it gets written. Writing boilerplate by hand is annoying and tedious,
-but at least it gives us some understanding of what's going on under the hood.
-With `GHC.Generics`, these things are certainly less clear.
+Our types in question were extremely complicated, recursive, initial-encoded
+behemoths, with ten constructors and nearly as many type variables:
 
-There is good and bad news here. The good news is that usually adding `INLINE`
-pragmas to each of your class' methods is enough to optimize away all usage of
-`GHC.Generics` at compile-time.
+[code/War/Refinery.hs:ProofStateT](Snip)
 
-The bad news is that this is only *usually* enough to optimize them away. Since
-there is no separate compilation step when working with `GHC.Generics`, it's
-quite a lot of work to actually determine whether or not your generic code is
-being optimized away.
-
-Thankfully, we have tools for convincing ourselves our performance isn't being
-compromised. Enter the `inspection-testing`@cite:inspection-testing library.
-`inspection-testing` provides a plugin to GHC which allows us to make assertions
-about our generated code. We can use it to ensure GHC optimizes away all of our
-usages of `GHC.Generics`, and generates the exact same code that we would have
-written by hand.
-
-We can use `inspection-testing` like so:
-
-1. Enable the `{-# OPTIONS_GHC -O -fplugin Test.Inspection.Plugin #-}` pragma.
-2. Enable `-XTemplateHaskell`.
-3. Import `Test.Inspection`.
-4. Write some code that exercises the generic code path. Call it `foo`, for
-   example.
-5. Add `inspect $ hasNoGenerics 'foo` to your top level module.
-
-> TODO(sandy): don't need the plugin anymore
-
-For example, if we wanted to show that the `schema` function successfully
-optimized away all of its generics, we could add a little test to our project
-like this:
-
-[noncode/InspectionTesting.hs](Snip)
-
-Easy as that. Now in the course of compiling your module, if your generic code
-has any runtime overhead, GHC will refuse to continue. Unfortunately for us,
-`inspection-testing` isn't magic and can't guarantee our implementation is as
-good as a hand-written example, but at least it can prove the generic
-representations don't exist at runtime.
-
-In order to prove two implementations (eg. one written generically and one
-written by hand) *are* equal, you can use `inspection-testing`'s `(===)`
-combinator. `(===)` causes a compile-time error if the actual generate Core
-isn't identical. This is often impractical to do for complicate usages of
-`GHC.Generics`, but it's comforting to know that it's possible in principle.
-
-There is a particularly egregious case that GHC is unable to optimize, however.
-It's described colloquially as "functions that are too polymorphic." But what
-does it mean to be *too polymorphic*?
-
-This class of problems sets in when GHC requires knowing about the
-functor/applicative/monad laws in order to perform the inlining, but the type
-itself is polymorphic. That is to say, a generic function that produces a
-`forall m. m a` will perform poorly, but `Maybe a` is fine. A good rule of thumb
-is that if you have a polymorphic higher-kinded type, your performance is going
-to go into the toolies.
-
-
-### Kan Extensions
-
-On the grasping hand, there is still good news to be found. Reclaiming our
-performance from the clutches of too-polymorphic generic code isn't a
-challenging exercise. The secret is to rewrite our types in terms of kan
-extensions.
-
-* Rather than `forall f. Functor f => f a`, instead use `forall f. Yoneda f a`
-* Instead of `forall f. Applicative f => f a`, use `forall f. Curried (Yoneda f)
-  (Yoneda f) a`
-* Instead of `forall f. Monad f => f a`, use `forall f. Codensity f a`
-
-These types `Yoneda`, `Curried` and `Codensity` all come from the
-`kan-extensions`@cite:kan-extensions package. We'll talk more about these
-transformations in a moment.
-
-In essence, the trick here is to write our "too polymorphic" code in a form more
-amenable to GHC's inlining abilities, and then transform it back into the
-desired form at the very end. `Yoneda`, `Curried` and `Codensity` are tools that
-can help with this transformation.
-
-Consider the definition of `Yoneda`:
-
-[code/Kan.hs:Yoneda](Snip)
-
-When we ask GHCi about the type of `runYoneda`, an interesting similarity to
-`fmap` emerges:
-
-```{ghci=code/Kan.hs}
-:t runYoneda
-:t flip fmap
-```
-
-`Codensity`---our transformation for polymorphic `Monad`ic code---also bears a
-similar resemblance.
-
-```{ghci=code/Kan.hs}
-:t runCodensity
-:t (>>=)
-```
-
-And `Curried` which we used to transform polymorphic `Applicative` code also
-shows this pattern, although it's a little trickier to see.
-
-```{ghci=code/Kan.hs}
-:t runCurried @(Yoneda _) @(Yoneda _)
-:t flip (<*>)
-```
-
-This is not an accident. The `Functor` instance for `Yoneda` is particularly
-enlightening:
-
-[code/Kan.hs:FunctorYoneda](Snip)
-
-Note the lack of a `Functor f` constraint on this instance! `Yoneda f` is
-a `Functor` *even when* `f` *isn't.* In essence, `Yoneda f` gives us a instance
-of `Functor` for free. Any type of kind `kind:Type -> Type` is eligible. There's
-lots of interesting category theory behind all of this, but it's not important
-to us.
-
-But how does `Yoneda` work? Keep in mind the functor law that `fmap f .  fmap g
-= fmap (f . g)`. The implementation of `Yoneda`'s `Functor` instance abuses this
-fact. All it's doing is accumulating all of the functions we'd like to `fmap` so
-that it can perform them all at once.
-
-As interesting as all of this is, the question remains: how does `Yoneda` help
-GHC optimize our programs? GHC's failure to inline "too polymorphic" functions
-is due to it being unable to perform the functor/etc. laws while inlining
-polymorphic code. But `Yoneda f` is a functor even when `f` isn't---exactly by
-implementing the `Functor` laws by hand. `Yoneda`'s `Functor` instance can't
-possibly depend on `f`. That means `Yoneda f` is never "too polymorphic," and as
-a result, acts as a fantastic carrier for our optimization tricks.
-
-Finally, the functions `liftYoneda :: Functor f => f a -> Yoneda f a` and
-`lowerYoneda :: Yoneda f a -> f a` witness an isomorphism between `Yoneda f a`
-and `f a`. Whenever your generic code needs to do something in `f`, it should
-use `liftYoneda`, and the final interface to your generic code should make a
-call to `lowerYoneda` to hide it as an implementation detail.
-
-This argument holds exactly when replacing `Functor` with `Applicative` or
-`Monad`, and `Yoneda` with `Curried` or `Codensity` respectively.
+*Yikes.*
 

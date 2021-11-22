@@ -39,5 +39,3 @@ learn new things from them about this marvelous language, even after five years.
 
 Written with love by Sandy Maguire. 2018.
 
-
-
