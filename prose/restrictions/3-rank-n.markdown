@@ -196,22 +196,22 @@ Solution
 :   Rank-3.
 
 
-### The Continuation Monad
+### The Codensity Monad {.rev2}
 
 An interesting fact is that the types `a` and `forall r. (a -> r) -> r` are
 isomorphic. This is witnessed by the following functions:
 
-[code/RankN.hs:cont](Snip)
+[code/RankN.hs:toCont](Snip)
 
-[code/RankN.hs:runCont](Snip)
+[code/RankN.hs:fromCont](Snip)
 
 Intuitively, we understand this as saying that having a value is just as good as
 having a function that will give that value to a callback. Spend a few minutes
-looking at `cont` and `runCont` to convince yourself you know why these things
-form an isomorphism.
+looking at `toCont` and `fromCont` to convince yourself you know why these
+things form an isomorphism.
 
-The type `forall r. (a -> r) -> r` is known as being in continuation-passing
-style or more tersely as CPS.
+Types of the form `(a -> r) -> r` are known as being in "continuation-passing
+style," or more tersely as "CPS."
 
 Recall that isomorphisms are transitive. If we have an isomorphism `t1` &cong;
 `t2`, and another `t2` &cong; `t3`, we must also have one `t1` &cong; `t3`.
@@ -223,14 +223,14 @@ preserve typeclasses, we should expect that CPS also forms a `Monad`.
 
 We'll use a newtype as something to attach this instance to.
 
-[code/RankN.hs:Cont](Snip)
+[code/RankN.hs:Codensity](Snip)
 
 Exercise
 
-:   Provide a `Functor` instance for `Cont`. Hint: use lots of type holes, and
-    an explicit lambda whenever looking for a function type. The implementation is
-    sufficiently difficult that trying to write it point-free will be particularly
-    mind-bending.
+:   Provide a `Functor` instance for `Codensity`. Hint: use lots of type holes,
+    and an explicit lambda whenever looking for a function type. The
+    implementation is sufficiently difficult that trying to write it point-free
+    will be particularly mind-bending.
 
 Solution
 
@@ -239,7 +239,7 @@ Solution
 
 Exercise
 
-:   Provide the `Applicative` instances for `Cont`.
+:   Provide the `Applicative` instances for `Codensity`.
 
 Solution
 
@@ -248,15 +248,15 @@ Solution
 
 Exercise
 
-:   Provide the `Monad` instances for `Cont`.
+:   Provide the `Monad` instances for `Codensity`.
 
 Solution
 
 :   [code/RankN.hs:contMonad](Snip)
 
 
-One of the big values of `Cont`'s `Monad` instance is that it allows us to
-flatten JavaScript-style "pyramids of doom."
+One of the important use-cases of of `Codensity`'s `Monad` instance is that it
+allows us to flatten JavaScript-style "pyramids of doom."
 
 For example, imagine the following functions all perform asynchronous `IO` in
 order to compute their values, and will call their given callbacks when
@@ -274,22 +274,111 @@ compute a value:
 [code/RankN.hs:releaseString](Snip)
 
 Notice how the deeper the callbacks go, the further indented this code becomes.
-We can instead use the `Cont` (or `ContT` if we want to believe these functions
+We can instead use the `Codensity` (or `CodensityT` if we want to believe these functions
 are actually performing `IO`) to flatten this pyramid.
 
-[code/RankN.hs:releaseStringCont](Snip)
+[code/RankN.hs:releaseStringCodensity](Snip)
 
 When written in continuation-passing style, `releaseStringCont` hides the fact
 that it's doing nested callbacks.
 
+
 Exercise
 
-:   There is also a monad transformer version of `Cont`. Implement it.
+:   There is also a monad transformer version of `Codensity`. Implement it.
 
 Solution
 
-:   [code/RankN.hs:ContT](Snip)
+:   [code/RankN.hs:CodensityT](Snip)
 
-    The `Functor`, `Applicative` and `Monad` instances for `ContT` are
-    identical to `Cont`.
+    The `Functor`, `Applicative` and `Monad` instances for `CodensityT` are
+    identical to `Codensity`.
+
+
+### War Story: Improving Monad Asymptotics with Codensity
+
+Several years ago, I became really excited about free monads. This was spurred
+on by an *expensive,* yet avoidable, bug stemming from an untestable codebase.
+At a high level, free monads represent your program as a tree, allowing you to
+inspect or reinterpret pieces of it. The trick is to build a data structure that
+separates the *operations* of your monad stack from the monadic "book-keeping."
+
+The book-keeping is done via the `Free` type:
+
+[code/War/Polysemy.hs:Free](Snip)
+
+which admits a `Monad` instance, for only the price of a `Functor f` instance:
+
+[code/War/Polysemy.hs:MonadFree](Snip)
+
+The details here aren't particularly important for the story at hand. Suffice it
+to say that this `Monad (Free f)` instance does the monadic book-keeping. We can
+engineer the operations that our monad is capable of by picking `f`. For
+example, maybe we'd like to be able to read and write to the console:
+
+[code/War/Polysemy.hs:Console](Snip)
+
+Rather surprisingly, we now have enough to write real programs. For example,
+here's one that prompts the user for their name, and then says hello:
+
+[code/War/Polysemy.hs:sayHello](Snip)
+
+Keep in mind that `sayHello` is nothing more than a data structure which
+describes the above program. This is clearer when we desugar away the
+`do`-notation:
+
+[code/War/Polysemy.hs:sayHello2](Snip){sayHello2="sayHello"}
+
+Of course, on its own, `sayHello` is nothing but a piece of syntax. It can't be
+actually *run.* For that, we need to give `Console` an interpretation---that is,
+a mapping from it into some other monad:
+
+[code/War/Polysemy.hs:interpretConsole](Snip)
+
+Finally, to tie everything together, we need a way of also running our
+book-keeping `Free` type. This is given by `foldFree`, which allows us to
+transform a `Free f` into any monad `m`, so long as we have a natural
+transformation[^nt] from `f` to `m`:
+
+[^nt]: A natural transformation from `f` to `g` is any function with a rank-2
+       type of the form `forall a. f a -> g a`.
+
+[code/War/Polysemy.hs:foldFree](Snip)
+
+Programming with free monads is a very lovely experience, which gives us an
+indirection layer underneath our business logic. But, *this doesn't all come for
+free!* The attentive reader will have noticed accidental quadratic complexity
+here! What's going wrong?
+
+You can think of `Free f` as an `f`-shaped tree, where `(>>=)` grafts subtrees
+into each `Pure` node. The problem is that every time you bind a `Free` your
+tree gets bigger, which is to say, that the leaves get *further away from the
+root.* So every bind needs to traverse the structure to get to its leaves, and
+then pushes them farther away so the subsequent bind needs to do even more work!
+
+This is exacerbated by the fact that `(>>=)` is left-associative, meaning the
+expression `a >>= b >>= c` is parsed as `(a >>= b) >>= c`. Meaning that each
+`(>>=)` is associated in a way that requires doing as much work as possible!
+
+Our lovely style of programming with free monads is a no-go if it is going to
+degrade our runtime performance asymptotically. What can we do?
+
+The trick is use `Codensity`! Recall the definition of `CodensityT`, and in
+particular, its `Monad` instance:
+
+[code/War/Polysemy.hs:CodensityT](Snip)
+
+[code/War/Polysemy.hs:MonadCodensityT](Snip)
+
+`Codensity`'s `Monad` instance does nothing but replace the lambda inside of the
+`CodensityT` newtype wrapper. This is very clearly $O(1)$---an asymptotic
+improvement over `Free`'s $O(n)$ bind! Thus we can improve any free monad by
+building it as a `Codensity (Free f)` rather than `Free f` directly. This is
+accomplished by a helper function:
+
+[code/War/Polysemy.hs:liftCodensity](Snip)
+
+and a corresponding change to `sayHello`:
+
+[code/War/Polysemy.hs:sayHelloImproved](Snip){sayHelloImproved="sayHello"}
 

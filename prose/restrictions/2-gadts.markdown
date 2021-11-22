@@ -50,6 +50,8 @@ The canonical example of a GADT is a type safe syntax tree. For example, we can
 declare a small language with integers, booleans, addition, logical negation,
 and if statements.
 
+> TODO(sandy): this example is not very good
+
 [code/GADTs.hs:Expr](Snip)
 
 The `where` at [1](Ann) is what turns on GADT syntax for the rest of the

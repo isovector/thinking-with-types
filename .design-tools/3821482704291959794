@@ -1,0 +1,1 @@
+CodeBlock ("",["ghci"],[]) "> :kind! Map (Or 'True) '[ 'True, 'False, 'False ]\n\n<interactive>:1:16: error:\n    Illegal type: \8216'[ 'True, 'False, 'False]\8217\n      Perhaps you intended to use DataKinds\n\n"

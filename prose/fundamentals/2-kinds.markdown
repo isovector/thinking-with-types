@@ -560,8 +560,7 @@ But because we're unable to partially apply closed type families, `Map` doesn't
 turn out to be particularly useful.
 
 ```{ghci=code/Kinds.hs}
-@import Data.Proxy
-:t undefined :: Proxy (Map (Or 'True) '[ 'True, 'False, 'False ])
+:kind! Map (Or 'True) '[ 'True, 'False, 'False ]
 ```
 
 This error is trying to tell us is that we used the `Or` closed type-family

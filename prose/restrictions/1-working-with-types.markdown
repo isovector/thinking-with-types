@@ -31,11 +31,12 @@ tried to reference an undefined variable, and Haskell has "helpfully" created a
 new one for us. The Haskell Report provides us with no means of referencing type
 variables outside of the contexts in which they're declared.
 
-There are several language extensions which can assuage this pain, the most
-important one being `-XScopedTypeVariables`. When enabled, it allows us to bind
-type variables and refer to them later. However, this behavior is only turned on
-for types that begin with an explicit `forall` quantifier. For example, with
-`-XScopedTypeVariables`, `broken` is still broken, but the following works:
+Fortunately this situation is greatly improved by `-XScopedTypeVariables`
+(implied by `GHC2021`.) When enabled, it allows us to bind type variables and
+refer to them later. However, this behavior is only turned on for types that
+begin with an explicit `forall` quantifier. For example, with
+`-XScopedTypeVariables`, `broken` is still broken, but the following works
+instead:
 
 [code/Misc.hs:working](Snip)
 
@@ -44,10 +45,10 @@ variables `a` and `b` to the remainder of the function's definition. This allows
 us to reuse `b` when adding the type signature to `apply`, rather than
 introducing a *new* type variable as it did before.
 
-`-XScopedTypeVariables` lets us talk about types, but we are still left without
-a good way of *instantiating* types. If we wanted to specialize `fmap` to
-`Maybe`, for example, the only solution sanctioned by the Haskell Report is to
-add an inline type signature.
+We can now talk about types, but are still left without a good way of
+*instantiating* types. If we wanted to specialize `fmap` to `Maybe`, for
+example, the only solution sanctioned by the Haskell Report is to add an inline
+type signature.
 
 If we wanted to implement a function that provides a `String` corresponding to a
 type's name, it's unclear how we could do such a thing. By default, we have no
@@ -74,8 +75,8 @@ let `typeRep` know which type representation we're looking for.  As such,
 ### Type Applications
 
 Clearly, Haskell's inability to directly specify types has ugly user-facing
-ramifications. The extension `-XTypeApplications` patches this glaring issue in
-the language.
+ramifications. The extension `-XTypeApplications` (again, implied by `GHC2021`)
+patches this glaring issue in the language.
 
 `-XTypeApplications`, as its name suggests, allows us to directly apply types to
 expressions. By prefixing a type with an `@`, we can explicitly fill in type

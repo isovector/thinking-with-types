@@ -39,61 +39,65 @@ applyToFive f = f 5
 
 -}
 
-cont :: a -> (forall r. (a -> r) -> r)
-cont a = \callback -> callback a
+toCont :: a -> (forall r. (a -> r) -> r)
+toCont a = \callback -> callback a
 
 
 isMempty :: (Monoid a, Eq a) => a -> Bool
 isMempty a = a == mempty
 
-runCont :: (forall r. (a -> r) -> r) -> a
-runCont f =
+fromCont :: (forall r. (a -> r) -> r) -> a
+fromCont f =
   let callback = id
    in f callback
 
 
-newtype Cont a = Cont
-  { unCont :: forall r. (a -> r) -> r
+newtype Codensity a = Codensity
+  { runCodensity :: forall r. (a -> r) -> r
+  }
+
+newtype Cont r a = Cont
+  { unCont :: (a -> r) -> r
   }
 
 -- # contFunctor
-instance Functor Cont where
-  fmap f (Cont c) = Cont $ \c' ->
+instance Functor Codensity where
+  fmap f (Codensity c) = Codensity $ \c' ->
     c (c' . f)
 
 -- # contApplicative
-instance Applicative Cont where
-  pure a = Cont $ \c -> c a
-  Cont f <*> Cont a = Cont $ \br ->
+instance Applicative Codensity where
+  pure a = Codensity $ \c -> c a
+  Codensity f <*> Codensity a = Codensity $ \br ->
     f $ \ab ->
       a $ br . ab
 
 -- # contMonad
-instance Monad Cont where
+instance Monad Codensity where
   return = pure
-  Cont m >>= f = Cont $ \c ->
+  Codensity m >>= f = Codensity $ \c ->
     m $ \a ->
-      unCont (f a) c
+      runCodensity (f a) c
 
-newtype ContT m a = ContT
-  { unContT :: forall r. (a -> m r) -> m r
+newtype CodensityT m a = CodensityT
+  { unCodensityT :: forall r. (a -> m r) -> m r
   }
 
-instance Functor (ContT m) where
-  fmap f (ContT c) = ContT $ \c' -> c (c' . f)
+instance Functor (CodensityT m) where
+  fmap f (CodensityT c) = CodensityT $ \c' -> c (c' . f)
 
-instance Applicative (ContT m) where
-  pure a = ContT $ \c -> c a
-  ContT f <*> ContT a = ContT $ \br -> f $ \ab -> a $ br . ab
+instance Applicative (CodensityT m) where
+  pure a = CodensityT $ \c -> c a
+  CodensityT f <*> CodensityT a = CodensityT $ \br -> f $ \ab -> a $ br . ab
 
-instance Monad (ContT m) where
+instance Monad (CodensityT m) where
   return = pure
-  ContT m >>= f = ContT $ \c ->
+  CodensityT m >>= f = CodensityT $ \c ->
     m $ \a ->
-      unContT (f a) c
+      unCodensityT (f a) c
 
-instance MonadTrans ContT where
-  lift m = ContT $ (m >>=)
+instance MonadTrans CodensityT where
+  lift m = CodensityT $ (m >>=)
 
 releaseString :: String
 releaseString =
@@ -113,11 +117,11 @@ withOS :: (String -> r) -> r
 withOS f = f "linux"
 
 
-releaseStringCont :: String
-releaseStringCont = runCont $ unCont $ do
-  version <- Cont withVersionNumber
-  date    <- Cont withTimestamp
-  os      <- Cont withOS
+releaseStringCodensity :: String
+releaseStringCodensity = fromCont $ runCodensity $ do
+  version <- Codensity withVersionNumber
+  date    <- Codensity withTimestamp
+  os      <- Codensity withOS
   pure $ os ++ "-" ++ show version ++ "-" ++ show date
 
 
