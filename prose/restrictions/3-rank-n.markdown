@@ -295,7 +295,7 @@ Solution
     identical to `Codensity`.
 
 
-### War Story: Improving Asymptotics with Codensity
+### War Story: Improving Asymptotics with Codensity {.rev2}
 
 > TODO(sandy): play up the personal stakes
 
