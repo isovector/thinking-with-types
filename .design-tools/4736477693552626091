@@ -1,1 +1,1 @@
-CodeBlock ("",["haskell","ghci"],[]) "> interleaved\nhehello\nhello\nhelllloo\n\nhello\nhello\n\n"
+CodeBlock ("",["haskell","ghci"],[]) "> interleaved\nhehlellol\no\nhehlellol\no\n\n"

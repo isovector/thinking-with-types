@@ -231,11 +231,6 @@ delEntity ix = setEntity ix Delete
 getEntity :: FunctorB (HKD w) => Id -> System w -> Entity w
 getEntity ix w = Entity $ bmap (IM.lookup $ idToInt ix) $ systemData w
 
-{-
-
-queryEntity :: Id -> Query w a -> System w -> Maybe a
-
--}
 
 queryEntity :: (FunctorB (HKD w), Generic w) => Id -> Query w a -> System w -> Maybe a
 queryEntity ix (Const a) s

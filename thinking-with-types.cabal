@@ -42,6 +42,7 @@ library
       Kan
       Kinds
       Misc
+      NoImpredicativeTypes
       OpenProduct
       OpenSum
       PosNeg

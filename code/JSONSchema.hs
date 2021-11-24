@@ -38,7 +38,7 @@ makePropertyObj
     :: forall name
      . (KnownSymbol name)
     => Value -> Value
-makePropertyObj v = undefined -- object
+makePropertyObj = undefined -- object
   -- [ pack (symbolVal $ Proxy @name) .= v
   -- ]
 

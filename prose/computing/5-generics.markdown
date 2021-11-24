@@ -506,7 +506,7 @@ Users can now get an instance of `Eq` for whatever weird types they want via `De
 [code/Generic/Omit.hs:Weird](Snip)
 
 
-### War Story: Checkers
+### War Story: Checkers {.rev2}
 
 The `checkers` library (@elliott_checkers_2008) automatically checks types for
 lawful instances of common Haskell typeclasses. This was exactly the tool I

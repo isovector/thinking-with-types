@@ -1,6 +1,8 @@
 -- # pragmas
 {-# LANGUAGE RecordWildCards #-}
 
+{-# OPTIONS_GHC -fno-warn-incomplete-uni-patterns #-}
+
 module Algebra where
 
 import Data.Void
