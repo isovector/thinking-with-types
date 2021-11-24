@@ -29,7 +29,7 @@ dependencies:
 - vector
 - text
 - bytestring
-- aeson-pretty
+# - aeson-pretty
 - constraints
 - first-class-families
 - inspection-testing
@@ -37,9 +37,9 @@ dependencies:
 - singletons-th
 - singletons-base
 - witherable
-- generic-lens
-- barbies
-- higgledy
+# - generic-lens
+# - barbies
+# - higgledy
 - kind-generics
 - kind-generics-th
 

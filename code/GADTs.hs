@@ -55,7 +55,7 @@ infixr 5 :#
 hHead :: HList (t ': ts) -> t
 hHead (t :# _) = t
 
-showBool :: HList '[_1, Bool, _2] -> String
+showBool :: HList '[a, Bool, b] -> String
 showBool (_ :# b :# _ :# HNil) = show b
 
 hLength :: HList ts -> Int

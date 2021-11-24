@@ -4,6 +4,8 @@
 
 module War.Ecstasy where
 
+{-
+
 import           Control.Applicative (Alternative ((<|>)))
 import           Control.Lens (Lens', (^.), (?~), (.~), (%~), at, (<>~))
 import           Control.Lens (view)
@@ -379,3 +381,4 @@ both s1 s2 = Both s1 s2
 delete :: Setter w
 delete = Delete
 
+-}

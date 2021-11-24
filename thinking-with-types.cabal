@@ -37,6 +37,7 @@ library
       Generic.Monoid
       Generic.Omit
       HKD
+      ImpredicativeTypes
       JSONSchema
       Kan
       Kinds
@@ -111,15 +112,11 @@ library
   ghc-options: -Wall
   build-depends:
       aeson
-    , aeson-pretty
-    , barbies
     , base >=4.7 && <5
     , bytestring
     , constraints
     , containers
     , first-class-families
-    , generic-lens
-    , higgledy
     , inspection-testing
     , kan-extensions
     , kind-generics
