@@ -49,7 +49,7 @@ $(sources): build/tex/%.tex: prose/metadata.markdown prose/%.markdown $(prose) f
 	sed -i 's/\CommentTok{{-}{-} .via \([^}]\+\)}/reducevia{\1}/g' $@
 	sed -i 's/\(\\KeywordTok{law} \\StringTok\){"\([^"]\+\)"}/\1{\\lawname{\2}}/g' $@
 
-build/epub.epub: build/%.epub: prose/metadata.markdown prose/%.markdown $(prose) theme/* prose/bib.bib $(IMAGES) format/epub.css
+build/epub.epub: build/%.epub: prose/metadata.markdown prose/%.markdown $(prose) theme/* bib.bib $(IMAGES) format/epub.css
 	pandoc $(PANDOC_OPTS) --epub-embed-font=Katibeh.ttf -t epub -o $@ $(filter %.markdown,$^)
 
 .PHONY: clean clean-images very-clean all $(RULES) epub lp sketches
