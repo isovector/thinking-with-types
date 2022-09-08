@@ -11,7 +11,7 @@ import Generics.Kind
 import Generics.Kind.TH
 import Data.Functor.Const
 import GHC.TypeLits
-
+import Data.Proxy
 
 data Person f = Person
   { personAge  :: f Int
