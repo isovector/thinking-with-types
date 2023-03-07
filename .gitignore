@@ -21,3 +21,5 @@ _minted-*/
 *.out
 .fracked/
 *.epub
+.stack-work
+dist-newstyle
